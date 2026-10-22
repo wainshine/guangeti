@@ -10,6 +10,24 @@ import potrace
 EM = 1000
 
 
+def clean_ink(mask: np.ndarray, min_area: int = 55, min_thick: float = 2.2) -> np.ndarray:
+    """Drop specks and isolated hair-thin strokes (printed 圈点 arcs)."""
+    m = mask.astype(np.uint8)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(m, 8)
+    if n <= 1:
+        return mask
+    dt = cv2.distanceTransform(m, cv2.DIST_L2, 5)
+    keep = np.zeros(n, bool)
+    for i in range(1, n):
+        a = stats[i, cv2.CC_STAT_AREA]
+        if a < min_area:
+            continue
+        if float(dt[lab == i].max()) < min_thick:
+            continue
+        keep[i] = True
+    return keep[lab]
+
+
 def binarize(img: np.ndarray) -> np.ndarray:
     """Return a boolean ink mask from a grayscale glyph crop."""
     img = cv2.medianBlur(img, 3)

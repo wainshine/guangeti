@@ -10,7 +10,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent))
 from fontbuild import build_font  # noqa: E402
-from glyphvec import binarize, trace, to_em, normalize_to_base, transform  # noqa: E402
+from glyphvec import binarize, clean_ink, trace, to_em, normalize_to_base, transform  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CELLS = ROOT / "work" / "cells"
@@ -42,10 +42,11 @@ def main():
         ch = row["label"]
         if not ch or ch in glyphs:
             continue
-        img = np.array(Image.open(CELLS / f).convert("L"))
-        if img.ndim != 2:
+        mpath = ROOT / "work" / "masks" / f
+        if not mpath.exists():
             continue
-        ink = binarize(img)
+        ink = np.array(Image.open(mpath).convert("L")) > 127
+        ink = clean_ink(ink)
         if ink.sum() < 60:
             continue
         contours = trace(ink)

@@ -323,42 +323,13 @@ def analyze_page(rgb: np.ndarray, min_comp_area: int = 60) -> dict:
 
     n, lab, stats, cent = cv2.connectedComponentsWithStats((mask > 0).astype(np.uint8), 8)
 
-    # ---- group components into character clusters -------------------------
-    # A dilation of ~6 px bridges detached strokes (撇/捺 tips, dots) but not
-    # the gap to the neighbouring characters or the printed 圈点.
-    dil = cv2.dilate((mask > 0).astype(np.uint8), np.ones((13, 13), np.uint8))
-    _, lab2 = cv2.connectedComponents(dil, 8)
-
-    comp_cluster = {}
-    for i in range(1, n):
-        a = stats[i, cv2.CC_STAT_AREA]
-        if a < min_comp_area:
-            continue
-        w, h = stats[i, cv2.CC_STAT_WIDTH], stats[i, cv2.CC_STAT_HEIGHT]
-        if w > mask.shape[1] * 0.5 or h > mask.shape[0] * 0.5:
-            continue
-        cid = int(lab2[int(cent[i][1]), int(cent[i][0])])
-        comp_cluster.setdefault(cid, []).append(i)
-
-    clusters = []
-    for cid, ids in comp_cluster.items():
-        sub = np.isin(lab, ids)
-        ys, xs = np.nonzero(sub)
-        if len(ys) < 80:
-            continue
-        clusters.append(dict(ids=ids,
-                             bbox=(int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1),
-                             cx=float(xs.mean()), cy=float(ys.mean()),
-                             area=int(len(ys))))
-
-    # ---- assign clusters to grid slots ------------------------------------
     col_slots = {}
     cell_ranges = []
     for ci, (x0, x1) in enumerate(cols):
         ranges = split_chars(mask[:, x0:x1], pitch)
         col_slots[ci] = (x0, x1)
         for ri, (y0, y1) in enumerate(ranges):
-            cell_ranges.append((ci, ri, x0, x1, y0, y1))
+            cell_ranges.append([ci, ri, x0, x1, y0, y1])
 
     def nearest_cell(cx, cy):
         best = None
@@ -374,22 +345,62 @@ def analyze_page(rgb: np.ndarray, min_comp_area: int = 60) -> dict:
                 break
         return best[1] if best else None
 
-    assign = {}
-    for cl in clusters:
-        k = nearest_cell(cl["cx"], cl["cy"])
-        if k is None:
+    dt = cv2.distanceTransform((mask > 0).astype(np.uint8), cv2.DIST_L2, 5)
+    comps = []
+    for i in range(1, n):
+        a = stats[i, cv2.CC_STAT_AREA]
+        if a < 55:
             continue
-        assign.setdefault(k, []).append(cl)
+        # drop hair-thin fragments: printed 圈点 arcs and paper creases
+        if a < 3000 and float(dt[lab == i].max()) < 2.3:
+            continue
+        w, h = stats[i, cv2.CC_STAT_WIDTH], stats[i, cv2.CC_STAT_HEIGHT]
+        if w > mask.shape[1] * 0.5 or h > mask.shape[0] * 0.5:
+            continue
+        comps.append(i)
+
+    # pass 1: nearest slot by centroid
+    assign = {}
+    for i in comps:
+        k = nearest_cell(cent[i][0], cent[i][1])
+        if k is not None:
+            assign.setdefault(k, []).append(i)
+
+    def bbox_of(ids):
+        x0 = min(int(stats[i, cv2.CC_STAT_LEFT]) for i in ids)
+        y0 = min(int(stats[i, cv2.CC_STAT_TOP]) for i in ids)
+        x1 = max(int(stats[i, cv2.CC_STAT_LEFT] + stats[i, cv2.CC_STAT_WIDTH]) for i in ids)
+        y1 = max(int(stats[i, cv2.CC_STAT_TOP] + stats[i, cv2.CC_STAT_HEIGHT]) for i in ids)
+        return x0, y0, x1, y1
+
+    # pass 2: pull in detached strokes (撇/捺 tips, dots) that overlap the cell box
+    for _ in range(2):
+        boxes = {k: bbox_of(ids) for k, ids in assign.items()}
+        owner = {i: k for k, ids in assign.items() for i in ids}
+        for i in comps:
+            if i in owner:
+                continue
+            x0 = int(stats[i, cv2.CC_STAT_LEFT]); y0 = int(stats[i, cv2.CC_STAT_TOP])
+            x1 = x0 + int(stats[i, cv2.CC_STAT_WIDTH]); y1 = y0 + int(stats[i, cv2.CC_STAT_HEIGHT])
+            area = int(stats[i, cv2.CC_STAT_AREA])
+            best = None
+            for k, (bx0, by0, bx1, by1) in boxes.items():
+                ix = max(0, min(x1, bx1 + 6) - max(x0, bx0 - 6))
+                iy = max(0, min(y1, by1 + 6) - max(y0, by0 - 6))
+                ov = ix * iy
+                if ov > 0.45 * max(1, area) and (best is None or ov > best[0]):
+                    best = (ov, k)
+            if best:
+                assign[best[1]].append(i)
+                owner[i] = best[1]
 
     cells = []
-    for k, cls in assign.items():
+    for k, ids in assign.items():
         ci, ri, x0, x1, y0, y1 = cell_ranges[k]
-        ids = [i for cl in cls for i in cl["ids"]]
-        xa = min(cl["bbox"][0] for cl in cls)
-        ya = min(cl["bbox"][1] for cl in cls)
-        xb = max(cl["bbox"][2] for cl in cls)
-        yb = max(cl["bbox"][3] for cl in cls)
+        xa, ya, xb, yb = bbox_of(ids)
         sub = np.isin(lab[ya:yb, xa:xb], ids)
+        if sub.sum() < 80:
+            continue
         cells.append(dict(col=ci, row=ri, x0=int(xa), y0=int(ya), x1=int(xb), y1=int(yb),
                           slot_y0=y0, slot_y1=y1, col_x0=x0, col_x1=x1,
                           comp_ids=ids, ink=float(sub.mean())))

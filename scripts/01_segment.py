@@ -25,7 +25,9 @@ PDF = ROOT / "四书白文.18卷.旧传明.姜立纲.pdf"
 
 
 def process_page(args):
-    page_no, dpi, outdir, pad = args
+    page_no, dpi, outdir, pad, maskdir = args
+    from pathlib import Path as _P
+    maskdir = _P(maskdir)
     try:
         doc = pymupdf.open(PDF)
         page = doc[page_no]
@@ -56,8 +58,12 @@ def process_page(args):
             gx0, gy0 = max(0, x0 - pad), max(0, y0 - pad)
             gx1, gy1 = min(gray.shape[1], x1 + pad), min(gray.shape[0], y1 + pad)
             crop = gray[gy0:gy1, gx0:gx1].copy()
+            msub = np.isin(lab[y0:y1, x0:x1], c["comp_ids"]).astype(np.uint8) * 255
+            mfull = np.zeros_like(crop)
+            mfull[(y0 - gy0):(y1 - gy0), (x0 - gx0):(x1 - gx0)] = msub
             name = f"p{page_no:04d}_c{c['col']:02d}_r{c['row']:02d}.png"
             Image.fromarray(crop).save(outdir / name, compress_level=6)
+            Image.fromarray(mfull).save(maskdir / name, compress_level=6)
             rows.append(dict(
                 file=name, page=page_no, col=c["col"], row=c["row"],
                 x0=x0, y0=y0, x1=x1, y1=y1, w=w, h=h,
@@ -82,6 +88,8 @@ def main():
     out = Path(args.out)
     cells_dir = out / "cells"
     cells_dir.mkdir(parents=True, exist_ok=True)
+    mask_dir = out / "masks"
+    mask_dir.mkdir(parents=True, exist_ok=True)
 
     if args.pages:
         pages = []
@@ -94,7 +102,7 @@ def main():
     else:
         pages = list(range(410))
 
-    tasks = [(p, args.dpi, cells_dir, 6) for p in pages]
+    tasks = [(p, args.dpi, cells_dir, 6, str(mask_dir)) for p in pages]
     t0 = time.time()
     all_rows = []
     import multiprocessing as mp

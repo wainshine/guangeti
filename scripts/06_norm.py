@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent))
-from glyphvec import (base_bounds, binarize, contour_bounds, trace,  # noqa: E402
+from glyphvec import (base_bounds, clean_ink, contour_bounds, trace,  # noqa: E402
                       normalize_to_base, to_em)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,8 +26,10 @@ def main():
         m = meta.get(row["file"])
         if not m or not ch:
             continue
-        img = np.array(Image.open(CELLS / row["file"]).convert("L"))
-        ink = binarize(img)
+        mpath = ROOT / "work" / "masks" / row["file"]
+        if not mpath.exists():
+            continue
+        ink = clean_ink(np.array(Image.open(mpath).convert("L")) > 127)
         cs = trace(ink)
         if not cs:
             continue
