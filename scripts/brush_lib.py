@@ -360,7 +360,8 @@ def end_kinds(f: dict) -> tuple[str, str]:
 
 
 def render_field(frames, scale: float = 0.90, be: float = 0.28, le: float = 0.20,
-                 contrast: float = 0.06, size: int = SIZE, ss: int = 1) -> np.ndarray:
+                 contrast: float = 0.06, size: int = SIZE, ss: int = 1,
+                 dips=None, taper: float = 0.0) -> np.ndarray:
     """Render strokes as the zero level-set of (distance - radius).
 
     No round caps: the ribbon terminates at the skeleton end, so ink budget is
@@ -369,7 +370,7 @@ def render_field(frames, scale: float = 0.90, be: float = 0.28, le: float = 0.20
     """
     S = size * ss
     acc = np.full((S, S), np.inf, np.float32)
-    for f in frames:
+    for fi, f in enumerate(frames):
         pts = (f["pts"] * ss).astype(np.float32)
         n = len(pts)
         if n < 2:
@@ -384,7 +385,12 @@ def render_field(frames, scale: float = 0.90, be: float = 0.28, le: float = 0.20
         if ke == "dun":
             boost *= 1.0 + be * np.exp(-np.square(u / max(1e-3, le)))
         orient = 1.0 + contrast * (2.0 * f["vert"] - 1.0)
-        r = np.maximum(1.0 * ss, f["r_obs"] * scale * orient * boost * ss)
+        dip = float(dips[fi]) if dips is not None and fi < len(dips) else 1.0
+        # asymmetric along-stroke taper: heavier at the stroke start, lighter at the end
+        # (measured on the print: end-start = -0.039 relative width)
+        upos = np.linspace(0.0, 1.0, n, dtype=np.float32)
+        tap = 1.0 + taper * (0.5 - upos)
+        r = np.maximum(1.0 * ss, f["r_obs"] * scale * orient * boost * dip * tap * ss)
 
         y0 = max(0, int(pts[:, 0].min() - r.max() - 2))
         y1 = min(S, int(pts[:, 0].max() + r.max() + 2))
@@ -438,3 +444,45 @@ def ink_target_for(ch: str, font_path: str, ratio: float = 0.83, size: int = SIZ
     """Target ink = source ink * ratio (0.83 because WenKai is 1.20x the print)."""
     src = render_char(ch, font_path, size)
     return max(1, int(round(src.sum() * ratio)))
+
+
+def render_ribbon(frames, scale=0.9, dips=None, taper=0.10, smooth=3.0,
+                  end_skew=0.5, size=SIZE, ss=2):
+    """Per-segment quads along the skeleton (no self-intersecting polygon).
+
+    Ends are cut at an angle by extending the two sides by different amounts.
+    """
+    from scipy.ndimage import gaussian_filter1d
+    S = size * ss
+    out = np.zeros((S, S), np.uint8)
+    for fi, f in enumerate(frames):
+        pts = (f["pts"] * ss).astype(np.float32)
+        n = len(pts)
+        if n < 3:
+            continue
+        r = f["r_obs"].astype(np.float32) * scale * ss
+        dip = float(dips[fi]) if dips is not None and fi < len(dips) else 1.0
+        r = r * dip
+        if smooth > 0:
+            r = gaussian_filter1d(r, smooth)
+        upos = np.linspace(0.0, 1.0, n, dtype=np.float32)
+        r = np.maximum(r * (1.0 + taper * (0.5 - upos)), 0.9 * ss)
+        tan = np.gradient(pts, axis=0)
+        tan = tan / (np.linalg.norm(tan, axis=1, keepdims=True) + 1e-6)
+        nrm = np.stack([-tan[:, 1], tan[:, 0]], axis=1)
+        L = pts + nrm * r[:, None]
+        R = pts - nrm * r[:, None]
+        if end_skew > 0:
+            ds = end_skew * float(r[0]) * 1.5
+            de = end_skew * float(r[-1]) * 1.5
+            L = np.vstack([L[0] - tan[0] * ds, L, L[-1] + tan[-1] * de * 0.2])
+            R = np.vstack([R[0] - tan[0] * ds * 0.2, R, R[-1] + tan[-1] * de])
+        m = len(L)
+        for i in range(m - 1):
+            quad = np.array([[L[i][1], L[i][0]], [L[i + 1][1], L[i + 1][0]],
+                             [R[i + 1][1], R[i + 1][0]], [R[i][1], R[i][0]]], np.float32)
+            cv2.fillPoly(out, [np.round(quad).astype(np.int32)], 1, lineType=cv2.LINE_AA)
+        for i in range(min(m, n)):
+            cv2.circle(out, (int(round(pts[i][1])), int(round(pts[i][0]))),
+                       max(1, int(round(r[i]))), 1, -1)
+    return cv2.resize(out * 255, (size, size), interpolation=cv2.INTER_AREA) > 127

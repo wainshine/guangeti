@@ -19,7 +19,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 ```
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，21.2 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.1 MB）
-- 发布包：`release/`、`GuanGeKai-v1.2.1.zip`
+- 发布包：`release/`、`GuanGeKai-v1.3.0.zip`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
 
@@ -42,9 +42,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.2.1）；1,675 真跡 + 19,317 合成 | 21.2 MB | `fdb9ad5043fa9880` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `3a456d76aa162958` |
-| `GuanGeKai-v1.2.1.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `7bbfd27fd9230508` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.3.0）；1,675 真跡 + 19,317 合成 | 20.0 MB | `e8bc94e1cdd58a37` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `005dd54b564b5584` |
+| `GuanGeKai-v1.3.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `550ada66c501d3b2` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
@@ -253,3 +253,20 @@ v1.2.0 只做纵向腐蚀，重量与对比度同时落回刻本区间。
 >   非零绕序下孔洞有效；只是与 TrueType「外框顺时针」的约定相反，已一并规范。
 > - 「控制点 bbox 偏小」：三次贝塞尔位于控制点凸包内，控制点 bbox 实为**偏大**（保守），
 >   非偏小；仍改为解析极点以求与质检口径一致。
+
+---
+
+## 14. v1.3.0 变更（2026-10-23）
+
+合成字渲染器从「圆盘点印」改为「**带状扫掠 + 斜切端头**」，并叠加逐笔墨量扰动 `dip`。
+
+| 指标（70–150 个留出字） | 真字 | v1.2.1 | **v1.3.0** |
+|---|---|---|---|
+| Dice | — | 0.420 | **0.433** |
+| 逐笔宽度 CV | 0.248 | 0.113 | **0.260** |
+| 端帽 cap_mid | 0.530 | 0.754（圆头） | **0.462** |
+| 端帽 KS | — | 0.333 | **0.114** |
+
+- 真字 1,675、合成 19,317、覆盖 20,992 均不变；许可链路不变。
+- 字体 20 MB（v1.2.1 也是 20 MB）；合成字轮廓为带状多边形经 potrace 矢量化。
+- 未解决：字重仍略轻；转折（横折方角）仍未专门处理。

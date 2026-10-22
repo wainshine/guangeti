@@ -44,6 +44,36 @@ def brush_style(a, k1=0, k2=1):
     return (b > 0).astype(np.uint8)
 
 
+def field_chunk(args):
+    lo, hi, chars, font_path, S, ss, mode = args
+    import importlib
+    bl = importlib.import_module("brush_lib")
+    from PIL import ImageFont as _IF
+    font = _IF.truetype(font_path, S)
+    rel = np.load(ROOT / "work/stroke_rel_width.npy")
+    out = np.zeros((hi - lo, S, S), np.uint8)
+    ok = np.zeros(hi - lo, bool)
+    for k, ch in enumerate(chars[lo:hi]):
+        base = render_base(font, ch, S)
+        bm = (base > 127)
+        fr = bl.glyph_frames(bm)
+        ds = np.ones(max(1, len(fr)))
+        if len(fr):
+            rng = np.random.RandomState(ord(ch) % (2 ** 31))
+            ds = rng.choice(rel, size=len(fr), replace=True)
+            ds = ds / max(1e-6, float(ds.mean()))
+        if mode == 'ribbon':
+            m = bl.render_ribbon(fr, scale=1.04, dips=np.power(ds, 1.4),
+                                 end_skew=0.9, taper=0.2, ss=ss).astype(np.uint8)
+        else:
+            m = bl.render_field(fr, scale=0.9, dips=ds, ss=ss).astype(np.uint8)
+        inter = (m & bm).sum(); union = max(1, (m | bm).sum())
+        good = inter / union >= 0.7 and m.sum() > bm.sum() * 0.7
+        out[k] = m if good else bm.astype(np.uint8)
+        ok[k] = good
+    return lo, out, ok
+
+
 def trace_chunk(args):
     lo, hi, chars, tag = args
     masks = np.load(MASKFILE, mmap_mode="r")
@@ -52,10 +82,21 @@ def trace_chunk(args):
         mask = np.array(masks[i]) > 0
         base_ok = tag["ok"][i]
         ch = chars[i]
-        cs = trace(mask, turdsize=4, alphamax=1.0, opttol=0.25)
-        if not cs:
-            continue
-        em = raster_to_em(cs, S)
+        try:
+            cs = trace(mask, turdsize=4, alphamax=1.0, opttol=0.25)
+            if not cs:
+                continue
+            em = raster_to_em(cs, S)
+        except Exception:
+            try:
+                from generate_lib import render_base as _rb
+                from PIL import ImageFont as _IF
+                _f = _IF.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
+                mask2 = _rb(_f, ch, S) > 127
+                cs = trace(mask2, turdsize=4, alphamax=1.0, opttol=0.25)
+                em = raster_to_em(cs, S)
+            except Exception:
+                continue
         if CAPS:
             try:
                 import importlib
@@ -77,7 +118,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
-    ap.add_argument("--method", choices=["model", "brush"], default="brush")
+    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon"], default="brush")
+    ap.add_argument("--field-ss", type=int, default=2)
+    ap.add_argument("--reuse-masks", action="store_true")
     ap.add_argument("--caps", action="store_true", help="apply vector cap replacement")
     ap.add_argument("--cap-k", type=float, default=1.2)
     ap.add_argument("--limit", type=int, default=0)
@@ -105,30 +148,63 @@ def main():
 
     masks = np.zeros((len(chars), S, S), dtype=np.uint8)
     ok = np.zeros(len(chars), dtype=bool)
-    B = 64
-    for start in range(0, len(chars), B):
-        chunk = chars[start:start + B]
-        base = np.stack([render_base(font, ch, S) for ch in chunk])
-        base_mask = (base > 127).astype(np.uint8)
-        if model is not None:
-            import torch
-            x = torch.from_numpy(base).float().unsqueeze(1) / 255.0
-            xd = torch.from_numpy(np.stack([dist_channel(a) for a in base])).float().unsqueeze(1)
-            with torch.no_grad():
-                y = torch.sigmoid(model(torch.cat([x, xd], 1).to(device))).cpu().numpy()[:, 0]
-            cand = (y > args.threshold).astype(np.uint8)
-        else:
-            cand = np.stack([brush_style(a) for a in base])
-        for i in range(len(chunk)):
-            m = cand[i]
-            inter = (m & base_mask[i]).sum()
-            union = max(1, (m | base_mask[i]).sum())
-            iou = inter / union
-            good = iou >= 0.7 and m.sum() > base_mask[i].sum() * 0.7
-            masks[start + i] = m if good else base_mask[i]
-            ok[start + i] = good
-        if start % (B * 10) == 0:
-            print(f"masks {start}/{len(chars)}", flush=True)
+    if args.reuse_masks and MASKFILE.exists():
+        masks = np.load(MASKFILE)
+        print("masks reused:", masks.shape, flush=True)
+    elif args.method == "field":
+        import multiprocessing as mp
+        ctx = mp.get_context("fork")
+        step = 200
+        tasks = [(i, min(i + step, len(chars)), chars,
+                  str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S, args.field_ss,
+                  args.method)
+                 for i in range(0, len(chars), step)]
+        with ctx.Pool(args.workers) as pool:
+            for lo, arr, okv in pool.imap_unordered(field_chunk, tasks):
+                masks[lo:lo + len(arr)] = arr
+                ok[lo:lo + len(okv)] = okv
+        np.save(MASKFILE, masks)
+        print("masks saved (field); tracing...", flush=True)
+    else:
+      B = 64
+      for start in range(0, len(chars), B):
+          chunk = chars[start:start + B]
+          base = np.stack([render_base(font, ch, S) for ch in chunk])
+          base_mask = (base > 127).astype(np.uint8)
+          if model is not None:
+              import torch
+              x = torch.from_numpy(base).float().unsqueeze(1) / 255.0
+              xd = torch.from_numpy(np.stack([dist_channel(a) for a in base])).float().unsqueeze(1)
+              with torch.no_grad():
+                  y = torch.sigmoid(model(torch.cat([x, xd], 1).to(device))).cpu().numpy()[:, 0]
+              cand = (y > args.threshold).astype(np.uint8)
+          elif args.method == "field":
+              import importlib
+              bl = importlib.import_module("brush_lib")
+              rel = np.load(ROOT / "work/stroke_rel_width.npy")
+              outs = []
+              for j, ch in enumerate(chunk):
+                  m_i = base_mask[j].astype(bool)
+                  fr = bl.glyph_frames(m_i)
+                  ds = np.ones(max(1, len(fr)))
+                  if len(fr):
+                      rng = np.random.RandomState(ord(ch) % (2 ** 31))
+                      ds = rng.choice(rel, size=len(fr), replace=True)
+                      ds = ds / max(1e-6, float(ds.mean()))
+                  outs.append(bl.render_field(fr, scale=0.9, dips=ds, ss=2).astype(np.uint8))
+              cand = np.stack(outs)
+          else:
+              cand = np.stack([brush_style(a) for a in base])
+          for i in range(len(chunk)):
+              m = cand[i]
+              inter = (m & base_mask[i]).sum()
+              union = max(1, (m | base_mask[i]).sum())
+              iou = inter / union
+              good = iou >= 0.7 and m.sum() > base_mask[i].sum() * 0.7
+              masks[start + i] = m if good else base_mask[i]
+              ok[start + i] = good
+          if start % (B * 10) == 0:
+              print(f"masks {start}/{len(chars)}", flush=True)
     np.save(MASKFILE, masks)
     print("masks saved; tracing...", flush=True)
 

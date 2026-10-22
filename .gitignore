@@ -32,3 +32,8 @@ data/fonts_target/
 /data/zi2zi_ds2/*.npz
 data/ids/Unihan_IRGSources.txt
 /data/zi2zi_ds/
+/data/zi2zi_eval_base
+/data/zi2zi_eval_cfg1.5
+/data/zi2zi_eval_cfg4.0
+/data/zi2zi_eval_lora
+/data/lora_long
