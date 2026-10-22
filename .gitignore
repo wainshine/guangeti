@@ -1,0 +1,9 @@
+# large / derived artifacts
+*.pdf
+.venv/
+work/
+data/base/*.ttf
+build/
+release/*.ttf
+__pycache__/
+.DS_Store
