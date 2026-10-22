@@ -25,3 +25,9 @@ data/base/cg/cg.zip
 data/base/cg/ComputerGrassRegular.ttf
 data/base/NotoSerifSC-Light.otf
 /data/vendor/zi2zi-JiT
+/*.zip
+data/models/
+data/fonts_target/
+/data/zi2zi_ds2/*.npz
+data/ids/Unihan_IRGSources.txt
+/data/zi2zi_ds/

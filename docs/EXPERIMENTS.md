@@ -69,7 +69,7 @@ def dice(pred_mask, target_mask):
 
 ## E3 — 自训 U-Net v3（patch 训练 + Dice）
 
-- 前置：v1.1 切字修复完成（黑圈点剔除、两遍归属、掩膜直出）
+- 前置：v1.1.0 切字修复完成（黑圈点剔除、两遍归属、掩膜直出）
 - 脚本：`scripts/09_train_b.py`
 - 数据：1,675 组干净配对；128² 随机 patch；2 通道（raster + DT）
 - 配置：U-Net base32，GroupNorm，BCE + Dice，batch 32，lr 3e-4，OneCycle，120 epoch（实际到 107）

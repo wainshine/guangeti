@@ -19,7 +19,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 ```
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，20.5 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.1 MB）
-- 发布包：`release/`、`GuanGeKai-v1.0.zip`
+- 发布包：`release/`、`GuanGeKai-v1.1.0.zip`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
 
@@ -42,9 +42,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字；1,675 真跡 + 19,317 合成 | 20.5 MB | `8fae95c14f044bfc` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `90b3dc9d5d9d956c` |
-| `GuanGeKai-v1.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `e08a8d8287bbd841` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.1.0）；1,675 真跡 + 19,317 合成 | 20.5 MB | `55e16c025e1468e0` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `32c9d657fd6b2833` |
+| `GuanGeKai-v1.1.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `ac12d2ad43ed8346` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
@@ -94,7 +94,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | ② OCR | `02_ocr.py` | ~4 min（4 进程） | 72 dpi 下准确率仅 ~70%；**必须 150 dpi + PP-OCRv6** |
 | ③ 词典 | `03_build_reference.py` | 秒 | 书序是「論語→大學→中庸→孟子」，与常见「大學→…」不同 |
 | ④ 标注 | `04_label.py` | 秒 | 页序/栏序错则整页标签错 |
-| ⑤ 选优 | `05_select.py` | ~2 min | 只出现 1 次的字无法交叉校验 |
+| ⑤ 选优 | `05_select.py --min-samples 2` | ~2 min | 只出现 1 次的字无法交叉校验，默认剔除（617 个） |
 | ⑥ 归一 | `06_norm.py` | ~90 s | — |
 | ⑦ 真字 | `07_build_real.py` | ~2 min | potrace 质量、轮廓方向 |
 | ⑧ 配对 | `08_make_pairs.py` | ~20 s | 目标必须用 mask，不能用灰度裁剪 |
@@ -107,7 +107,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 
 ## 5. 关键工程决策（以及为什么）
 
-1. **句读圈点是黑色印刷，不是朱笔**。早期按「去红」处理完全无效；改用「厚度 + 连通域」判据：面积 <3000 且距离变换峰值 <2.3 px 的孤立碎片整段剔除（`pageproc.comps` 过滤）。这是 v1.1 最重要的修复。
+1. **句读圈点是黑色印刷，不是朱笔**。早期按「去红」处理完全无效；改用「厚度 + 连通域」判据：面积 <3000 且距离变换峰值 <2.3 px 的孤立碎片整段剔除（`pageproc.comps` 过滤）。这是 v1.1.0 最重要的修复。
 2. **两遍连通域归属**。撇、捺、点常是独立连通域，按质心归格会把它们判给邻字，导致笔画被截断。第二遍把「与本格外框重叠 >45%」的未分配连通域吸回本格，迭代两次。
 3. **不再对裁剪图重新二值化**。直接保存「本格所有连通域的联集掩膜」（`work/masks/*.png`），邻字碎片物理上进不来。
 4. **字距用全页自相关**（~310 px），每栏再拟合相位与缩放，切分线落在空白带上。
@@ -133,11 +133,11 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 ## 7. 已知缺陷清单（按严重度）
 
 ### 7.1 已修复
-- 红色/黑色句读圈点混入字形（v1.1 修复）
-- 撇捺被截断（v1.1 修复）
-- 邻字碎片进入裁剪（v1.1 修复）
-- 坐标翻转 bug：`raster_to_em` 里末点误用 `mx()` 导致整字变条形码（v1.1 修复）
-- 轮廓方向：翻转时用多边形近似三次曲线 → 改为 `ReverseContourPen`（v1.1 修复）
+- 红色/黑色句读圈点混入字形（v1.1.0 修复）
+- 撇捺被截断（v1.1.0 修复）
+- 邻字碎片进入裁剪（v1.1.0 修复）
+- 坐标翻转 bug：`raster_to_em` 里末点误用 `mx()` 导致整字变条形码（v1.1.0 修复）
+- 轮廓方向：翻转时用多边形近似三次曲线 → 改为 `ReverseContourPen`（v1.1.0 修复）
 
 ### 7.2 已知但接受
 - **617 个「书中仅出现 1 次」的字被剔除**，改由合成字补。原因：无法交叉校验，实测确有错标（「落」被标成「姓」）。真字因此从 2,292 降到 1,675。
@@ -165,7 +165,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | 要验证的结论 | 方法 |
 |---|---|
 | 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf` |
-| 真字数量 1,675 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数 |
+| 真字数量 1,675 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数；重跑 `05_select.py` 应得到同样的 1,675 |
 | 每个字来自哪里 | `release/provenance.json`（逐字 real/gen） |
 | 真字样本是否对得上 | `work/cells/<file>.png` 与 `work/masks/<file>.png` 成对存在；`chosen.jsonl` 有 `file/page/col/row` |
 | OCR 对齐质量 | `work/align_report.json`（每页匹配率） |
@@ -184,7 +184,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | 17:05–17:15 | OCR（PP-OCRv4 → v6）、标准文本对齐、标注、选优 |
 | 17:15–17:45 | 第一次构建 20,992 字（1,686 真字）；发现字体内部命名/轮廓 bug |
 | 17:45–18:10 | 修复切字（两遍归属、黑圈点、掩膜直出），真字 1,675 |
-| 18:10–18:50 | 重建 v1.1，发布包、样张、对照图 |
+| 18:10–18:50 | 重建 v1.1.0，发布包、样张、对照图 |
 | 18:50–19:25 | 实验 E1–E3（自训 U-Net 三次）→ 全部未达标 |
 | 19:25–19:50 | 实验 E4（IDS 拼字）→ 覆盖率 6%，比例差 |
 | 19:50–20:20 | 实验 E5–E6（zi2zi-JiT 零样本 + LoRA 5 分钟）→ 风格最好，结构有幻觉 |

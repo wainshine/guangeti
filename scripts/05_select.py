@@ -49,6 +49,11 @@ def sharpness(path: Path) -> float:
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--min-samples", type=int, default=2,
+                    help="drop characters whose label occurs fewer times (cannot be cross-validated)")
+    args = ap.parse_args()
     rows = [json.loads(l) for l in open(ROOT / "work" / "labeled.jsonl")]
     rows = [r for r in rows if r["label"]]
     groups = defaultdict(list)
@@ -65,7 +70,11 @@ def main():
 
     chosen = {}
     second = {}
+    dropped = 0
     for lab, items in groups.items():
+        if len(items) < args.min_samples:
+            dropped += 1
+            continue
         V = np.stack([vecs[r["file"]] for r in items])
         F = V.reshape(len(items), -1)
         # robust medoid: start from the mean, drop the worst 35%, recompute
@@ -99,7 +108,7 @@ def main():
         chosen[lab] = build(int(order[0]))
         if len(order) > 1:
             second[lab] = build(int(order[1]))
-    print("chosen", len(chosen))
+    print(f"chosen {len(chosen)} (dropped {dropped} labels with <{args.min_samples} samples)")
     with open(ROOT / "work" / "chosen.jsonl", "w") as f:
         for lab, r in sorted(chosen.items()):
             f.write(json.dumps(r, ensure_ascii=False) + "\n")

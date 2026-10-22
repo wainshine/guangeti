@@ -69,7 +69,7 @@ def _orient(contours):
 
 
 def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Kai",
-               style: str = "Regular", version: str = "1.000",
+               style: str = "Regular", version: str = "1.1.0",
                copyright_text: str = "", upm: int = EM) -> None:
     """glyphs: {char: [contour, ...]} in font units."""
     chars = sorted(glyphs)
@@ -138,6 +138,10 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
     fb.setupPost(keepGlyphNames=False)
     fb.setupMaxp()
     fb.font["head"].macStyle = 0
+    try:
+        fb.font["head"].fontRevision = float(".".join(version.split(".")[:2]))
+    except Exception:
+        pass
     fb.font["head"].flags = 0b00000011
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fb.save(str(out_path))

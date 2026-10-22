@@ -17,7 +17,7 @@
   与 OFL 不兼容。IDS 数据只可用于实验，不可进入发布字体。
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 
-## 当前状态（v1.1）
+## 当前状态（v1.1.0）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真跡 + 19,317 合成
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真跡

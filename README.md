@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.1（2026-10-22）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> **狀態：v1.1.0（2026-10-22）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
 > 合成字結構正確、字重接近，但**沒有真正的刻刀筆鋒**。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
@@ -84,14 +84,18 @@ python3 scripts/01_segment.py          # PDF -> 單字切片 (約 4 分鐘, 12 �
 python3 scripts/02_ocr.py              # 逐頁 PP-OCR
 python3 scripts/03_build_reference.py  # 生成《四書》標準文本
 python3 scripts/04_label.py            # 切片 -> 字
-python3 scripts/05_select.py           # 每字挑最優樣本
+python3 scripts/05_select.py           # 每字挑最優樣本（默認剔除僅出現 1 次的字）
 python3 scripts/06_norm.py             # 字身框歸一化參數
 python3 scripts/07_build_real.py       # 真實字形子集字體
-python3 scripts/08_make_pairs.py       # 訓練配對
-python3 scripts/09_train.py            # 風格遷移模型 (MPS/CPU)
-python3 scripts/10_generate.py         # 生成缺失字
+python3 scripts/10_generate.py --method brush   # 生成缺失字（發布版走筆墨濾波）
 python3 scripts/11_build_full.py       # 合成完整字體
+python3 scripts/12_specimen.py         # 樣張
+python3 scripts/13_qa.py               # 覆蓋率質檢
+python3 scripts/14_package.py          # 發布包
 ```
+
+> 訓練步驟（`08_make_pairs.py` → `09_train*.py`）**不是發布版必需**：三次自訓均未達標，
+> 發布版用的是程序化筆墨濾波。複現實驗見 [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)。
 
 原始 PDF 需放在倉庫根目錄，檔名為 `四书白文.18卷.旧传明.姜立纲.pdf`（版權原因**不入庫**）。
 基線字體 `data/base/LXGWWenKai-Regular.ttf` 需自行從
@@ -99,8 +103,9 @@ python3 scripts/11_build_full.py       # 合成完整字體
 
 ## 已知限制
 
-* 生成字形（18,692 字）在結構上保證正確（來自基線字體），但筆鋒細節是模型推斷的，
-  與真實字形存在可感知差異。用於正文小字時建議以真實字形子集為準。
+* 生成字形（19,317 字）在結構上保證正確（骨骼來自基線字體），但筆鋒是**程序化筆墨濾波**
+  的近似（豎粗橫細、加重、閉合），並非模型推斷，也非刻本刀鋒；與真實字形存在可感知差異。
+  用於正文小字時建議以真實字形子集為準。
 * 掃描本只覆蓋《四書》用字（1,675 個校驗後字形），因此大部分現代常用字屬於生成字形。
 * 尚未做 hinting；大字号、印刷級輸出請自行 outline。
 

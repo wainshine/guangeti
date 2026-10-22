@@ -14,7 +14,7 @@
 | `data/base/LXGWWenKai-Regular.ttf` | 25 MB | [LXGW WenKai v1.530](https://github.com/lxgw/LxgwWenKai/releases) | **OFL 1.1，含 Reserved Font Name**（霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW） | ❌ 不入库（可自行下载） |
 | `data/base/NotoSerifSC-Light.otf` | 23 MB | [noto-cjk](https://github.com/notofonts/noto-cjk) | OFL 1.1，无 RFN | ❌ 不入库 |
 | `data/base/cg/ComputerGrassRegular.ttf` | 55 MB | [computer-grass](https://github.com/LingDong-/computer-grass) release | **Arphic Public License**（随包 `ARPHICPL.TXT`） | 仅评估用；`ARPHICPL.TXT` 入库 |
-| `data/ids/ids.txt` | 2.1 MB | [cjkvi-ids](https://github.com/cjkvi/cjkvi-ids)（基于 CHISE IDS） | **许可证未在仓库中明确** | ⚠️ 当前入库，建议核对后再决定 |
+| `data/ids/ids.txt` | 2.1 MB | [cjkvi-ids](https://github.com/cjkvi/cjkvi-ids)（基于 CHISE IDS） | **仓库未提供顶层 LICENSE**（CHISE 系历史许可），仅用于 E4 实验、**未进入发布字体** | ⚠️ 若发布仓库需完全干净，建议移出（见 §7） |
 | `data/ids/Unihan_IRGSources.txt` | 13 MB | Unicode UCD | Unicode License v3（宽松） | ⚠️ 当前入库（该版本**不含 kIDS**，实际没用上，可删） |
 | `data/canonical/{daxue,zhongyong,mengzi,lunyu}.json` | 180 KB | [chinese-poetry](https://github.com/chinese-poetry/chinese-poetry)（论语来自 lihuibng fork） | MIT | ✅ 入库 |
 | `data/vendor/zi2zi-JiT/` | 93 MB | [zi2zi-JiT](https://github.com/kaonashi-tyc/zi2zi-JiT) | 代码 MIT；**权重许可未声明** | 有本地 MPS 补丁，见 §4 |
@@ -73,9 +73,9 @@
 ## 5. 校验和
 
 ```
-8fae95c14f044bfcdbfd9f539ef3a3720b126a55e1f24d418b5dd1e7c7321694  build/GuanGeKai-Regular.ttf
-90b3dc9d5d9d956c46dc478c71cbc0de1f6a8414a8429f3383ae9130a1da18e6  build/GuanGeKai-Real.ttf
-e08a8d8287bbd84183f718a6177dc670b1fc97ddb174f3ca6aa6a8470f4b8bd0  GuanGeKai-v1.0.zip
+55e16c025e1468e0de5b72fae9394367a95809859ae499f6d26bb2060f6c6778  build/GuanGeKai-Regular.ttf
+32c9d657fd6b2833b156be235e379439f9c35cd660ab620b8ed159769d5cf16a  build/GuanGeKai-Real.ttf
+ac12d2ad43ed8346cf08b0c5117951ad7d40b68762ee12bd559038f8eac57547  GuanGeKai-v1.1.0.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -120,3 +120,20 @@ python3 scripts/14_package.py           # 发布包
 | `data/zi2zi_ds2/inference.npz` | 4.5 MB | 删除（可由 `scripts/zi2zi_make_npz.py` 重建） |
 | `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 旧名残留（与 `build/` 重复），**建议 `git rm`** |
 | `data/base/cg/ARPHICPL.TXT` | 6.7 KB | 可保留（评估记录） |
+| `GuanGeKai-v1.1.0.zip` | 17 MB | 已在版本库中；发布包属构建产物，建议 `git rm --cached`，改由 GitHub Releases 发布 |
+
+一键清理（由仓库维护者执行，agent 不代跑）：
+
+```bash
+git rm --cached data/ids/Unihan_IRGSources.txt \
+                  GuanGeKai-v1.1.0.zip \
+                  data/zi2zi_ds/test.npz \
+                  data/zi2zi_ds2/inference.npz \
+                  data/zi2zi_ds2/test.npz \
+                  data/fonts_target/GuangeKai-Real.ttf
+git commit -m "chore: drop large intermediate files (see docs/DATA.md §7)"
+```
+
+> `.gitignore` 里已加 `/*.zip`，但对**已被跟踪**的文件无效——需要先 `git rm --cached`。
+> `data/fonts_target/GuangeKai-Real.ttf` 是旧拼写的残留（与 `build/GuanGeKai-Real.ttf` 重复），
+> 文件名只差大小写，在 macOS 上删除时勿用 `GuangeKai-*` 通配符（会误删新文件）。
