@@ -3,6 +3,7 @@
 .venv/
 work/
 data/base/*.ttf
+data/base/*.otf
 build/
 release/*.ttf
 __pycache__/

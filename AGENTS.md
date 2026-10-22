@@ -15,6 +15,8 @@
 - **不要**把 `史记...pdf` 的字形并入本字体：用户明确要求《史记》另立项目、单独训练。
 - **不要**引入 Arphic Public License 的数据（MakeMeAHanzi `graphics.txt`、computer-grass 字形、AR PL UKai）——
   与 OFL 不兼容。IDS 数据只可用于实验，不可进入发布字体。
+- **禁止使用任何专有字体**（华文/方正/汉仪/微软雅黑/苹方等系统字体）——即使只做测量或对照。
+  只允许 OFL / Apache-2.0 / UFL 等自由许可字体；基于专有字体测出的数字也不得作为决策依据。
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 
 ## 当前状态（v1.1.0）
