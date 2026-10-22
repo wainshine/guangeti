@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.2.0（2026-10-22）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> **狀態：v1.2.1（2026-10-22）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
 > 合成字結構正確、字重接近，但**沒有真正的刻刀筆鋒**。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
@@ -115,7 +115,9 @@ python3 scripts/14_package.py          # 發布包
 * 字體：SIL Open Font License 1.1，見 [OFL.txt](OFL.txt)。
   生成字形衍生自 [LXGW WenKai](https://github.com/lxgw/LxgwWenKai)（OFL 1.1，保留字體名
   「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」），本項目已按 OFL 要求更名為 GuanGe Kai。
-* 代碼：MIT。
+* 字體：SIL OFL 1.1（見 `OFL.txt`）。
+* 代碼（`scripts/`）：MIT（見 `LICENSE`）。
+* 文件名與倉庫結構見 [docs/DATA.md](docs/DATA.md)。
 * 掃描圖像：書格（shuge.org）整理，原書藏於日本宮內廳書陵部。字形是對公有領域 2D 作品的
   忠實再現；本項目不對掃描圖像本身主張權利。
 

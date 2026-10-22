@@ -74,9 +74,9 @@
 ## 5. 校验和
 
 ```
-844440e565326670e4dbd7496cf39bd33f43eb8caeb629205f3a61e0c73846e8  build/GuanGeKai-Regular.ttf
-7119d68665d7ffefa99ba040d693cbd042960d7a05250936ccbf706463bc7459  build/GuanGeKai-Real.ttf
-92b43f9abf979b27d2eb1728dd70931126d5d338cd0bf73b586507f321988211  GuanGeKai-v1.2.0.zip
+fdb9ad5043fa98807df84821d33fd6ede6060940b7b2d8fb016c25ef6822f50c  build/GuanGeKai-Regular.ttf
+3a456d76aa162958cef9fd4c8787bb5a270a384fcde09855cf659d4992b456de  build/GuanGeKai-Real.ttf
+7bbfd27fd9230508f395fe01cf9d39201ac3caa1673e218b2f89514722bb8ee9  GuanGeKai-v1.2.1.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -107,34 +107,31 @@ python3 scripts/14_package.py           # 发布包
 
 预期总耗时（M3 Ultra）：约 15 分钟。产物与本文档 §2 一致。
 
+**已知局限**：中间产物（`work/*.jsonl`、`work/masks/`）没有校验和链，只保证"同一份 PDF +
+同一版霞鹜文楷 + 锁定版本依赖"下可复现；`release/SHA256SUMS` 只覆盖最终发布文件。
+若需逐字级追溯，用 `release/provenance.json`（每字 real/gen）与 `work/chosen.jsonl`
+（每字取自哪一页、哪一栏、哪一格）。
+
 ---
 
-## 7. 建议的清理（交给仓库维护者决定）
+## 7. 工作区残留（可删除，不影响复现）
 
-当前 git 里跟踪了几个体积较大、且可由脚本重建的文件：
+这些文件只存在于磁盘，**均未被 git 跟踪**（`.gitignore` 已覆盖），删掉不影响发布或复现：
 
-| 文件 | 体积 | 建议 |
+| 路径 | 体积 | 说明 |
 |---|---|---|
-| `data/ids/Unihan_IRGSources.txt` | 13 MB | 删除（该版本无 kIDS，未使用） |
-| `data/ids/ids.txt` | 2.1 MB | 保留或改由脚本下载（许可待确认） |
-| `data/zi2zi_ds/test.npz` | 12 MB | 删除（实验中间产物） |
-| `data/zi2zi_ds2/inference.npz` | 4.5 MB | 删除（可由 `scripts/zi2zi_make_npz.py` 重建） |
-| `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 旧名残留（与 `build/` 重复），**建议 `git rm`** |
-| `data/base/cg/ARPHICPL.TXT` | 6.7 KB | 可保留（评估记录） |
-| `GuanGeKai-v1.2.0.zip` | 17 MB | 已在版本库中；发布包属构建产物，建议 `git rm --cached`，改由 GitHub Releases 发布 |
+| `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 旧拼写残留，与 `build/` 重复 |
+| `data/ids/Unihan_IRGSources.txt` | 13 MB | 该版本不含 kIDS，从未使用 |
+| `data/zi2zi_ds/`、`data/zi2zi_ds2/` | 140 MB | zi2zi 实验数据集，可由脚本重建 |
+| `data/base/cg/ComputerGrassRegular.ttf` | 55 MB | Arphic PL，仅评估用 |
 
-一键清理（由仓库维护者执行，agent 不代跑）：
+清理：
 
 ```bash
-git rm --cached data/ids/Unihan_IRGSources.txt \
-                  GuanGeKai-v1.2.0.zip \
-                  data/zi2zi_ds/test.npz \
-                  data/zi2zi_ds2/inference.npz \
-                  data/zi2zi_ds2/test.npz \
-                  data/fonts_target/GuangeKai-Real.ttf
-git commit -m "chore: drop large intermediate files (see docs/DATA.md §7)"
+rm -rf data/fonts_target data/ids/Unihan_IRGSources.txt data/zi2zi_ds data/zi2zi_ds2
+rm -rf data/base/cg/ComputerGrassRegular.ttf data/base/cg/cg.zip
 ```
 
-> `.gitignore` 里已加 `/*.zip`，但对**已被跟踪**的文件无效——需要先 `git rm --cached`。
-> `data/fonts_target/GuangeKai-Real.ttf` 是旧拼写的残留（与 `build/GuanGeKai-Real.ttf` 重复），
-> 文件名只差大小写，在 macOS 上删除时勿用 `GuangeKai-*` 通配符（会误删新文件）。
+> 目前 git 跟踪的 56 个文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
+> 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
+> 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。

@@ -33,6 +33,8 @@ def main():
     for f in (full, real):
         shutil.copy2(f, out / f.name)
     shutil.copy2(ROOT / "OFL.txt", out / "OFL.txt")
+    if (ROOT / "LICENSE").exists():
+        shutil.copy2(ROOT / "LICENSE", out / "LICENSE")
     shutil.copy2(ROOT / "README.md", out / "README.md")
     for img in (ROOT / "docs" / "images").glob("*.png"):
         shutil.copy2(img, out / img.name)

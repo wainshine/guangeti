@@ -5,7 +5,7 @@
 **先读这三个文件，再动手：**
 
 1. [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) —— 现状、决策、已知缺陷、未决问题、审计方法
-2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 7 组实验的配置/指标/复现命令（含"第几轮训练"）
+2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 10 组实验（E1–E10）的配置/指标/复现命令（含"第几轮训练"）
 3. [`docs/DATA.md`](docs/DATA.md) —— 数据来源、许可、校验和、重建步骤
 
 ## 硬性约束
@@ -19,7 +19,7 @@
   只允许 OFL / Apache-2.0 / UFL 等自由许可字体；基于专有字体测出的数字也不得作为决策依据。
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 
-## 当前状态（v1.2.0）
+## 当前状态（v1.2.1）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真跡 + 19,317 合成
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真跡
@@ -35,9 +35,11 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 ## 下一步（已排序，详见 PROJECT_STATE §8）
 
-1. 骨架 + 笔刷引擎（许可干净，1–2 天）
-2. zi2zi-JiT LoRA 全量重训 1.5–2 小时（需先确认权重许可）
-3. 《史记》独立项目（先做页面去卷曲）
+栅格层面的四条路线都已探过并记录（E1–E10），结论：**径向宽度模型复刻不了刻刀的角状收笔**。
+
+1. **端部模板量产化**：现有模板机制可用，但需要「按局部笔宽缩放 + 按曲率对齐 + 只在外侧补墨」（见 E10）
+2. **zi2zi-JiT LoRA 全量重训** 1.5–2 小时（需先确认权重许可）
+3. **《史记》独立项目**：先做页面去卷曲；真字预计 4,000–6,000，是唯一能改变 8% 覆盖率的路
 
 ## 常见坑
 

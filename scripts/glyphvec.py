@@ -129,13 +129,47 @@ def base_bounds(char: str):
     return bp.bounds
 
 
+def _cubic_axis(p0, p1, p2, p3):
+    """Extrema of a 1-D cubic Bezier (returns list of values incl. endpoints)."""
+    A = -p0 + 3 * p1 - 3 * p2 + p3
+    B = 2 * (p0 - 2 * p1 + p2)
+    C = p1 - p0
+    ts = [0.0, 1.0]
+    if abs(A) < 1e-12:
+        if abs(B) > 1e-12:
+            t = -C / B
+            if 0 < t < 1:
+                ts.append(t)
+    else:
+        disc = B * B - 4 * A * C
+        if disc >= 0:
+            r = disc ** 0.5
+            for t in ((-B + r) / (2 * A), (-B - r) / (2 * A)):
+                if 0 < t < 1:
+                    ts.append(t)
+    out = []
+    for t in ts:
+        u = 1 - t
+        out.append(u ** 3 * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t ** 3 * p3)
+    return out
+
+
 def contour_bounds(contours):
+    """Exact bbox of cubic outlines (control points alone overestimate a Bezier)."""
     xs, ys = [], []
     for c in contours:
-        xs.append(c["start"][0]); ys.append(c["start"][1])
+        x0, y0 = c["start"]
+        xs.append(x0); ys.append(y0)
+        px, py = x0, y0
         for s in c["segs"]:
-            for i in range(1, len(s), 2):
-                xs.append(s[i]); ys.append(s[i + 1])
+            if s[0] == "L":
+                xs.append(s[1]); ys.append(s[2])
+                px, py = s[1], s[2]
+            else:
+                c1x, c1y, c2x, c2y, ex, ey = s[1:]
+                xs.extend(_cubic_axis(px, c1x, c2x, ex))
+                ys.extend(_cubic_axis(py, c1y, c2y, ey))
+                px, py = ex, ey
     return (min(xs), min(ys), max(xs), max(ys))
 
 

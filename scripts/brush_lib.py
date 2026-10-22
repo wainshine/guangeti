@@ -143,9 +143,11 @@ def stroke_edges(sk: np.ndarray) -> list[dict]:
                     break
                 visited[cy, cx] = True
                 path.append((cy, cx))
+            # a "node" is a skeleton pixel with degree != 2; only degree >= 3 is a
+            # junction -- degree 1 is a free stroke end (was conflated before).
             edges.append({"pts": path,
-                          "start_node": bool(is_node[path[0][0], path[0][1]]),
-                          "end_node": bool(is_node[path[-1][0], path[-1][1]]),
+                          "start_node": bool(nb[path[0][0], path[0][1]] >= 3),
+                          "end_node": bool(nb[path[-1][0], path[-1][1]] >= 3),
                           "closed": closed})
     return [e for e in edges if len(e["pts"]) >= 2]
 
@@ -166,9 +168,9 @@ def edge_frames(edge: dict, dt: np.ndarray, size: int = SIZE) -> dict:
     pts = np.asarray(edge["pts"], np.float32)          # (y, x)
     n = len(pts)
     tan = _tangents(pts)                               # unit tangent in (y, x)
-    # orientation: 1 = vertical stroke
-    vert = np.abs(tan[:, 1])                           # x-component high → horizontal
-    vert = np.abs(tan[:, 0])                           # y-component high → vertical
+    # orientation: 1 = vertical stroke (tangent is (dy, dx); a vertical stroke
+    # has a large dy component)
+    vert = np.abs(tan[:, 0])
     idx = np.arange(n, dtype=np.float32)
     d_start = idx
     d_end = (n - 1) - idx
@@ -376,10 +378,11 @@ def render_field(frames, scale: float = 0.90, be: float = 0.28, le: float = 0.20
         u = np.where(np.isfinite(f["d_free"]), f["d_free"] / half, 1.0)
         ks, ke = end_kinds(f)
         boost = np.ones(n, np.float32)
+        # u = 0 at a free end -> the 顿笔 boost must peak there
         if ks == "dun":
-            boost *= 1.0 + be * np.exp(-np.square((1.0 - u) / max(1e-3, le)))
+            boost *= 1.0 + be * np.exp(-np.square(u / max(1e-3, le)))
         if ke == "dun":
-            boost *= 1.0 + be * np.exp(-np.square((1.0 - u) / max(1e-3, le)))
+            boost *= 1.0 + be * np.exp(-np.square(u / max(1e-3, le)))
         orient = 1.0 + contrast * (2.0 * f["vert"] - 1.0)
         r = np.maximum(1.0 * ss, f["r_obs"] * scale * orient * boost * ss)
 

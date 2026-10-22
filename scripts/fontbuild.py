@@ -69,7 +69,7 @@ def _orient(contours):
 
 
 def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Kai",
-               style: str = "Regular", version: str = "1.2.0",
+               style: str = "Regular", version: str = "1.2.1",
                copyright_text: str = "", upm: int = EM) -> None:
     """glyphs: {char: [contour, ...]} in font units."""
     chars = sorted(glyphs)
@@ -79,8 +79,9 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
     fb.setupCharacterMap({ord(ch): f"uni{ord(ch):04X}" for ch in chars})
 
     pen = TTGlyphPen(None)
-    outer = [(40, -120), (960, -120), (960, 880), (40, 880)]
-    inner = [(100, -60), (100, 820), (900, 820), (900, -60)]
+    # TrueType convention: outer clockwise, hole counter-clockwise (y-up).
+    outer = [(40, -120), (40, 880), (960, 880), (960, -120)]
+    inner = [(100, -60), (900, -60), (900, 820), (100, 820)]
     for pts in (outer, inner):
         pen.moveTo(pts[0])
         for p in pts[1:]:
