@@ -7,6 +7,11 @@
   <img src="docs/images/specimen.png" width="820" alt="Guange Kai specimen">
 </p>
 
+> **狀態：v1.1（2026-10-22）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> 合成字結構正確、字重接近，但**沒有真正的刻刀筆鋒**。品質定位與已知限制見
+> [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
+> [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
+
 ## 這是什麼
 
 《四書白文》（十八卷，舊傳明·姜立綱書，日本宮內廳書陵部藏，書格 shuge.org 數位化）是一部典型的
@@ -50,6 +55,15 @@ GuangeKai (20,992 字)
 ```
 
 細節見 [docs/method.md](docs/method.md)。
+
+## 文檔索引
+
+| 文檔 | 給誰看 | 內容 |
+|---|---|---|
+| [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
+| [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 7 組實驗的配置、指標、判定、复現命令 |
+| [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
 
 ## 安裝
 
