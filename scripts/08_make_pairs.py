@@ -50,6 +50,19 @@ def book_raster(m, path, nrm):
     return warped
 
 
+def book_raster_ink(m, ink, nrm):
+    scale = nrm["scale"]
+    slot_cx, slot_cy = nrm["slot_cx"], nrm["slot_cy"]
+    px0, py0 = m["x0"] - PAD, m["y0"] - PAD
+    a = scale * S / 1000.0 * nrm["sx"]
+    bscale = scale * S / 1000.0 * nrm["sy"]
+    tx = (((px0 - slot_cx) * scale + 500) * nrm["sx"] + nrm["dx"]) * S / 1000.0
+    ty = (880 - nrm["dy"] - 440 * nrm["sy"] - (slot_cy - py0) * scale * nrm["sy"]) * S / 1000.0
+    M = np.array([[a, 0, tx], [0, bscale, ty]], dtype=np.float32)
+    return cv2.warpAffine(ink, M, (S, S), flags=cv2.INTER_LINEAR,
+                          borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+
+
 def to_ink(gray):
     gray = cv2.medianBlur(gray, 3)
     thr, _ = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -79,9 +92,14 @@ def main():
         nrm = norm.get(r["label"])
         if not nrm:
             continue
-        g = book_raster(m, CELLS / r["file"], nrm)
+        mpath = ROOT / "work" / "masks" / r["file"]
+        if not mpath.exists():
+            continue
+        ink = np.array(Image.open(mpath).convert("L"))
+        ink = (ink > 127).astype(np.uint8) * 255
+        g = book_raster_ink(m, ink, nrm)
         chars.append(r["label"])
-        targets.append(to_ink(g))
+        targets.append(cv2.GaussianBlur(g.astype(np.float32), (0, 0), 1.0).astype(np.uint8))
     bases = render_base(chars, None)
     # stack into a npz
     X = np.stack([bases[c] for c in chars]).astype(np.uint8)
