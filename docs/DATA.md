@@ -74,9 +74,9 @@
 ## 5. 校验和
 
 ```
-55e16c025e1468e0de5b72fae9394367a95809859ae499f6d26bb2060f6c6778  build/GuanGeKai-Regular.ttf
-32c9d657fd6b2833b156be235e379439f9c35cd660ab620b8ed159769d5cf16a  build/GuanGeKai-Real.ttf
-ac12d2ad43ed8346cf08b0c5117951ad7d40b68762ee12bd559038f8eac57547  GuanGeKai-v1.1.0.zip
+844440e565326670e4dbd7496cf39bd33f43eb8caeb629205f3a61e0c73846e8  build/GuanGeKai-Regular.ttf
+7119d68665d7ffefa99ba040d693cbd042960d7a05250936ccbf706463bc7459  build/GuanGeKai-Real.ttf
+92b43f9abf979b27d2eb1728dd70931126d5d338cd0bf73b586507f321988211  GuanGeKai-v1.2.0.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -121,13 +121,13 @@ python3 scripts/14_package.py           # 发布包
 | `data/zi2zi_ds2/inference.npz` | 4.5 MB | 删除（可由 `scripts/zi2zi_make_npz.py` 重建） |
 | `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 旧名残留（与 `build/` 重复），**建议 `git rm`** |
 | `data/base/cg/ARPHICPL.TXT` | 6.7 KB | 可保留（评估记录） |
-| `GuanGeKai-v1.1.0.zip` | 17 MB | 已在版本库中；发布包属构建产物，建议 `git rm --cached`，改由 GitHub Releases 发布 |
+| `GuanGeKai-v1.2.0.zip` | 17 MB | 已在版本库中；发布包属构建产物，建议 `git rm --cached`，改由 GitHub Releases 发布 |
 
 一键清理（由仓库维护者执行，agent 不代跑）：
 
 ```bash
 git rm --cached data/ids/Unihan_IRGSources.txt \
-                  GuanGeKai-v1.1.0.zip \
+                  GuanGeKai-v1.2.0.zip \
                   data/zi2zi_ds/test.npz \
                   data/zi2zi_ds2/inference.npz \
                   data/zi2zi_ds2/test.npz \

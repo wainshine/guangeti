@@ -42,7 +42,7 @@ def main():
     print(f"real {len(real)} gen {len(gen)} total {len(glyphs)} / {BLOCK[1]-BLOCK[0]+1}")
     missing = (BLOCK[1] - BLOCK[0] + 1) - len(glyphs)
     print("missing", missing)
-    build_font(glyphs, Path(args.out), family="GuanGe Kai", version="1.1.0",
+    build_font(glyphs, Path(args.out), family="GuanGe Kai", version="1.2.0",
                copyright_text=(
                    "GuanGe Kai (館閣楷). Real glyphs extracted from the Ming woodblock print "
                    "四書白文 (attributed to 姜立綱), scans courtesy of 書格 shuge.org / 宮内庁書陵部. "

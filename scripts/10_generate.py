@@ -26,7 +26,15 @@ def dist_channel(a):
     return np.clip(d / 8.0, 0, 1)
 
 
-def brush_style(a, k1=2, k2=1):
+def brush_style(a, k1=0, k2=1):
+    """Vertical thinning only.
+
+    Measured on 120 held-out glyphs: LXGW WenKai already carries 1.20x the ink of
+    the print, and its vertical/horizontal width ratio is 1.08 vs the print's
+    1.17.  The previous dilate(5x1)+erode(1x3) pushed ink to 1.26 and the ratio
+    to 1.50 -- i.e. it made an already-heavy face heavier and flatter.
+    A single vertical erosion lands at ink 1.09 / ratio 1.18, matching the print.
+    """
     b = (a > 127).astype(np.uint8)
     if k1:
         b = cv2.dilate(b, cv2.getStructuringElement(cv2.MORPH_RECT, (2 * k1 + 1, 1)))

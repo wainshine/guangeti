@@ -69,7 +69,7 @@ def _orient(contours):
 
 
 def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Kai",
-               style: str = "Regular", version: str = "1.1.0",
+               style: str = "Regular", version: str = "1.2.0",
                copyright_text: str = "", upm: int = EM) -> None:
     """glyphs: {char: [contour, ...]} in font units."""
     chars = sorted(glyphs)

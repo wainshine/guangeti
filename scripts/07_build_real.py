@@ -68,7 +68,7 @@ def main():
     with open(ROOT / "work" / "real_contours.jsonl", "w") as fh:
         for ch, cs in glyphs.items():
             fh.write(json.dumps({"char": ch, "contours": cs, "src": "real"}, ensure_ascii=False) + "\n")
-    build_font(glyphs, Path(args.out), family="GuanGe Kai", style="Real", version="1.1.0",
+    build_font(glyphs, Path(args.out), family="GuanGe Kai", style="Real", version="1.2.0",
                copyright_text="GuanGe Kai — extracted from 四書白文 (Ming, attributed to 姜立綱). Scans: 書格 shuge.org / 宮内庁書陵部. SIL OFL 1.1.")
     print("wrote", args.out)
     with open(ROOT / "work" / "real_glyph_sources.json", "w") as fh:
