@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--font", default=str(ROOT / "build" / "GuangeKai-Regular.ttf"))
+    ap.add_argument("--font", default=str(ROOT / "build" / "GuanGeKai-Regular.ttf"))
     ap.add_argument("--out", default=str(ROOT / "docs" / "images" / "specimen.png"))
     args = ap.parse_args()
 
@@ -25,7 +25,7 @@ def main():
 
     d.text((60, 40), "館閣楷", font=f_title, fill="black")
     w, _ = d.textbbox((60, 40), "館閣楷", font=f_title)[2:]
-    d.text((60 + (w - 60) + 18, 62), "Guange Kai", font=ImageFont.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), 34), fill="#555")
+    d.text((60 + (w - 60) + 18, 62), "GuanGe Kai", font=ImageFont.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), 34), fill="#555")
     d.text((60, 130), "明代《四書白文》刻本　館閣體　CJK 基本區 U+4E00–U+9FFF　20,992 字", font=f_caption, fill="#444")
 
     body = [

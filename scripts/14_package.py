@@ -28,8 +28,8 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    full = ROOT / "build" / "GuangeKai-Regular.ttf"
-    real = ROOT / "build" / "GuangeKai-Real.ttf"
+    full = ROOT / "build" / "GuanGeKai-Regular.ttf"
+    real = ROOT / "build" / "GuanGeKai-Real.ttf"
     for f in (full, real):
         shutil.copy2(f, out / f.name)
     shutil.copy2(ROOT / "OFL.txt", out / "OFL.txt")

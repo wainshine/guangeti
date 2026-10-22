@@ -1,11 +1,16 @@
-# 館閣楷 Guange Kai
+# 館閣楷 GuanGe Kai
 
 > 一款以明代刻本《四書白文》為字形來源的**館閣體**開源字體。
-> An open-source *guange-ti* (館閣體, Ming court/office regular script) typeface built from the Ming woodblock print *四書白文*.
+> An open-source *guan-ge-ti* (館閣體, Ming court/office regular script) typeface built from the Ming woodblock print *四書白文*.
 
 <p align="center">
-  <img src="docs/images/specimen.png" width="820" alt="Guange Kai specimen">
+  <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
+
+> **狀態：v1.1（2026-10-22）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> 合成字結構正確、字重接近，但**沒有真正的刻刀筆鋒**。品質定位與已知限制見
+> [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
+> [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
 
 ## 這是什麼
 
@@ -15,7 +20,7 @@ CJK 字體：
 
 | 項目 | 內容 |
 | --- | --- |
-| 家族名 | Guange Kai（館閣楷） |
+| 家族名 | GuanGe Kai（館閣楷） |
 | 覆蓋 | CJK 基本區 U+4E00–U+9FFF，共 **20,992** 字 |
 | 格式 | TTF（glyf，UPM 1000） |
 | 授權 | SIL Open Font License 1.1 |
@@ -24,8 +29,8 @@ CJK 字體：
 
 字體分兩級發布：
 
-* **GuangeKai-Real** —— 只含掃描本真實字形（1,675 字），可視為「原刻字形集」。
-* **GuangeKai** —— 完整 20,992 字，其餘由 19,317 個生成字形補齊。
+* **GuanGeKai-Real** —— 只含掃描本真實字形（1,675 字），可視為「原刻字形集」。
+* **GuanGeKai** —— 完整 20,992 字，其餘由 19,317 個生成字形補齊。
 
 原刻本（左）與本字體排印相同文字（右）：
 
@@ -42,22 +47,31 @@ PDF 掃描 (410 頁)
    ↓  PP-OCR 逐欄轉錄 + 《四書》標準文本對齊 + 同字聚類投票
 2,300 個字的標註（保留 1,675 個可交叉校驗的字）
    ↓  potrace 向量化 / 基線與字身框歸一化
-GuangeKai-Real
+GuanGeKai-Real
    ↓  缺失字：以霞鶩文楷為骨架 + 程序化筆墨濾波（豎粗橫細、加重、閉合）
 19,317 個生成字形 → 向量化
    ↓  合併、構建 OpenType
-GuangeKai (20,992 字)
+GuanGeKai (20,992 字)
 ```
 
 細節見 [docs/method.md](docs/method.md)。
+
+## 文檔索引
+
+| 文檔 | 給誰看 | 內容 |
+|---|---|---|
+| [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
+| [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 7 組實驗的配置、指標、判定、复現命令 |
+| [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
 
 ## 安裝
 
 ```bash
 # macOS
-cp build/GuangeKai-Regular.ttf ~/Library/Fonts/
+cp build/GuanGeKai-Regular.ttf ~/Library/Fonts/
 # Linux
-cp build/GuangeKai-Regular.ttf ~/.local/share/fonts/ && fc-cache -f
+cp build/GuanGeKai-Regular.ttf ~/.local/share/fonts/ && fc-cache -f
 ```
 
 ## 從源碼重建
@@ -94,7 +108,7 @@ python3 scripts/11_build_full.py       # 合成完整字體
 
 * 字體：SIL Open Font License 1.1，見 [OFL.txt](OFL.txt)。
   生成字形衍生自 [LXGW WenKai](https://github.com/lxgw/LxgwWenKai)（OFL 1.1，保留字體名
-  「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」），本項目已按 OFL 要求更名為 Guange Kai。
+  「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」），本項目已按 OFL 要求更名為 GuanGe Kai。
 * 代碼：MIT。
 * 掃描圖像：書格（shuge.org）整理，原書藏於日本宮內廳書陵部。字形是對公有領域 2D 作品的
   忠實再現；本項目不對掃描圖像本身主張權利。

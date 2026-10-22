@@ -19,14 +19,14 @@
 
 ## 当前状态（v1.1）
 
-- `build/GuangeKai-Regular.ttf`：20,992 字 = 1,675 真跡 + 19,317 合成
-- `build/GuangeKai-Real.ttf`：仅 1,675 真跡
+- `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真跡 + 19,317 合成
+- `build/GuanGeKai-Real.ttf`：仅 1,675 真跡
 - 真字覆盖率 8% 是全局瓶颈；合成字结构正确但无笔锋
 
 ## 最短验证命令
 
 ```bash
-python3 scripts/13_qa.py --font build/GuangeKai-Regular.ttf   # 覆盖率/空字形
+python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字形
 wc -l work/chosen.jsonl                                       # 应为 1675
 python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v=='real' for v in d.values()))"
 ```

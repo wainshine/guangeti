@@ -26,7 +26,7 @@ def load(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(ROOT / "build" / "GuangeKai-Regular.ttf"))
+    ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-Regular.ttf"))
     ap.add_argument("--real", default=str(ROOT / "work" / "real_contours.jsonl"))
     ap.add_argument("--gen", default=str(ROOT / "work" / "generated.jsonl"))
     args = ap.parse_args()
@@ -42,12 +42,12 @@ def main():
     print(f"real {len(real)} gen {len(gen)} total {len(glyphs)} / {BLOCK[1]-BLOCK[0]+1}")
     missing = (BLOCK[1] - BLOCK[0] + 1) - len(glyphs)
     print("missing", missing)
-    build_font(glyphs, Path(args.out), family="Guange Kai",
+    build_font(glyphs, Path(args.out), family="GuanGe Kai",
                copyright_text=(
-                   "Guange Kai (館閣楷). Real glyphs extracted from the Ming woodblock print "
+                   "GuanGe Kai (館閣楷). Real glyphs extracted from the Ming woodblock print "
                    "四書白文 (attributed to 姜立綱), scans courtesy of 書格 shuge.org / 宮内庁書陵部. "
                    "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
-                   "Copyright 2026 The Guange Kai Project Authors."
+                   "Copyright 2026 The GuanGe Kai Project Authors."
                ))
     print("wrote", args.out)
 

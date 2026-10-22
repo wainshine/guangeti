@@ -68,7 +68,7 @@ def _orient(contours):
     return out
 
 
-def build_font(glyphs: dict[str, list], out_path: Path, family: str = "Guange Kai",
+def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Kai",
                style: str = "Regular", version: str = "1.000",
                copyright_text: str = "", upm: int = EM) -> None:
     """glyphs: {char: [contour, ...]} in font units."""

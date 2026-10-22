@@ -15,7 +15,7 @@ BLOCK = (0x4E00, 0x9FFF)
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--font", default=str(ROOT / "build" / "GuangeKai-Regular.ttf"))
+    ap.add_argument("--font", default=str(ROOT / "build" / "GuanGeKai-Regular.ttf"))
     ap.add_argument("--outdir", default=str(ROOT / "work" / "qa"))
     args = ap.parse_args()
     out = Path(args.outdir)

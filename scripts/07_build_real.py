@@ -19,7 +19,7 @@ CELLS = ROOT / "work" / "cells"
 def main():
     ap = __import__("argparse").ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--out", default=str(ROOT / "build" / "GuangeKai-Real.otf"))
+    ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-Real.otf"))
     args = ap.parse_args()
 
     meta = {}
@@ -68,8 +68,8 @@ def main():
     with open(ROOT / "work" / "real_contours.jsonl", "w") as fh:
         for ch, cs in glyphs.items():
             fh.write(json.dumps({"char": ch, "contours": cs, "src": "real"}, ensure_ascii=False) + "\n")
-    build_font(glyphs, Path(args.out), family="Guange Kai", style="Real",
-               copyright_text="Guange Kai — extracted from 四書白文 (Ming, attributed to 姜立綱). Scans: 書格 shuge.org / 宮内庁書陵部. SIL OFL 1.1.")
+    build_font(glyphs, Path(args.out), family="GuanGe Kai", style="Real",
+               copyright_text="GuanGe Kai — extracted from 四書白文 (Ming, attributed to 姜立綱). Scans: 書格 shuge.org / 宮内庁書陵部. SIL OFL 1.1.")
     print("wrote", args.out)
     with open(ROOT / "work" / "real_glyph_sources.json", "w") as fh:
         json.dump(used_files, fh, ensure_ascii=False)

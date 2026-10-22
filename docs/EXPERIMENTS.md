@@ -92,7 +92,7 @@ def dice(pred_mask, target_mask):
 
 - 仓库：https://github.com/kaonashi-tyc/zi2zi-JiT （MIT，权重在作者 Google Drive）
 - 权重：`data/models/zi2zi/zi2zi-JiT-B-16.pth`（2.1 GB）
-- 数据构建：`scripts/generate_font_dataset.py`（用 `build/GuangeKai-Real.ttf` 作为目标字体、思源宋体 Light 作为源字体）→ `data/zi2zi_ds2/`
+- 数据构建：`scripts/generate_font_dataset.py`（用 `build/GuanGeKai-Real.ttf` 作为目标字体、思源宋体 Light 作为源字体）→ `data/zi2zi_ds2/`
 - 推理：`generate_chars.py --device mps --num_sampling_steps 25`（cfg 2.6，heun）
 - 结果（8 字）：**Dice 0.528**，基线 0.309（+71%）
 - 视觉：字重与笔锋明显接近刻本；但偏粗、偏匀

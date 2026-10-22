@@ -45,8 +45,8 @@
 
 - **字体本身**：`build/*.ttf` 的 `name` 表 ID 13 = SIL OFL 1.1 全文，ID 14 = 许可 URL，ID 0 = 版权声明（含 LXGW 与 Klee 的版权行）。
 - **衍生关系**：合成字由霞鹜文楷（OFL，含 RFN）派生 → 本体必须 OFL，且**不得使用 RFN**。已更名：
-  - Family：`Guange Kai`（不含「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」）
-  - PostScript：`GuangeKai-Regular` / `GuangeKai-Real`
+  - Family：`GuanGe Kai`（不含「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」）
+  - PostScript：`GuanGeKai-Regular` / `GuanGeKai-Real`
 - **扫描本**：字形是对公有领域二维作品的忠实再现，本项目未对扫描图像主张权利；README 已署名书格与宫内厅。
 - **未混入的 copyleft 数据**：未使用 MakeMeAHanzi `graphics.txt`（Arphic PL）、未使用 computer-grass 字形、未使用 AR PL UKai。IDS 数据仅用于 E4 实验，**未进入发布字体**。
 - **模型权重**：zi2zi-JiT 权重来自作者 Google Drive，其许可未在仓库声明；当前**仅用于实验**，发布字体未包含其输出。若要采用其输出，需先确认权重许可。
@@ -73,9 +73,9 @@
 ## 5. 校验和
 
 ```
-a009ee227b2bd1f0a15c85b6c54b34fc26ff8339f5d8a0be360c82d99737da8b  build/GuangeKai-Regular.ttf
-11d99804c67236450de18e4f2521dbb1152f76ae1194873d6b65e4f14fe942a3  build/GuangeKai-Real.ttf
-68d88169e0803c4dee6d67389657d5071a5da1885c8d731f2fa748b6277922c9  GuangeKai-v1.0.zip
+8fae95c14f044bfcdbfd9f539ef3a3720b126a55e1f24d418b5dd1e7c7321694  build/GuanGeKai-Regular.ttf
+90b3dc9d5d9d956c46dc478c71cbc0de1f6a8414a8429f3383ae9130a1da18e6  build/GuanGeKai-Real.ttf
+e08a8d8287bbd84183f718a6177dc670b1fc97ddb174f3ca6aa6a8470f4b8bd0  GuanGeKai-v1.0.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -118,5 +118,5 @@ python3 scripts/14_package.py           # 发布包
 | `data/ids/ids.txt` | 2.1 MB | 保留或改由脚本下载（许可待确认） |
 | `data/zi2zi_ds/test.npz` | 12 MB | 删除（实验中间产物） |
 | `data/zi2zi_ds2/inference.npz` | 4.5 MB | 删除（可由 `scripts/zi2zi_make_npz.py` 重建） |
-| `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 删除（与 `build/` 重复） |
+| `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 旧名残留（与 `build/` 重复），**建议 `git rm`** |
 | `data/base/cg/ARPHICPL.TXT` | 6.7 KB | 可保留（评估记录） |

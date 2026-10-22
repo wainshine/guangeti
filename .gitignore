@@ -24,3 +24,4 @@ data/models/zi2zi/zi2zi-JiT-B-16.pth
 data/base/cg/cg.zip
 data/base/cg/ComputerGrassRegular.ttf
 data/base/NotoSerifSC-Light.otf
+/data/vendor/zi2zi-JiT

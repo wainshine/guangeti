@@ -1,6 +1,6 @@
 # 项目状态与交接（供其他 agent 会话审计）
 
-> **一句话**：以明代刻本《四書白文》为字形来源，做一套覆盖 CJK 基本区 20,992 字、OFL 1.1 授权的馆阁体字体（Guange Kai / 館閣楷）。
+> **一句话**：以明代刻本《四書白文》为字形来源，做一套覆盖 CJK 基本区 20,992 字、OFL 1.1 授权的馆阁体字体（GuanGe Kai / 館閣楷）。
 >
 > 最后更新：2026-10-22 20:45（Asia/Shanghai）
 
@@ -15,11 +15,11 @@ cd /Users/wainshine/newAI/guangeti
 ls build/          # 两个成品字体
 cat docs/EXPERIMENTS.md   # 所有实验的配置与指标
 cat docs/DATA.md          # 输入/输出清单、许可、校验和
-python3 scripts/13_qa.py --font build/GuangeKai-Regular.ttf   # 覆盖率/空字形检查
+python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字形检查
 ```
 
-- 成品：`build/GuangeKai-Regular.ttf`（20,992 字，20.5 MB）、`build/GuangeKai-Real.ttf`（1,675 字，3.1 MB）
-- 发布包：`release/`、`GuangeKai-v1.0.zip`
+- 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，20.5 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.1 MB）
+- 发布包：`release/`、`GuanGeKai-v1.0.zip`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
 
@@ -42,16 +42,16 @@ python3 scripts/13_qa.py --font build/GuangeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuangeKai-Regular.ttf` | 20,992 字；1,675 真跡 + 19,317 合成 | 20.5 MB | `a009ee227b2bd1f0` |
-| `build/GuangeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `11d99804c6723645` |
-| `GuangeKai-v1.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `68d88169e0803c4d` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字；1,675 真跡 + 19,317 合成 | 20.5 MB | `8fae95c14f044bfc` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `90b3dc9d5d9d956c` |
+| `GuanGeKai-v1.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `e08a8d8287bbd841` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
 
 **质量定位**：
-- `GuangeKai-Real.ttf` 是**可信的刻本字形集**，可直接用于正文。
-- `GuangeKai-Regular.ttf` 的 19,317 个合成字是**近似**：结构正确（来自霞鹜文楷骨架）、笔画重量接近，但**没有真正的刻刀笔锋**。这是当前最大的未解问题（见 §6、§8）。
+- `GuanGeKai-Real.ttf` 是**可信的刻本字形集**，可直接用于正文。
+- `GuanGeKai-Regular.ttf` 的 19,317 个合成字是**近似**：结构正确（来自霞鹜文楷骨架）、笔画重量接近，但**没有真正的刻刀笔锋**。这是当前最大的未解问题（见 §6、§8）。
 
 ---
 
@@ -80,11 +80,11 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
      ├④标注─► labeled.jsonl（每格 → 一个字）
      ├⑤选优─► chosen.jsonl（每字一个最佳样本）
      ├⑥归一─► norm.json（字面框 → 基线字框的仿射参数）
-     ├⑦真字─► real_contours.jsonl + GuangeKai-Real.ttf
+     ├⑦真字─► real_contours.jsonl + GuanGeKai-Real.ttf
      ├⑧配对─► pairs/pairs.npz（霞鹜文楷 → 刻本）
      ├⑨训练─► style_*.pt（三次尝试，均未达标，见 EXPERIMENTS.md）
      ├⑩合成─► generated.jsonl（笔墨滤波或模型）
-     ├⑪合字─► GuangeKai-Regular.ttf
+     ├⑪合字─► GuanGeKai-Regular.ttf
      ├⑫样张/⑬质检/⑭打包
 ```
 
@@ -113,7 +113,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 4. **字距用全页自相关**（~310 px），每栏再拟合相位与缩放，切分线落在空白带上。
 5. **标注以 OCR 为主、标准文本为辅**：OCR 与标准文本一致率 ~89%，不一致时保留 OCR（刻本有异体字，如 爲/為、巳/已）。
 6. **字面框归一到基线字体**（80% 权重），保证真字与合成字混排时大小/位置一致。
-7. **字体命名避开 LXGW 的 Reserved Font Name**：家族名 `Guange Kai`，PS 名 `GuangeKai-Regular`（OFL 合规要求）。
+7. **字体命名避开 LXGW 的 Reserved Font Name**：家族名 `GuanGe Kai`，PS 名 `GuanGeKai-Regular`（OFL 合规要求）。
 
 ---
 
@@ -164,14 +164,14 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 
 | 要验证的结论 | 方法 |
 |---|---|
-| 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuangeKai-Regular.ttf` |
+| 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf` |
 | 真字数量 1,675 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数 |
 | 每个字来自哪里 | `release/provenance.json`（逐字 real/gen） |
 | 真字样本是否对得上 | `work/cells/<file>.png` 与 `work/masks/<file>.png` 成对存在；`chosen.jsonl` 有 `file/page/col/row` |
 | OCR 对齐质量 | `work/align_report.json`（每页匹配率） |
 | 训练实验的指标 | `work/train*.log`、`work/style_*.pt`、`EXPERIMENTS.md` 的表格 |
 | 许可合规 | `OFL.txt`；字体 `name` 表 ID 0/13/14；见 `DATA.md` §3 |
-| 字体结构合法 | `python3 -c "from fontTools.ttLib import TTFont; TTFont('build/GuangeKai-Regular.ttf')"`；`13_qa.py` 检查空字形与越界 bbox |
+| 字体结构合法 | `python3 -c "from fontTools.ttLib import TTFont; TTFont('build/GuanGeKai-Regular.ttf')"`；`13_qa.py` 检查空字形与越界 bbox |
 
 ---
 

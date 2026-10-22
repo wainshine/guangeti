@@ -1,6 +1,6 @@
-Copyright 2026 The Guange Kai Project Authors (https://github.com/guangek/guan-ge-kai)
+Copyright 2026 The GuanGe Kai Project Authors (https://github.com/guan-ge-kai)
 
-Guange Kai is a derivative work of LXGW WenKai:
+GuanGe Kai is a derivative work of LXGW WenKai:
   Copyright 2021-2026 LXGW (https://github.com/lxgw/LxgwWenKai), with Reserved Font Name
   '霞鹜', '霞鶩', '落霞孤鹜', '落霞孤鶩' and 'LXGW'.
   Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee).
