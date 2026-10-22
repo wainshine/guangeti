@@ -56,9 +56,21 @@ def trace_chunk(args):
         if not cs:
             continue
         em = raster_to_em(cs, S)
+        if CAPS:
+            try:
+                import importlib
+                cg = importlib.import_module("19_cap_geom")
+                hd = np.load(ROOT / "work/cap_h_fit.npy") * CAP_K
+                em = cg.apply_caps(em, mask, hd, ord(ch))
+            except Exception:
+                pass
         em = normalize_to_base(em, ch, blend=1.0, min_scale=0.8, max_scale=1.25)
         out.append((ch, em, "gen" if base_ok else "base"))
     return out
+
+
+CAPS = False
+CAP_K = 1.2
 
 
 def main():
@@ -66,10 +78,15 @@ def main():
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
     ap.add_argument("--method", choices=["model", "brush"], default="brush")
+    ap.add_argument("--caps", action="store_true", help="apply vector cap replacement")
+    ap.add_argument("--cap-k", type=float, default=1.2)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--threshold", type=float, default=0.5)
     ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args()
+    global CAPS, CAP_K
+    CAPS = bool(getattr(args, "caps", False))
+    CAP_K = float(getattr(args, "cap_k", 1.2))
 
     real = {json.loads(l)["label"] for l in open(ROOT / "work" / "chosen.jsonl")}
     chars = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1) if chr(c) not in real]
