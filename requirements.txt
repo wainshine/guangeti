@@ -1,4 +1,4 @@
-# Tested on 2026-10-22 (macOS 15 / Apple Silicon, Python 3.14).
+# Tested on 2026-10-23 (macOS / Apple Silicon, Python 3.14).
 # Exact versions below are the ones the released fonts were built with;
 # `pip install -r requirements.txt` reproduces that environment.
 pymupdf==2.0
@@ -10,4 +10,8 @@ rapidocr==3.10.0
 opencc-python-reimplemented==0.1.7
 potracer==0.0.4
 fonttools==4.61.1
+scikit-image==0.26.0
+scikit-learn==1.9.0
+shapely==2.1.2
+tqdm==4.67.3
 torch==2.12.1        # only for the experimental scripts/09_train*.py

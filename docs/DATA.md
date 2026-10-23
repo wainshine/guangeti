@@ -9,7 +9,7 @@
 
 | 文件 | 体积 | 来源 | 许可 | 是否入库 |
 |---|---|---|---|---|
-| `四书白文.18卷.旧传明.姜立纲.pdf` | 1.1 GB | 书格 shuge.org 数字化；原本藏日本宫内厅书陵部 | 原书为公有领域；扫描方未主张额外权利，但**发布前应向书格确认条款** | ❌ 不入库 |
+| `四书白文.18卷.旧传明.姜立纲.pdf` | 1.1 GB | 原本藏日本宫内厅书陵部，数字化由其图书寮数字档案完成（档号 1000066720000）；本项目用的 PDF 由书格 shuge.org 整理发布（**扫描非书格所制**） | 原书为公有领域；扫描方未主张额外权利，但**发布前应向书格确认条款** | ❌ 不入库 |
 | `史记.二十四册.传姜立纲抄本.新加坡国立大学藏.水印.pdf` | 1.4 GB | 新加坡国立大学藏本（用户提供） | 同上，**未使用** | ❌ 不入库 |
 | `data/base/LXGWWenKai-Regular.ttf` | 25 MB | [LXGW WenKai v1.530](https://github.com/lxgw/LxgwWenKai/releases) | **OFL 1.1，含 Reserved Font Name**（霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW） | ❌ 不入库（可自行下载） |
 | `data/base/NotoSerifSC-Light.otf` | 23 MB | [noto-cjk](https://github.com/notofonts/noto-cjk) | OFL 1.1，无 RFN | ❌ 不入库 |
@@ -28,15 +28,15 @@
 |---|---|---|
 | `work/cells/` + `work/masks/` | 1.9 GB | 54,109 个单字灰度裁剪 + 对应二值掩膜 |
 | `work/cells.jsonl` | 12 MB | 每格元数据（页/栏/行/bbox/slot/pitch/ink） |
-| `work/ocr_pages.jsonl` | 2 MB | 逐页 PP-OCRv6 结果 |
+| `work/ocr_pages.jsonl` | 1.2 MB | 逐页 PP-OCRv6 结果 |
 | `work/labeled.jsonl` | 18 MB | 每格 → 字标签（含 OCR/标准文本/一致性） |
 | `work/chosen.jsonl` | 1 MB | 每字一个最佳样本（1,675 条） |
-| `work/norm.json` | 472 KB | 字面框归一化仿射参数 |
+| `work/norm.json` | 337 KB | 字面框归一化仿射参数 |
 | `work/real_contours.jsonl` | 57 MB | 真字轮廓（字体单位） |
 | `work/generated.jsonl` | 311 MB | 合成字轮廓（19,317 条） |
-| `work/gen_masks.npy` | 1.2 GB | 合成用 256² 掩膜缓存 |
-| `work/pairs/pairs.npz` | 3 MB | 风格迁移训练配对 |
-| `work/align_report.json` | 20 KB | 每页 OCR↔标准文本匹配率 |
+| `work/gen_masks.npy` | 640 KB（最新一次 field 运行的掩膜缓存） | 合成用 256² 掩膜缓存 |
+| `work/pairs/pairs.npz` | 29 MB | 风格迁移训练配对 |
+| `work/align_report.json` | 9.4 KB | 每页 OCR↔标准文本匹配率 |
 | `work/qa/` | 43 MB | 覆盖检查表（21 张 contact sheet） |
 | `work/preview/` | 135 MB | 调试/对照图（部分用于文档） |
 
@@ -48,7 +48,8 @@
 - **衍生关系**：合成字由霞鹜文楷（OFL，含 RFN）派生 → 本体必须 OFL，且**不得使用 RFN**。已更名：
   - Family：`GuanGe Kai`（不含「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」）
   - PostScript：`GuanGeKai-Regular` / `GuanGeKai-Real`
-- **扫描本**：字形是对公有领域二维作品的忠实再现，本项目未对扫描图像主张权利；README 已署名书格与宫内厅。
+- **扫描本**：字形是对公有领域二维作品的忠实再现，本项目未对扫描图像主张权利；
+  README 已分别署名「宫内厅书陵部（藏本与数字化）」与「书格（整理发布）」。
 - **未混入的 copyleft 数据**：未使用 MakeMeAHanzi `graphics.txt`（Arphic PL）、未使用 computer-grass 字形、未使用 AR PL UKai。IDS 数据仅用于 E4 实验，**未进入发布字体**。
 - **模型权重**：zi2zi-JiT 权重来自作者 Google Drive，其许可未在仓库声明；当前**仅用于实验**，发布字体未包含其输出。若要采用其输出，需先确认权重许可。
 
@@ -76,12 +77,20 @@
 ```
 21ae1c6c746ac1a0afe7100e5bc253148c8f2c90857f73906eff91187c9da0c1  build/GuanGeKai-Regular.ttf
 860e41cfcc9a07ee8f81dc0b2fcd42fe3fef09315b43fa4f772fa88b40e7fbc6  build/GuanGeKai-Real.ttf
-299d3597099d177d51c44f97fc15b9a656c754e201c9362c2e4c5a4cd21bf44a  GuanGeKai-v1.3.2.zip
+14b1975103078e3fa2c29a45f16ae992393ad06577eddb0644d04cdae96abd1f  GuanGeKai-v1.3.2.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
 
 ---
+
+## 5.5 评估工具
+
+| 脚本 | 用途 |
+|---|---|
+| `scripts/18_eval.py` | 指标库（Dice / 端帽剖面 / 墨量）与留出集评估 |
+| `scripts/22_eval_gan.py` | 单一模型（GAN 检查点）指标 |
+| `scripts/23_compare_all.py --set work/eval_clean2.json` | **全方案横向对比**，同时生成面板 A/B |
 
 ## 6. 重建步骤
 
@@ -98,7 +107,7 @@ python3 scripts/04_label.py             # 标注
 python3 scripts/05_select.py            # 每字选优
 python3 scripts/06_norm.py              # 归一化参数
 python3 scripts/07_build_real.py        # 真字子集字体
-python3 scripts/10_generate.py --method brush   # 合成缺字
+python3 scripts/10_generate.py --method ribbon --workers 12 --out work/generated.jsonl  # 合成缺字
 python3 scripts/11_build_full.py        # 合成完整字体
 python3 scripts/12_specimen.py          # 样张
 python3 scripts/13_qa.py                # 覆盖率质检

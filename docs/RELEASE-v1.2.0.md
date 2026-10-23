@@ -63,6 +63,6 @@ SIL Open Font License 1.1。衍生自 LXGW WenKai（OFL，含 Reserved Font Name
 本項目已按要求更名為 `GuanGe Kai`，不含任何 RFN。
 
 字形來源：《四書白文》十八卷（舊傳明·姜立綱書），日本宮內廳書陵部藏，
-書格 shuge.org 數位化。原書為公有領域；本項目未對掃描圖像主張權利。
+原書藏日本宮內廳書陵部，數位化由其圖書寮數位檔案完成（檔號 1000066720000）；本項目使用的 PDF 由書格整理發布。原書為公有領域；本項目未對掃描圖像主張權利。
 
 專案首頁：https://github.com/wainshine/guangeti

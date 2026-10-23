@@ -180,21 +180,6 @@ def main():
               with torch.no_grad():
                   y = torch.sigmoid(model(torch.cat([x, xd], 1).to(device))).cpu().numpy()[:, 0]
               cand = (y > args.threshold).astype(np.uint8)
-          elif args.method == "field":
-              import importlib
-              bl = importlib.import_module("brush_lib")
-              rel = np.load(ROOT / "work/stroke_rel_width.npy")
-              outs = []
-              for j, ch in enumerate(chunk):
-                  m_i = base_mask[j].astype(bool)
-                  fr = bl.glyph_frames(m_i)
-                  ds = np.ones(max(1, len(fr)))
-                  if len(fr):
-                      rng = np.random.RandomState(ord(ch) % (2 ** 31))
-                      ds = rng.choice(rel, size=len(fr), replace=True)
-                      ds = ds / max(1e-6, float(ds.mean()))
-                  outs.append(bl.render_field(fr, scale=0.9, dips=ds, ss=2).astype(np.uint8))
-              cand = np.stack(outs)
           else:
               cand = np.stack([brush_style(a) for a in base])
           for i in range(len(chunk)):

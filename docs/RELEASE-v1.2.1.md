@@ -39,4 +39,4 @@ cp GuanGeKai-Regular.ttf ~/.local/share/fonts/ && fc-cache -f
 
 字體：SIL OFL 1.1（衍生自 LXGW WenKai，已避開 RFN）。
 代碼：MIT。
-字形來源：《四書白文》（舊傳明·姜立綱書），日本宮內廳書陵部藏，書格 shuge.org 數位化；原書公有領域。
+字形來源：《四書白文》（舊傳明·姜立綱書），原書藏日本宮內廳書陵部、由其圖書寮數位檔案掃描（檔號 1000066720000）；本項目使用的 PDF 由書格整理發布；原書公有領域。

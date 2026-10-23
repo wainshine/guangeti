@@ -77,9 +77,9 @@ def build_methods():
         ("霞鹜文楷", lambda ch: em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", ch)),
         ("v1.3 ribbon", ribbon),
         ("U-Net (E3)", unet),
-        ("JiT 零样本", lambda ch: jit_img("data/zi2zi_eval_base", ch)),
-        ("JiT LoRA-40", lambda ch: jit_img("data/zi2zi_eval_lora40", ch)),
-        ("JiT LoRA-600", lambda ch: jit_img("data/zi2zi_eval_lora", ch)),
+        ("JiT 零样本", lambda ch: jit_img("data/zi2zi_eval_zerob", ch)),
+        ("JiT LoRA-40", lambda ch: jit_img("data/zi2zi_eval_lora40b", ch)),
+        ("JiT LoRA-600", lambda ch: jit_img("data/zi2zi_eval_lora600b", ch)),
         ("zi2zi-GAN", gan_fn),
     ]
 
@@ -139,10 +139,19 @@ def main():
     print(json.dumps(rows, ensure_ascii=False, indent=1))
     (ROOT / "work/eval_all.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1))
 
-    # panel: 8 chars x methods
-    sel = clean[:8]
-    sel = [c for c in sel if all((fn is None) or (fn(c) is not None) for _, fn in methods)]
+    # panels need at least 8 chars; a small --n run must not overwrite the published images
+    if len(clean) < 8:
+        print(f"only {len(clean)} chars: metrics written, panels skipped")
+        return
+    # panel: 8 chars x methods that can actually render them
+    probe = clean[0]
+    usable = [(n, f) for n, f in methods if f is None or f(probe) is not None]
+    sel = [c for c in clean[:8] if all((fn is None) or (fn(c) is not None) for _, fn in usable)]
+    methods = usable
     H = len(methods); W = len(sel)
+    if W == 0:
+        print("panel A skipped: no char has outputs from every usable method")
+        return
     sheet = Image.new("L", (S * W, S * H), 0)
     for r, (name, fn) in enumerate(methods):
         for c, ch in enumerate(sel):
@@ -157,6 +166,38 @@ def main():
         d.text((8, r * S + S // 2 - 12), name, font=f, fill=255)
     lab.resize((lab.width // 2, lab.height // 2)).save(ROOT / "docs/images/eval-panelA.png")
     print("panelA ->", ROOT / "docs/images/eval-panelA.png")
+
+    # ---- panel B: characters with NO ground truth (the real use case)
+    have = set(chars)
+    gen_chars = []
+    with open(ROOT / "work/generated.jsonl") as fh:
+        for line in fh:
+            c = json.loads(line)["char"]
+            if c not in have:
+                gen_chars.append(c)
+            if len(gen_chars) >= 8:
+                break
+    ship = ImageFont.truetype(str(ROOT / "build/GuanGeKai-Regular.ttf"), S)
+
+    def shipped(ch):
+        im = Image.new("L", (S, S), 0)
+        ImageDraw.Draw(im).text((0, 880 * S / 1000), ch, fill=255, font=ship, anchor="ls")
+        return np.array(im) > 127
+
+    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", "v1.3 ribbon", "zi2zi-GAN")]
+    rows_b.append(("已发布字体", shipped))
+    pb = Image.new("L", (S * len(gen_chars) + 160, S * len(rows_b)), 0)
+    for r, (name, fn) in enumerate(rows_b):
+        for c, ch in enumerate(gen_chars):
+            m = fn(ch)
+            if m is None:
+                continue
+            pb.paste(Image.fromarray((np.asarray(m) * 255).astype(np.uint8)), (160 + c * S, r * S))
+    db = ImageDraw.Draw(pb)
+    for r, (name, _) in enumerate(rows_b):
+        db.text((8, r * S + S // 2 - 12), name, font=f, fill=255)
+    pb.resize((pb.width // 2, pb.height // 2)).save(ROOT / "docs/images/eval-panelB.png")
+    print("panelB ->", ROOT / "docs/images/eval-panelB.png", "chars:", "".join(gen_chars))
 
 
 if __name__ == "__main__":

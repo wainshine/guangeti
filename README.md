@@ -14,7 +14,7 @@
 
 ## 這是什麼
 
-《四書白文》（十八卷，舊傳明·姜立綱書，日本宮內廳書陵部藏，書格 shuge.org 數位化）是一部典型的
+《四書白文》（十八卷，舊傳明·姜立綱書，原藏日本宮內廳書陵部（圖書寮數位檔案 shoryobu.kunaicho.go.jp，檔號 1000066720000））是一部典型的
 **館閣體**刻本：結體方正、筆畫豐腴、橫細豎粗、起收分明。本項目把它變成一套可安裝、可再分發的
 CJK 字體：
 
@@ -62,8 +62,10 @@ GuanGeKai (20,992 字)
 |---|---|---|
 | [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
-| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 16 組實驗（E1–E16）的配置、指標、判定、复現命令 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 17 組實驗（E1–E17）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
+| [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 想知道下一步的人 | v1.4.0 起三線並行的分工、產物命名與評估口徑 |
+| [docs/REPORTS/](docs/REPORTS/) | 想看實測數據的人 | 每次橫向評測的完整報告（指標表 + 兩個面板） |
 
 ## 安裝
 
@@ -94,8 +96,9 @@ python3 scripts/13_qa.py               # 覆蓋率質檢
 python3 scripts/14_package.py          # 發布包
 ```
 
-> 訓練步驟（`08_make_pairs.py` → `09_train*.py`）**不是發布版必需**：三次自訓均未達標，
-> 發布版用的是程序化筆墨濾波。複現實驗見 [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)。
+> 訓練步驟（`08_make_pairs.py` → `09_train*.py`）**不是發布版必需**：自訓 U-Net、
+> zi2zi 系列均未達標，發布版用的是**帶狀掃掠渲染**（`render_ribbon`）。
+> 複現實驗見 [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)。
 
 原始 PDF 需放在倉庫根目錄，檔名為 `四书白文.18卷.旧传明.姜立纲.pdf`（版權原因**不入庫**）。
 基線字體 `data/base/LXGWWenKai-Regular.ttf` 需自行從
@@ -103,8 +106,8 @@ python3 scripts/14_package.py          # 發布包
 
 ## 已知限制
 
-* 生成字形（19,317 字）在結構上保證正確（骨骼來自基線字體），但筆鋒是**程序化筆墨濾波**
-  的近似（帶狀掃掠 + 斜切端頭 + 逐筆墨量擾動），並非模型推斷，也非刻本刀鋒；
+* 生成字形（19,317 字）在結構上保證正確（骨骼來自基線字體），筆形由**帶狀掃掠**
+  （斜切端頭 + 逐筆墨量擾動 + 沿程 taper）程序化生成，並非模型推斷，也非刻本刀鋒；
   墨量 1.077、端帽形狀 KS 0.101，是目前最接近刻本的方案，但仍與真跡有可感知差異。
   用於正文小字時建議以真實字形子集為準。
 * 掃描本只覆蓋《四書》用字（1,675 個校驗後字形），因此大部分現代常用字屬於生成字形。
@@ -115,15 +118,57 @@ python3 scripts/14_package.py          # 發布包
 * 字體：SIL Open Font License 1.1，見 [OFL.txt](OFL.txt)。
   生成字形衍生自 [LXGW WenKai](https://github.com/lxgw/LxgwWenKai)（OFL 1.1，保留字體名
   「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」），本項目已按 OFL 要求更名為 GuanGe Kai。
-* 字體：SIL OFL 1.1（見 `OFL.txt`）。
 * 代碼（`scripts/`）：MIT（見 `LICENSE`）。
-* 掃描圖像：書格（shuge.org）整理，原書藏於日本宮內廳書陵部。字形是對公有領域 2D 作品的
-  忠實再現；本項目不對掃描圖像本身主張權利。
+* 掃描圖像：原書藏於日本宮內廳書陵部，數位化由其圖書寮數位檔案完成
+  （檔號 1000066720000）；本項目使用的 PDF 為書格（shuge.org）整理發布的版本。
+  字形是對公有領域 2D 作品的忠實再現，本項目不對掃描圖像本身主張權利。
 
 ## 致謝
 
-* 書格 shuge.org、日本宮內廳書陵部 —— 掃描本
-* [LXGW WenKai 霞鶩文楷](https://github.com/lxgw/LxgwWenKai) —— 缺失字的結構基線
-* [qiji-font 齊伋體](https://github.com/LingDong-/qiji-font) —— 紅章去除、向量化與字身框置中的思路
-* [RapidOCR / PP-OCR](https://github.com/RapidAI/RapidOCR) —— 逐頁轉錄
-* [potrace](http://potrace.sourceforge.net/) / [fontTools](https://github.com/fonttools/fonttools)
+本項目的字形品質來自「別人的字」遠多於我們的代碼。以下按用途分類，
+**每一項都說明我們用了它的什麼或受了它什麼啟發**。
+
+### 緣起：最早的三個參考
+
+本項目最早的技術路線，是照著這三個項目定下來的（都只看流程，沒有複製代碼/數據）：
+
+* **[qiji-font 齊伋體](https://github.com/LingDong-/qiji-font)** —— 「刻本掃描 → 切字 → OCR → 字體」的完整流程樣板，
+  我們的分頁、切格、OCR 校驗、字形歸一化都受它啟發
+* **[Image-to-font-extractor](https://github.com/wyattmattoe/Image-to-font-extractor)**（MIT）——
+  「字形圖 → SVG → 可安裝 TTF」的最小可行路徑，確立了我們「先出字體、再談風格」的順序
+* **[FontForge](https://github.com/fontforge/fontforge) / [fontTools](https://github.com/fonttools/fonttools)** ——
+  字體組裝工具；最終實現全部走 fontTools（FontForge 僅作流程參考）
+
+### 數據與掃描
+
+* **日本宮內廳書陵部（圖書寮數位檔案）** —— 原書藏本與**數位化掃描**（檔號 1000066720000）
+* **書格 shuge.org** —— 將該掃描整理成可下載的 PDF（**掃描並非書格製作**）
+* 說明：本 PDF 已被去色（實測 `r−g` 最大僅 11–14，無紅色像素），原書的**紅色圈點**在我們這份檔案裡
+  已變成深灰，故顏色分離無效，實際用「厚度 + 連通域」判據剔除（`scripts/pageproc.py`）。
+  若使用未去色的掃描，`red_mask()` 仍可直接生效。
+
+### 字體（OFL）
+
+* **[LXGW WenKai 霞鶩文楷](https://github.com/lxgw/LxgwWenKai)** —— 19,317 個缺失字的**結構骨架**；
+  本字體是它的衍生作品，已按 OFL 要求避開保留字體名
+* **Noto Serif SC / 思源宋體** —— 作為「內容字形」輸入（zi2zi 系列實驗）與對照基準
+
+### 工具
+
+* [FontTools](https://github.com/fonttools/fonttools) —— 字體組裝（UPM、name 表、cmap、輪廓寫入）
+* [potrace](http://potrace.sourceforge.net/) / [potracer](https://pypi.org/project/potracer/) —— 點陣轉向量
+* [OpenCV](https://opencv.org/)、[NumPy](https://numpy.org/)、[SciPy](https://scipy.org/)、
+  [scikit-image](https://scikit-image.org/)、[Pillow](https://python-pillow.org/) —— 影像處理
+* [RapidOCR / PP-OCR](https://github.com/RapidAI/RapidOCR) —— 逐頁轉錄（OCR）
+* [PyMuPDF](https://pymupdf.readthedocs.io/) —— PDF 渲染與頁面處理
+
+### 參考項目與思想
+
+* **[kaonashi-tyc/zi2zi](https://github.com/kaonashi-tyc/zi2zi)**（Apache-2.0）——
+  路線 B 的配方來源：U-Net + 全局判別器 + `L1×100 + 對抗 + 常量損失`，由我們獨立重寫為
+  `scripts/21_train_gan.py`，未使用其任何權重
+* **[kaonashi-tyc/zi2zi-JiT](https://github.com/kaonashi-tyc/zi2zi-JiT)**（代碼 MIT）——
+  路線 C 的架構；**其預訓練權重沒有許可聲明**（LICENSE 僅寫 "MIT License (Software)"），
+  故本項目只將其輸出作為**評價參考**，從未進入發布字體
+* **[computer-grass](https://github.com/LingDong-/computer-grass)** —— 逐筆墨量擾動 `dip`
+  與「針狀收筆」的思路；其字形數據的授權與 OFL 不兼容，**未使用**
