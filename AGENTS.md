@@ -38,7 +38,7 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 三条线各自保留产物：**A 带状扫掠**（`--method ribbon`）/ **B zi2zi-GAN** / **C zi2zi-JiT 自训练权重**。
 
 - A：墨量 1.077、端帽 KS 0.101、std 0.229。待做 —— **转折（横折方角）**、锐角内侧空洞、小字号回归。
-- B：40 字无泄漏集 Dice 0.554、墨量 0.922；训练中（150 ep）。需结构闸门（孔洞/连通域）。
+- B：40 字无泄漏集 Dice 0.563、墨量 1.013、端帽 KS 0.048（ep100）；训练中（150 ep）。需结构闸门（孔洞/连通域）。
 - C：上游权重不可用（LICENSE 只覆盖 "Software"）；计划用 MIT 代码 + 自有数据从头训练（`main_jit.py` 已验证可跑）。
 - 换数据源（楷书字典刻本）是唯一能根本改变 8% 覆盖率的路线。
 
