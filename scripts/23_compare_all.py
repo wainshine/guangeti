@@ -8,6 +8,8 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.stats import ks_2samp
 
 sys.path.insert(0, str(Path(__file__).parent))
+from fontbuild import VERSION  # noqa: E402
+from generate_lib import ribbon_scale as _rs  # noqa: E402
 import brush_lib as B
 ev = __import__("importlib").import_module("18_eval")
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,7 +56,7 @@ def build_methods():
         rng = np.random.RandomState(ord(ch) % (2 ** 31))
         ds = rng.choice(REL, size=len(fr), replace=True)
         w = np.power(ds, 1.4); w = w / max(1e-6, float(w.mean()))
-        return B.render_ribbon(fr, scale=0.78, dips=w, end_skew=0.9, taper=0.2)
+        return B.render_ribbon(fr, scale=_rs(float(m.sum())), dips=w, end_skew=0.9, taper=0.2)
 
     def unet(ch):
         x = gl.render_base(ImageFont.truetype(str(ROOT / "data/base/LXGWWenKai-Regular.ttf"), S), ch, S)
@@ -75,7 +77,7 @@ def build_methods():
         ("真迹", None),
         ("思源宋体", lambda ch: em_render(ROOT / "data/base/NotoSerifSC-Light.otf", ch)),
         ("霞鹜文楷", lambda ch: em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", ch)),
-        ("A·ribbon (v1.3.3)", ribbon),
+        (f"A·ribbon (v{VERSION})", ribbon),
         ("U-Net (E3)", unet),
         ("JiT 零样本", lambda ch: jit_img("data/zi2zi_eval_zerob", ch)),
         ("JiT LoRA-40", lambda ch: jit_img("data/zi2zi_eval_lora40b", ch)),
@@ -162,8 +164,7 @@ def main():
         for c, ch in enumerate(sel):
             m = Y[pos[ch]] > 127 if fn is None else fn(ch)
             sheet.paste(Image.fromarray((np.asarray(m) * 255).astype(np.uint8)), (c * S, r * S))
-    (ROOT / "work/preview").mkdir(parents=True, exist_ok=True)
-    sheet.save(ROOT / "work/preview/eval_panelA_raw.png")
+    # (no intermediate file: the finished panels go straight to docs/images)
     lab = Image.new("L", (S * W + 160, S * H), 0)
     lab.paste(sheet, (160, 0))
     d = ImageDraw.Draw(lab)
@@ -190,7 +191,7 @@ def main():
         ImageDraw.Draw(im).text((0, 880 * S / 1000), ch, fill=255, font=ship, anchor="ls")
         return np.array(im) > 127
 
-    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", "A·ribbon (v1.3.3)", "zi2zi-GAN")]
+    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", f"A·ribbon (v{VERSION})", "zi2zi-GAN")]
     rows_b.append(("已发布字体", shipped))
     pb = Image.new("L", (S * len(gen_chars) + 160, S * len(rows_b)), 0)
     for r, (name, fn) in enumerate(rows_b):

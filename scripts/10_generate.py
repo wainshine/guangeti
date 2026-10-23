@@ -103,7 +103,8 @@ def gated_chunk(args):
             rng = np.random.RandomState(ord(ch) % (2 ** 31))
             raw = rng.choice(rel, size=len(fr), replace=True)
             w = np.power(raw, 1.4); w = w / max(1e-6, float(w.mean()))
-            g = bl.render_ribbon(fr, scale=0.78, dips=w, end_skew=0.9, taper=0.2)
+            from generate_lib import ribbon_scale as _rs
+            g = bl.render_ribbon(fr, scale=_rs(float(ref.sum())), dips=w, end_skew=0.9, taper=0.2)
         out[j] = g.astype(np.uint8)
         okv[j] = True
     return lo, out, okv
@@ -130,12 +131,34 @@ def field_chunk(args):
         if mode == 'ribbon':
             w = np.power(ds, 1.4)
             w = w / max(1e-6, float(w.mean()))     # keep mean ink at 1.0
-            m = bl.render_ribbon(fr, scale=0.78, dips=w,
+            # The print's ink/WenKai ratio falls with complexity (0.99 at 10k px -> 0.76 at 22k),
+            # so a single global scale makes simple glyphs too light and dense ones too heavy.
+            # Fit on the 1,675 pairs: ratio = 20.619 * ink^-0.330; ribbon ink ~= 1.06 * scale.
+            from generate_lib import ribbon_scale as _rs
+            scale_i = _rs(float(bm.sum()))
+            m = bl.render_ribbon(fr, scale=scale_i, dips=w,
                                  end_skew=0.9, taper=0.2, ss=ss).astype(np.uint8)
         else:
             m = bl.render_field(fr, scale=0.9, dips=ds, ss=ss).astype(np.uint8)
+        # Structural guard: ribbon is built from the base skeleton, so structure is what
+        # matters. The old IoU>=0.7 test rejected 20.9% of glyphs whose dip simply made them
+        # thinner; accept instead whenever the topology (components + counters) is unchanged.
+        def _topo(mask):
+            import cv2 as _cv
+            mb = mask.astype(bool)
+            n, lab, st, _ = _cv.connectedComponentsWithStats(mb.astype(np.uint8), 8)
+            comps = sum(1 for i in range(1, n) if st[i, 4] >= 20)
+            nh, hl, hs, _ = _cv.connectedComponentsWithStats(((~mb).astype(np.uint8)), 8)
+            holes = sum(1 for i in range(1, nh) if hs[i, 4] >= 20
+                        and hs[i, 0] > 1 and hs[i, 1] > 1
+                        and hs[i, 0] + hs[i, 2] < mask.shape[1] - 1
+                        and hs[i, 1] + hs[i, 3] < mask.shape[0] - 1)
+            return comps, holes
         inter = (m & bm).sum(); union = max(1, (m | bm).sum())
-        good = inter / union >= 0.7 and m.sum() > bm.sum() * 0.7
+        iou = inter / union
+        # accept when either the topology is intact or the shape is still close;
+        # the old rule (IoU only) silently dropped the most strongly styled glyphs
+        good = (_topo(m) == _topo(bm) or iou >= 0.7) and m.sum() > bm.sum() * 0.5
         out[k] = m if good else bm.astype(np.uint8)
         ok[k] = good
     return lo, out, ok

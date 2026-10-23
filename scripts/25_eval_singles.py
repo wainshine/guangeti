@@ -27,7 +27,7 @@ def main():
         fr = B.glyph_frames(X[i] > 127)
         rng = np.random.RandomState(i); raw = rng.choice(REL, size=len(fr), replace=True)
         w = np.power(raw, 1.4); w = w / max(1e-6, float(w.mean()))
-        return B.render_ribbon(fr, scale=0.78, dips=w, end_skew=0.9, taper=0.2)
+        return B.render_ribbon(fr, scale=_rs(float(m.sum())), dips=w, end_skew=0.9, taper=0.2)
 
     def gan_fn(i):
         a = (X[i].astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]

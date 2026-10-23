@@ -84,3 +84,13 @@ def raster_to_em(contours, S, em_top=880.0, em_bot=-120.0):
                 segs.append(("C", mx(s[1]), my(s[2]), mx(s[3]), my(s[4]), mx(s[5]), my(s[6])))
         out.append(dict(start=(mx(sx), my(sy)), segs=segs))
     return out
+
+
+def ribbon_scale(comp: float, base: float = 1.06, lo: float = 0.62, hi: float = 1.12) -> float:
+    """Per-character ribbon scale.
+
+    The print's ink/WenKai ratio falls with stroke density (fit on the 1,675 pairs):
+    ratio = 20.619 * ink^-0.330, and ribbon ink is ~1.06x its scale.
+    """
+    tgt = 20.619 * max(float(comp), 1.0) ** -0.330
+    return float(min(hi, max(lo, tgt / base)))

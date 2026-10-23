@@ -17,9 +17,28 @@ CELLS = ROOT / "work" / "cells"
 
 
 def main():
+    # Fast path: the contours are already extracted; no need for work/masks.
+    if "--reuse-contours" in sys.argv:
+        cache = ROOT / "work" / "real_contours.jsonl"
+        if not cache.exists():
+            raise SystemExit(f"ABORT: {cache} missing")
+        glyphs = {}
+        for line in open(cache):
+            r = json.loads(line)
+            glyphs[r["char"]] = r["contours"]
+        if len(glyphs) < 1000:
+            raise SystemExit(f"ABORT: only {len(glyphs)} cached glyphs")
+        build_font(glyphs, Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv
+                   else ROOT / "build" / "GuanGeKai-Real.ttf",
+                   family="GuanGe Kai", style="Real", version=VERSION,
+                   copyright_text="GuanGe Kai — extracted from 四書白文 (Ming, attributed to 姜立綱). Scans: 書格 shuge.org / 宮内庁書陵部. SIL OFL 1.1.")
+        print("wrote (from cached contours)")
+        return
     ap = __import__("argparse").ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-Real.ttf"))
+    ap.add_argument("--reuse-contours", action="store_true",
+                    help="rebuild from work/real_contours.jsonl when work/masks has been cleared")
     args = ap.parse_args()
 
     meta = {}

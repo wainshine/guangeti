@@ -76,7 +76,7 @@ def build():
         rng = np.random.RandomState(ord(ch) % (2 ** 31))
         raw = rng.choice(REL, size=len(fr), replace=True)
         w = np.power(raw, 1.4); w = w / max(1e-6, float(w.mean()))
-        return B.render_ribbon(fr, scale=0.78, dips=w, end_skew=0.9, taper=0.2)
+        return B.render_ribbon(fr, scale=_rs(float(m.sum())), dips=w, end_skew=0.9, taper=0.2)
 
     def gan_fn(ch):
         x = gl.render_base(ImageFont.truetype(str(ROOT / "data/base/LXGWWenKai-Regular.ttf"), S), ch, S)
@@ -94,7 +94,7 @@ def build():
     return [
         ("思源宋体", lambda ch: em_render(ROOT / "data/base/NotoSerifSC-Light.otf", ch)),
         ("霞鹜文楷", lambda ch: em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", ch)),
-        ("A·ribbon (v1.3.3)", ribbon),
+        (f"A·ribbon (v{VERSION})", ribbon),
         ("U-Net (E3)", unet_fn),
         ("JiT 零样本", lambda ch, k=CLS[0]: jit(JIT[k][0], ch)),
         ("JiT LoRA-40", lambda ch, k=CLS[0]: jit(JIT[k][1], ch)),
