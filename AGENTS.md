@@ -5,7 +5,7 @@
 **先读这三个文件，再动手：**
 
 1. [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) —— 现状、决策、已知缺陷、未决问题、审计方法
-2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 21 组实验（E1–E21）的配置/指标/复现命令（含"第几轮训练"）
+2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 22 组实验（E1–E22）的配置/指标/复现命令（含"第几轮训练"）
 3. [`docs/DATA.md`](docs/DATA.md) —— 数据来源、许可、校验和、重建步骤
 
 ## 硬性约束

@@ -447,7 +447,8 @@ def ink_target_for(ch: str, font_path: str, ratio: float = 0.83, size: int = SIZ
 
 
 def render_ribbon(frames, scale=0.9, dips=None, taper=0.10, smooth=3.0,
-                  end_skew=0.5, corner_boost=0.0, junction_max=False, size=SIZE, ss=2):
+                  end_skew=0.5, corner_boost=0.0, junction_max=False, size=SIZE, ss=2,
+                  miter=0.0, miter_limit=4.0):
     """Per-segment quads along the skeleton (no self-intersecting polygon).
 
     Ends are cut at an angle by extending the two sides by different amounts.
@@ -499,6 +500,43 @@ def render_ribbon(frames, scale=0.9, dips=None, taper=0.10, smooth=3.0,
         for i in range(min(m, n)):
             cv2.circle(out, (int(round(pts[i][1])), int(round(pts[i][0]))),
                        max(1, int(round(r[i]))), 1, -1)
+        # miter join: at a corner the offset lines of the two chords meet at a
+        # point; filling the wedge out to it squares the outer corner while the
+        # inner corner stays rounded (which is what the print shows for 横折).
+        if miter > 0 and n > 8:
+            # the skeleton rounds a corner over roughly 3 radii, so accumulate the
+            # turn over that arc instead of looking at adjacent segments
+            win = int(max(3, min(n // 3, round(2.5 * float(np.median(r))))))
+            for i in range(win, n - win):
+                a0 = pts[i - win]
+                a1 = pts[i]
+                a2 = pts[i + win]
+                d0 = a1 - a0
+                d1 = a2 - a1
+                l0 = float(np.linalg.norm(d0)); l1 = float(np.linalg.norm(d1))
+                if l0 < 1e-3 or l1 < 1e-3:
+                    continue
+                u0 = d0 / l0; u1 = d1 / l1
+                dot = float(u0[0] * u1[0] + u0[1] * u1[1])
+                ang = float(np.degrees(np.arccos(np.clip(dot, -1, 1))))
+                if not (45.0 <= ang <= 120.0):
+                    continue
+                cr = float(u0[0] * u1[1] - u0[1] * u1[0])
+                side = 1.0 if cr < 0 else -1.0
+                q0 = np.array([-u0[1], u0[0]]) * side
+                q1 = np.array([-u1[1], u1[0]]) * side
+                o0 = a1 + q0 * r[i] * miter
+                o1 = a1 + q1 * r[i] * miter
+                den = float(u0[0] * u1[1] - u0[1] * u1[0])
+                if abs(den) < 1e-6:
+                    continue
+                dv = o1 - o0
+                t = float(dv[0] * u1[1] - dv[1] * u1[0]) / den
+                X = o0 + u0 * t
+                if np.linalg.norm(X - a1) > miter_limit * max(1e-3, float(r[i])):
+                    continue
+                tri = np.array([[o0[1], o0[0]], [X[1], X[0]], [o1[1], o1[0]]], np.float32)
+                cv2.fillPoly(out, [np.round(tri).astype(np.int32)], 1, lineType=cv2.LINE_AA)
         # 顿笔: a small square block at sharp bends squares off the outer corner
         if corner_boost > 0 and n > 6:
             ang = np.zeros(n, np.float32)
