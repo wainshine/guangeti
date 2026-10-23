@@ -19,7 +19,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 ```
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，21.2 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.1 MB）
-- 发布包：`release/`、`GuanGeKai-v1.3.0.zip`
+- 发布包：`release/`、`GuanGeKai-v1.3.1.zip`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
 
@@ -42,9 +42,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.3.0）；1,675 真跡 + 19,317 合成 | 20.0 MB | `e8bc94e1cdd58a37` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `005dd54b564b5584` |
-| `GuanGeKai-v1.3.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `550ada66c501d3b2` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.3.1）；1,675 真跡 + 19,317 合成 | 20.0 MB | `3ef70af3929fb8a0` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真跡（风格名 Real） | 3.1 MB | `aaaff3f320c9e3a2` |
+| `GuanGeKai-v1.3.1.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 17 MB | `6f1c6e611814fe90` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。

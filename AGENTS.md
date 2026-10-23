@@ -19,7 +19,7 @@
   只允许 OFL / Apache-2.0 / UFL 等自由许可字体；基于专有字体测出的数字也不得作为决策依据。
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 
-## 当前状态（v1.3.0）
+## 当前状态（v1.3.1）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真跡 + 19,317 合成
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真跡

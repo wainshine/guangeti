@@ -37,3 +37,5 @@ data/ids/Unihan_IRGSources.txt
 /data/zi2zi_eval_cfg4.0
 /data/zi2zi_eval_lora
 /data/lora_long
+/data/zi2zi_eval_lora40
+/data/scratch_test

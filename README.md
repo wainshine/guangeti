@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.3.0（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> **狀態：v1.3.1（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
 > 合成字結構正確、字重接近，但**沒有真正的刻刀筆鋒**。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。

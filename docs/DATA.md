@@ -74,9 +74,9 @@
 ## 5. 校验和
 
 ```
-e8bc94e1cdd58a37aa667720e05b0b7fd6b027b9f21258abee654a0eeca5b856  build/GuanGeKai-Regular.ttf
-005dd54b564b558470bc887e44f15323e14f247948760a693a9bbc847c9d3888  build/GuanGeKai-Real.ttf
-550ada66c501d3b209801095cce944783510e585e66897583a6ff6484ddebf80  GuanGeKai-v1.3.0.zip
+3ef70af3929fb8a0eee78851fc39c638691fdf331ac58118f3c665361888ab1c  build/GuanGeKai-Regular.ttf
+aaaff3f320c9e3a2d2cdfb450d1f79e8352c55c8c660230a99e760a11af1830c  build/GuanGeKai-Real.ttf
+6f1c6e611814fe909015a1c43b557a3f0b8297b07984c826d765aa70c30d6059  GuanGeKai-v1.3.1.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。

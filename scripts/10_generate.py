@@ -63,7 +63,9 @@ def field_chunk(args):
             ds = rng.choice(rel, size=len(fr), replace=True)
             ds = ds / max(1e-6, float(ds.mean()))
         if mode == 'ribbon':
-            m = bl.render_ribbon(fr, scale=1.04, dips=np.power(ds, 1.4),
+            w = np.power(ds, 1.4)
+            w = w / max(1e-6, float(w.mean()))     # keep mean ink at 1.0
+            m = bl.render_ribbon(fr, scale=0.82, dips=w,
                                  end_skew=0.9, taper=0.2, ss=ss).astype(np.uint8)
         else:
             m = bl.render_field(fr, scale=0.9, dips=ds, ss=ss).astype(np.uint8)
