@@ -1,0 +1,79 @@
+"""Build the single-occurrence test set (617 glyphs never used in training)."""
+from __future__ import annotations
+import collections, json, sys
+from pathlib import Path
+
+import cv2, numpy as np
+from PIL import Image, ImageDraw, ImageFont
+
+sys.path.insert(0, str(Path(__file__).parent))
+from glyphvec import clean_ink, trace, to_em, contour_bounds, base_bounds
+
+ROOT = Path(__file__).resolve().parents[1]
+S, PAD, BLEND = 256, 6, 0.8
+
+
+def main():
+    meta = {json.loads(l)["file"]: json.loads(l) for l in open(ROOT / "work/cells.jsonl")}
+    rows = [json.loads(l) for l in open(ROOT / "work/labeled.jsonl")]
+    cnt = collections.Counter(r["label"] for r in rows if r.get("label"))
+    singles = [r for r in rows if r.get("label") and cnt[r["label"]] == 1]
+
+    norm = {}
+    for row in singles:
+        ch, m, mp = row["label"], meta.get(row["file"]), ROOT / "work/masks" / row["file"]
+        if not m or not mp.exists():
+            continue
+        cs = trace(clean_ink(np.array(Image.open(mp).convert("L")) > 127))
+        if not cs:
+            continue
+        scale = 880.0 / max(200.0, m["pitch"])
+        em = to_em(cs, scale, m["x0"] - PAD, m["y0"] - PAD,
+                   (m["x0"] + m["x1"]) / 2, (m["slot"][0] + m["slot"][1]) / 2,
+                   em_cx=500.0, em_cy=440.0)
+        bb = base_bounds(ch)
+        d = dict(scale=float(scale), origin=(m["x0"] - PAD, m["y0"] - PAD), file=row["file"],
+                 slot_cx=float((m["x0"] + m["x1"]) / 2),
+                 slot_cy=float((m["slot"][0] + m["slot"][1]) / 2))
+        if bb is None:
+            d.update(sx=1.0, sy=1.0, dx=0.0, dy=0.0)
+        else:
+            x0, y0, x1, y1 = contour_bounds(em)
+            w, h = max(1e-3, x1 - x0), max(1e-3, y1 - y0)
+            tw, th = bb[2] - bb[0], bb[3] - bb[1]
+            sx = min(max((BLEND * tw + (1 - BLEND) * w) / w, 0.6), 1.7)
+            sy = min(max((BLEND * th + (1 - BLEND) * h) / h, 0.6), 1.7)
+            cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+            d.update(sx=float(sx), sy=float(sy),
+                     dx=float((bb[0] + bb[2]) / 2 - cx * sx),
+                     dy=float((bb[1] + bb[3]) / 2 - cy * sy))
+        norm[ch] = d
+
+    def book_ink(m, ink, nrm):
+        sc = nrm["scale"]; scx, scy = nrm["slot_cx"], nrm["slot_cy"]
+        px0, py0 = m["x0"] - PAD, m["y0"] - PAD
+        a = sc * S / 1000.0 * nrm["sx"]; bs = sc * S / 1000.0 * nrm["sy"]
+        tx = (((px0 - scx) * sc + 500) * nrm["sx"] + nrm["dx"]) * S / 1000.0
+        ty = (880 - nrm["dy"] - 440 * nrm["sy"] - (scy - py0) * sc * nrm["sy"]) * S / 1000.0
+        M = np.array([[a, 0, tx], [0, bs, ty]], np.float32)
+        return cv2.warpAffine(ink, M, (S, S), flags=cv2.INTER_LINEAR,
+                              borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+
+    chars = sorted(norm)
+    font = ImageFont.truetype(str(ROOT / "data/base/LXGWWenKai-Regular.ttf"), S)
+    X = np.zeros((len(chars), S, S), np.uint8)
+    Y = np.zeros((len(chars), S, S), np.uint8)
+    for i, ch in enumerate(chars):
+        nrm = norm[ch]; m = meta[nrm["file"]]
+        img = Image.new("L", (S, S), 0)
+        ImageDraw.Draw(img).text((0, 880 * S / 1000), ch, fill=255, font=font, anchor="ls")
+        X[i] = np.array(img)
+        g = np.array(Image.open(ROOT / "work/cells" / nrm["file"]).convert("L"))
+        Y[i] = book_ink(m, (g < 160).astype(np.uint8) * 255, nrm)
+    np.savez_compressed(ROOT / "work/pairs_single.npz", X=X, Y=Y, chars=np.array(chars))
+    json.dump(norm, open(ROOT / "work/norm_single.json", "w"), ensure_ascii=False)
+    print(f"singles: {len(chars)} glyphs -> work/pairs_single.npz")
+
+
+if __name__ == "__main__":
+    main()

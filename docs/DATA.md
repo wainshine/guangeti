@@ -90,7 +90,18 @@
 |---|---|
 | `scripts/18_eval.py` | 指标库（Dice / 端帽剖面 / 墨量）与留出集评估 |
 | `scripts/22_eval_gan.py` | 单一模型（GAN 检查点）指标 |
-| `scripts/23_compare_all.py --set work/eval_clean2.json` | **全方案横向对比**，同时生成面板 A/B |
+| `scripts/23_compare_all.py --set work/eval_clean3.json --n 120` | **全方案横向对比**，同时生成面板 A/B |
+| `scripts/24_build_singles.py` | 构建 617 个「只出现一次」字的测试集 |
+| `scripts/25_eval_singles.py` | 在该测试集上评估 ribbon / GAN / 文楷 |
+
+留出集有三档，按用途选用：
+
+| 文件 | 字数 | 用途 |
+|---|---|---|
+| `work/eval_set.json` | 200 | 分层留出（按自由端数），评测的总体抽样框 |
+| `work/eval_clean3.json` | 120 | 模型训练时未见的全部字，**主力评估集** |
+| `work/eval_clean2.json` | 91 | 同时不在 LoRA 训练集内，用于与 JiT 对比 |
+| `work/pairs_single.npz` | 617 | **只出现一次、从未参与训练**的字，独立外部测试集 |
 
 ## 6. 重建步骤
 

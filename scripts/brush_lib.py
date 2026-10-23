@@ -447,7 +447,7 @@ def ink_target_for(ch: str, font_path: str, ratio: float = 0.83, size: int = SIZ
 
 
 def render_ribbon(frames, scale=0.9, dips=None, taper=0.10, smooth=3.0,
-                  end_skew=0.5, size=SIZE, ss=2):
+                  end_skew=0.5, corner_boost=0.0, junction_max=False, size=SIZE, ss=2):
     """Per-segment quads along the skeleton (no self-intersecting polygon).
 
     Ends are cut at an angle by extending the two sides by different amounts.
@@ -472,6 +472,20 @@ def render_ribbon(frames, scale=0.9, dips=None, taper=0.10, smooth=3.0,
         nrm = np.stack([-tan[:, 1], tan[:, 0]], axis=1)
         L = pts + nrm * r[:, None]
         R = pts - nrm * r[:, None]
+        # junction smoothing: endpoints shared by several strokes take the max
+        # radius, so a thin horizontal meeting a thick vertical does not step down
+        if junction_max:
+            for i in (0, n - 1):
+                best = float(r[i])
+                for gi, g in enumerate(frames):
+                    gp = g["pts"] * ss
+                    for j in (0, len(gp) - 1):
+                        if np.linalg.norm(gp[j] - pts[i]) < 2.0 * ss:
+                            gr = float(g["r_obs"][j]) * scale * ss
+                            if dips is not None and gi < len(dips):
+                                gr *= float(dips[gi])
+                            best = max(best, gr)
+                r[i] = best
         if end_skew > 0:
             ds = end_skew * float(r[0]) * 1.5
             de = end_skew * float(r[-1]) * 1.5
@@ -485,4 +499,20 @@ def render_ribbon(frames, scale=0.9, dips=None, taper=0.10, smooth=3.0,
         for i in range(min(m, n)):
             cv2.circle(out, (int(round(pts[i][1])), int(round(pts[i][0]))),
                        max(1, int(round(r[i]))), 1, -1)
+        # 顿笔: a small square block at sharp bends squares off the outer corner
+        if corner_boost > 0 and n > 6:
+            ang = np.zeros(n, np.float32)
+            w = max(3, n // 12)
+            for i in range(w, n - w):
+                v1 = pts[i] - pts[i - w]
+                v2 = pts[i + w] - pts[i]
+                c = v1.dot(v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-6)
+                ang[i] = np.degrees(np.arccos(np.clip(c, -1, 1)))
+            peaks = np.where(ang < 100)[0]
+            if len(peaks):
+                keep = peaks[np.r_[True, np.diff(peaks) > 3]]
+                for i in keep:
+                    side = max(2, int(round(r[i] * (1.0 + corner_boost))))
+                    x, y = int(round(pts[i][1])), int(round(pts[i][0]))
+                    cv2.rectangle(out, (x - side, y - side), (x + side, y + side), 1, -1)
     return cv2.resize(out * 255, (size, size), interpolation=cv2.INTER_AREA) > 127

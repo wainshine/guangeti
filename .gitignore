@@ -42,3 +42,9 @@ data/ids/Unihan_IRGSources.txt
 /data/zi2zi_eval_lora40b
 /data/zi2zi_eval_lora600b
 /data/zi2zi_eval_zerob
+/data/jit_l40A
+/data/jit_l40C
+/data/jit_l600A
+/data/jit_l600C
+/data/jit_zeroA
+/data/jit_zeroC
