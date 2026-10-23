@@ -52,8 +52,9 @@ def build_methods():
         m = em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", ch)
         fr = B.glyph_frames(m)
         rng = np.random.RandomState(ord(ch) % (2 ** 31))
-        ds = rng.choice(REL, size=len(fr), replace=True); ds = ds / ds.mean()
-        return B.render_ribbon(fr, scale=1.04, dips=np.power(ds, 1.4), end_skew=0.9, taper=0.2)
+        ds = rng.choice(REL, size=len(fr), replace=True)
+        w = np.power(ds, 1.4); w = w / max(1e-6, float(w.mean()))
+        return B.render_ribbon(fr, scale=0.82, dips=w, end_skew=0.9, taper=0.2)
 
     def unet(ch):
         x = gl.render_base(ImageFont.truetype(str(ROOT / "data/base/LXGWWenKai-Regular.ttf"), S), ch, S)
@@ -107,10 +108,11 @@ def metrics(m, t, store=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=40)
+    ap.add_argument("--set", default=str(ROOT / "work/eval_clean.json"))
     args = ap.parse_args()
     chars, X, Y = load_pairs()
     pos = {c: i for i, c in enumerate(chars)}
-    clean = json.load(open(ROOT / "work/eval_clean.json"))[: args.n]
+    clean = json.load(open(args.set))[: args.n]
     methods = build_methods()
 
     real_store = {"cap": []}

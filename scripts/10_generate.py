@@ -153,7 +153,7 @@ def main():
     if args.reuse_masks and MASKFILE.exists():
         masks = np.load(MASKFILE)
         print("masks reused:", masks.shape, flush=True)
-    elif args.method == "field":
+    elif args.method in ("field", "ribbon"):
         import multiprocessing as mp
         ctx = mp.get_context("fork")
         step = 200

@@ -1,7 +1,7 @@
 # 数据、许可与校验和
 
 > 本文件回答三个问题：**每个文件从哪来、能不能用、怎么复现**。
-> 所有体积为 2026-10-22 实测。
+> 所有体积为 2026-10-23 实测。
 
 ---
 
@@ -16,7 +16,7 @@
 | `data/base/SourceHanSansCN-Regular.otf` | 8 MB | [adobe-fonts/source-han-sans](https://github.com/adobe-fonts/source-han-sans)（SubsetOTF/CN） | OFL 1.1，无 RFN | ❌ 不入库（仅骨架选型实验用） |
 | `data/base/cg/ComputerGrassRegular.ttf` | 55 MB | [computer-grass](https://github.com/LingDong-/computer-grass) release | **Arphic Public License**（随包 `ARPHICPL.TXT`） | 仅评估用；`ARPHICPL.TXT` 入库 |
 | `data/ids/ids.txt` | 2.1 MB | [cjkvi-ids](https://github.com/cjkvi/cjkvi-ids)（基于 CHISE IDS） | **仓库未提供顶层 LICENSE**（CHISE 系历史许可），仅用于 E4 实验、**未进入发布字体** | ⚠️ 若发布仓库需完全干净，建议移出（见 §7） |
-| `data/ids/Unihan_IRGSources.txt` | 13 MB | Unicode UCD | Unicode License v3（宽松） | ⚠️ 当前入库（该版本**不含 kIDS**，实际没用上，可删） |
+| `data/ids/Unihan_IRGSources.txt` | 13 MB | Unicode UCD | Unicode License v3（宽松） | ❌ 未跟踪（该版本不含 kIDS，从未使用） |
 | `data/canonical/{daxue,zhongyong,mengzi,lunyu}.json` | 180 KB | [chinese-poetry](https://github.com/chinese-poetry/chinese-poetry)（论语来自 lihuibng fork） | MIT | ✅ 入库 |
 | `data/vendor/zi2zi-JiT/` | 93 MB | [zi2zi-JiT](https://github.com/kaonashi-tyc/zi2zi-JiT) | 代码 MIT；**权重许可未声明** | 有本地 MPS 补丁，见 §4 |
 
@@ -27,18 +27,18 @@
 | 文件/目录 | 体积 | 内容 |
 |---|---|---|
 | `work/cells/` + `work/masks/` | 1.9 GB | 54,109 个单字灰度裁剪 + 对应二值掩膜 |
-| `work/cells.jsonl` | 23 MB | 每格元数据（页/栏/行/bbox/slot/pitch/ink） |
-| `work/ocr_pages.jsonl` | 6 MB | 逐页 PP-OCRv6 结果 |
-| `work/labeled.jsonl` | 25 MB | 每格 → 字标签（含 OCR/标准文本/一致性） |
+| `work/cells.jsonl` | 12 MB | 每格元数据（页/栏/行/bbox/slot/pitch/ink） |
+| `work/ocr_pages.jsonl` | 2 MB | 逐页 PP-OCRv6 结果 |
+| `work/labeled.jsonl` | 18 MB | 每格 → 字标签（含 OCR/标准文本/一致性） |
 | `work/chosen.jsonl` | 1 MB | 每字一个最佳样本（1,675 条） |
 | `work/norm.json` | 472 KB | 字面框归一化仿射参数 |
 | `work/real_contours.jsonl` | 57 MB | 真字轮廓（字体单位） |
-| `work/generated.jsonl` | 240 MB | 合成字轮廓（19,317 条） |
+| `work/generated.jsonl` | 311 MB | 合成字轮廓（19,317 条） |
 | `work/gen_masks.npy` | 1.2 GB | 合成用 256² 掩膜缓存 |
 | `work/pairs/pairs.npz` | 3 MB | 风格迁移训练配对 |
 | `work/align_report.json` | 20 KB | 每页 OCR↔标准文本匹配率 |
-| `work/qa/` | 39 MB | 覆盖检查表（21 张 contact sheet） |
-| `work/preview/` | 132 MB | 调试/对照图（部分用于文档） |
+| `work/qa/` | 43 MB | 覆盖检查表（21 张 contact sheet） |
+| `work/preview/` | 135 MB | 调试/对照图（部分用于文档） |
 
 ---
 
@@ -74,9 +74,9 @@
 ## 5. 校验和
 
 ```
-3ef70af3929fb8a0eee78851fc39c638691fdf331ac58118f3c665361888ab1c  build/GuanGeKai-Regular.ttf
-aaaff3f320c9e3a2d2cdfb450d1f79e8352c55c8c660230a99e760a11af1830c  build/GuanGeKai-Real.ttf
-6f1c6e611814fe909015a1c43b557a3f0b8297b07984c826d765aa70c30d6059  GuanGeKai-v1.3.1.zip
+21ae1c6c746ac1a0afe7100e5bc253148c8f2c90857f73906eff91187c9da0c1  build/GuanGeKai-Regular.ttf
+860e41cfcc9a07ee8f81dc0b2fcd42fe3fef09315b43fa4f772fa88b40e7fbc6  build/GuanGeKai-Real.ttf
+299d3597099d177d51c44f97fc15b9a656c754e201c9362c2e4c5a4cd21bf44a  GuanGeKai-v1.3.2.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -132,6 +132,6 @@ rm -rf data/fonts_target data/ids/Unihan_IRGSources.txt data/zi2zi_ds data/zi2zi
 rm -rf data/base/cg/ComputerGrassRegular.ttf data/base/cg/cg.zip
 ```
 
-> 目前 git 跟踪的 56 个文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
+> 目前 git 跟踪的 75 个文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
 > 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
 > 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。

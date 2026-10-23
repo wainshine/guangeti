@@ -13,7 +13,9 @@
 | 第 1 轮 | 自训 U-Net v1（256²，脏目标） | `09_train.py`（旧） | 停于 ep16 | val L1 0.202 |
 | 第 2 轮 | 自训 U-Net v2（2 通道 + GroupNorm） | `09_train.py` | 跑完 45 ep | val L1 0.210 |
 | 第 3 轮 | 自训 U-Net v3（128² patch + Dice） | `09_train_b.py` | 停于 ep107 | **Dice 0.441** |
-| 第 4 轮 | zi2zi-JiT **LoRA 微调**（第一个外部预训练模型） | `lora_single_gpu_finetune_jit.py` | 跑完 40 ep / 1,240 步 | Dice 0.514 |
+| 第 4 轮 | zi2zi-JiT **LoRA 微调**（40 ep） | `lora_single_gpu_finetune_jit.py` | 跑完 1,240 步 | Dice 0.514（8 字） |
+| 第 5 轮 | zi2zi-JiT **LoRA 长训练**（600 ep） | 同上 | 18,600 步 / 1:28:17 | Dice 0.397（142 字） |
+| 第 6 轮 | **zi2zi-GAN**（原版配方的 PyTorch 重实现） | `21_train_gan.py` | 150 ep（进行中） | 见 E16 |
 
 > 另有一次 **zi2zi-JiT 零样本**推理（E5），不涉及训练。
 > 所以：**自训模型到第 3 轮为止；算上 LoRA，一共进行了 4 轮训练。**
@@ -446,3 +448,23 @@ cd data/vendor/zi2zi-JiT && PYTHONPATH=. python3 lora_single_gpu_finetune_jit.py
 全量：19,317 字约 2 分钟（12 进程），字体 **20 MB**（比 field 版小，因为带状渲染的边缘更干净、potrace 点数更少）。
 
 **遗留**：字重仍略轻于真字；`taper` 在骨架 DT 口径下测不出（需要用轮廓宽度轮廓重测）。
+
+### E16 — 原版 zi2zi 配方的 PyTorch 重实现（2026-10-23）
+
+- 代码：`scripts/21_train_gan.py`（Apache-2.0 配方的独立重实现，**未使用任何预训练权重**）
+- 架构：U-Net（8 下 / 7 上，5×5，BN，dropout）+ **全局 FC 判别器**；
+  损失 `L1×100 + BCE(adv) + 常数量×15`（编码器特征匹配）
+- 训练：1,555 对，batch 16，146 s/epoch，150 epoch ≈ 6 小时（M3 Ultra / MPS）
+- 结果（40 字无泄漏集，ep42 检查点）：
+
+| 指标 | 值 |
+|---|---|
+| Dice | **0.549**（所有方案最高） |
+| 墨量比 | 0.979 |
+| 端帽 cap_mid / KS | 0.557 / 0.093 |
+| 逐笔 std | 0.246 |
+
+- **但**：对 8 个不在 1,675 真字里的常见字（`丂万与` 等），输出**全背景**（`max=-0.07`）。
+  即模型学的是这 1,675 个输入字形到输出的映射，**不是通用字形风格迁移**。
+- 结论：**该路线对本项目无效**——我们需要的是 19,317 个「没见过的字」。
+  高 Dice 只说明它记住了训练字体里的字。实验代码与检查点保留（`work/zi2zi_gan.pt`）供参考。

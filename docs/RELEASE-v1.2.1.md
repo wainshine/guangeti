@@ -15,7 +15,7 @@
 
 | 檔案 | 內容 | 大小 |
 |---|---|---|
-| `GuanGeKai-Regular.ttf` | 20,992 字 = 1,675 真跡 + 19,317 合成 | 21.2 MB |
+| `GuanGeKai-Regular.ttf` | 20,992 字 = 1,675 真跡 + 19,317 合成 | 20.0 MB |
 | `GuanGeKai-Real.ttf` | 僅 1,675 真跡 | 3.1 MB |
 | `OFL.txt` / `LICENSE` | 字體 OFL 1.1；代碼 MIT | |
 | `provenance.json` / `coverage.txt` / `SHA256SUMS` | 逐字來源、覆蓋、校驗和 | |

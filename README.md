@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.3.1（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> **狀態：v1.3.2（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
 > 合成字結構正確、字重接近，但**沒有真正的刻刀筆鋒**。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
@@ -48,7 +48,7 @@ PDF 掃描 (410 頁)
 2,300 個字的標註（保留 1,675 個可交叉校驗的字）
    ↓  potrace 向量化 / 基線與字身框歸一化
 GuanGeKai-Real
-   ↓  缺失字：以霞鶩文楷為骨架 + 程序化筆墨濾波（豎粗橫細、加重、閉合）
+   ↓  缺失字：霞鶩文楷骨架 → 帶狀掃掠（斜切端頭 + 逐筆墨量波動）
 19,317 個生成字形 → 向量化
    ↓  合併、構建 OpenType
 GuanGeKai (20,992 字)
@@ -62,7 +62,7 @@ GuanGeKai (20,992 字)
 |---|---|---|
 | [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
-| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 7 組實驗的配置、指標、判定、复現命令 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 16 組實驗（E1–E16）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
 
 ## 安裝
@@ -87,7 +87,7 @@ python3 scripts/04_label.py            # 切片 -> 字
 python3 scripts/05_select.py           # 每字挑最優樣本（默認剔除僅出現 1 次的字）
 python3 scripts/06_norm.py             # 字身框歸一化參數
 python3 scripts/07_build_real.py       # 真實字形子集字體
-python3 scripts/10_generate.py --method brush   # 生成缺失字（發布版走筆墨濾波）
+python3 scripts/10_generate.py --method ribbon  # 生成缺失字（發布版：帶狀掃掠）
 python3 scripts/11_build_full.py       # 合成完整字體
 python3 scripts/12_specimen.py         # 樣張
 python3 scripts/13_qa.py               # 覆蓋率質檢
@@ -104,9 +104,8 @@ python3 scripts/14_package.py          # 發布包
 ## 已知限制
 
 * 生成字形（19,317 字）在結構上保證正確（骨骼來自基線字體），但筆鋒是**程序化筆墨濾波**
-  的近似（僅縱向腐蝕 + 閉合），並非模型推斷，也非刻本刀鋒；與真實字形存在可感知差異。
-  v1.2.0 起墨量（1.09）與豎橫比（1.18）已對齊刻本；v1.3.0 改用**帶狀掃掠 + 斜切端頭 + 逐筆墨量擾動**，
-  端帽形狀與筆內粗細變化更接近刻本。
+  的近似（帶狀掃掠 + 斜切端頭 + 逐筆墨量擾動），並非模型推斷，也非刻本刀鋒；
+  墨量 1.077、端帽形狀 KS 0.101，是目前最接近刻本的方案，但仍與真跡有可感知差異。
   用於正文小字時建議以真實字形子集為準。
 * 掃描本只覆蓋《四書》用字（1,675 個校驗後字形），因此大部分現代常用字屬於生成字形。
 * 尚未做 hinting；大字号、印刷級輸出請自行 outline。
@@ -118,7 +117,6 @@ python3 scripts/14_package.py          # 發布包
   「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」），本項目已按 OFL 要求更名為 GuanGe Kai。
 * 字體：SIL OFL 1.1（見 `OFL.txt`）。
 * 代碼（`scripts/`）：MIT（見 `LICENSE`）。
-* 文件名與倉庫結構見 [docs/DATA.md](docs/DATA.md)。
 * 掃描圖像：書格（shuge.org）整理，原書藏於日本宮內廳書陵部。字形是對公有領域 2D 作品的
   忠實再現；本項目不對掃描圖像本身主張權利。
 
