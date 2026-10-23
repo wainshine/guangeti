@@ -54,7 +54,7 @@ def build_methods():
         rng = np.random.RandomState(ord(ch) % (2 ** 31))
         ds = rng.choice(REL, size=len(fr), replace=True)
         w = np.power(ds, 1.4); w = w / max(1e-6, float(w.mean()))
-        return B.render_ribbon(fr, scale=0.82, dips=w, end_skew=0.9, taper=0.2)
+        return B.render_ribbon(fr, scale=0.78, dips=w, end_skew=0.9, taper=0.2)
 
     def unet(ch):
         x = gl.render_base(ImageFont.truetype(str(ROOT / "data/base/LXGWWenKai-Regular.ttf"), S), ch, S)

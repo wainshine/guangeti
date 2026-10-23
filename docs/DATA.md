@@ -72,12 +72,28 @@
 
 ---
 
+## 4.5 发布包内容（`release/` 与 zip）
+
+`release/` 由 `14_package.py` 生成，共 11 个文件：
+
+| 文件 | 说明 |
+|---|---|
+| `GuanGeKai-Regular.ttf` / `GuanGeKai-Real.ttf` | 完整版 / 真迹子集 |
+| `OFL.txt` / `LICENSE` | 字体与代码许可 |
+| `README.md` | 根 README 的副本（**改 README 后必须重打包**） |
+| `provenance.json` | 逐字 real/gen |
+| `coverage.txt` | 覆盖码位清单 |
+| `stats.json` / `SHA256SUMS` | 统计与自校验 |
+| `specimen.png` / `book-vs-font.png` | 样张与刻本对照 |
+
+> 分析用的对比面板（`docs/images/eval-panel*.png`）**不进发布包**，只留在仓库里。
+
 ## 5. 校验和
 
 ```
-21ae1c6c746ac1a0afe7100e5bc253148c8f2c90857f73906eff91187c9da0c1  build/GuanGeKai-Regular.ttf
-860e41cfcc9a07ee8f81dc0b2fcd42fe3fef09315b43fa4f772fa88b40e7fbc6  build/GuanGeKai-Real.ttf
-14b1975103078e3fa2c29a45f16ae992393ad06577eddb0644d04cdae96abd1f  GuanGeKai-v1.3.2.zip
+f341247d7e25c7b62283905e88d053ac33dfc7b6fdfc6751e04a6e7de46104fd  build/GuanGeKai-Regular.ttf
+42592d7d4085aa1c33daec345d2b6b70010d02a4a3fad47960e47097bb0537f6  build/GuanGeKai-Real.ttf
+0e2c93c7952b367dbcf671e6938154b94e4a66d227e184b9468e774f0e2dc3ad  GuanGeKai-v1.3.3.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -93,6 +109,8 @@
 | `scripts/23_compare_all.py --set work/eval_clean3.json --n 120` | **全方案横向对比**，同时生成面板 A/B |
 | `scripts/24_build_singles.py` | 构建 617 个「只出现一次」字的测试集 |
 | `scripts/25_eval_singles.py` | 在该测试集上评估 ribbon / GAN / 文楷 |
+| `scripts/26_bench.py --classes A,B,C` | **三类基准**（见过 / 没见过 / 书中没有），所有方案同一规则 |
+| `scripts/27_fit_width.py` | 从全部真字（45,042 条笔画）重拟合逐笔宽度分布 |
 
 留出集有三档，按用途选用：
 

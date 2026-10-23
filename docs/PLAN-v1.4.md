@@ -6,7 +6,7 @@
 
 - 代码：`scripts/brush_lib.render_ribbon` + `10_generate.py --method ribbon`
 - 产物：`build/GuanGeKai-A-ribbon.ttf`
-- 现状：墨量 1.077、端帽 KS 0.101、笔内 std 0.229（真迹 1.000 / — / 0.248）
+- 现状（v1.3.3）：字体级墨量 1.146、端帽 KS 0.124、Dice 0.432；逐笔宽度分布已用 45,042 条笔画重拟合
 - 参考：[qiji-font](https://github.com/LingDong-/qiji-font) 的取字流程（视觉居中、双阈值保细节）
   —— 实测视觉中心与 bbox 中心相差仅 0.030–0.032 em（p90 0.063），暂不值得改。
 - 待做：
@@ -18,8 +18,8 @@
 
 - 代码：`scripts/21_train_gan.py`（原版 zi2zi 配方的独立 PyTorch 重实现，Apache-2.0 参考、无预训练权重）
 - 产物：`build/GuanGeKai-B-gan.ttf`
-- 现状：150 epoch 训练中（已到 ep100）；40 字无泄漏集 Dice 0.563、墨量 1.013、端帽 KS 0.048、std 0.234
-- 已知问题：8 个未见字中 2 个孔洞数错误（`丌`、`丏`），需要结构闸门；缺字无真值，只能查墨量与孔洞一致性
+- 现状：**训练完成（150 epoch）**。见过的字 Dice 0.803 / 墨量 0.997 / 端帽 KS 0.048；没见过的字 0.552 / 0.993 / 0.039；书中没有的字拓扑 116/150
+- 已知问题：书中没有的字有 23% 拓扑漂移（34/150），需要结构闸门；缺字无真值，只能查墨量与孔洞一致性
 - 待做：
   1. 训练到 150 epoch，按 epoch 20/50/100/150 各评估一次
   2. 结构闸门：孔洞数 / bbox IoU / 连通域数，不通过回退到路线 A
@@ -39,7 +39,7 @@
 ## 产物命名
 
 ```
-build/GuanGeKai-A-ribbon.ttf   路线 A（当前发布 = v1.3.2 的 build/GuanGeKai-Regular.ttf）
+build/GuanGeKai-A-ribbon.ttf   路线 A（当前发布 = v1.3.3 的 build/GuanGeKai-Regular.ttf）
 build/GuanGeKai-B-gan.ttf      路线 B
 build/GuanGeKai-C-jit.ttf      路线 C
 release/                       只放当前被选为“发布”的那一条线
@@ -47,7 +47,8 @@ release/                       只放当前被选为“发布”的那一条线
 
 ## 评估口径（三条线共用）
 
-- 评估集：`work/eval_clean2.json`（91 字，同时不在 GAN/U-Net 与 LoRA 训练集里）
-- 指标：Dice、墨量比、端帽 cap_mid、端帽 KS、笔内 std —— **五项必须同时报**，
-  Dice 单独没有意义（它奖励加粗）
-- 每次评估出一份 `docs/REPORTS/YYYY-MM-DD-*.md`，含两个面板（有真迹 / 无真迹）
+- 三类测试集：`work/bench_seen.json`（150，见过）、`work/bench_unseen.json`（91，没见过）、`work/bench_noreal.json`（150，书中没有）
+- 统一入口：`python3 scripts/26_bench.py --classes A,B,C`，结果写入 `work/bench_results.json`
+
+- 指标：Dice、墨量比、端帽 cap_mid、端帽 KS、笔内 std —— 五项必须同时报，Dice 单独没有意义（它奖励加粗）
+- 每次评估出一份 `docs/REPORTS/YYYY-MM-DD-*.md`

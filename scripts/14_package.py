@@ -36,8 +36,11 @@ def main():
     if (ROOT / "LICENSE").exists():
         shutil.copy2(ROOT / "LICENSE", out / "LICENSE")
     shutil.copy2(ROOT / "README.md", out / "README.md")
-    for img in (ROOT / "docs" / "images").glob("*.png"):
-        shutil.copy2(img, out / img.name)
+    # only the two user-facing figures; analysis panels stay in the repo
+    for name in ("specimen.png", "book-vs-font.png"):
+        img = ROOT / "docs" / "images" / name
+        if img.exists():
+            shutil.copy2(img, out / name)
 
     real_chars = {json.loads(l)["label"] for l in open(ROOT / "work" / "chosen.jsonl")}
     gen_chars = set()

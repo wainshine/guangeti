@@ -1,11 +1,11 @@
 # AGENTS.md — 给接手的 agent
 
-本项目：从明代刻本《四書白文》扫描本出发，做一套覆盖 CJK 基本区 20,992 字的 **馆阁体** 开源字体（OFL 1.1）。
+本项目：从明代刻本《四书白文》扫描本出发，做一套覆盖 CJK 基本区 20,992 字的 **馆阁体** 开源字体（OFL 1.1）。
 
 **先读这三个文件，再动手：**
 
 1. [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) —— 现状、决策、已知缺陷、未决问题、审计方法
-2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 17 组实验（E1–E17）的配置/指标/复现命令（含"第几轮训练"）
+2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 19 组实验（E1–E19）的配置/指标/复现命令（含"第几轮训练"）
 3. [`docs/DATA.md`](docs/DATA.md) —— 数据来源、许可、校验和、重建步骤
 
 ## 硬性约束
@@ -19,11 +19,12 @@
   只允许 OFL / Apache-2.0 / UFL 等自由许可字体；基于专有字体测出的数字也不得作为决策依据。
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 
-## 当前状态（v1.3.2）
+## 当前状态（v1.3.3）
 
-- `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真跡 + 19,317 合成
-- `build/GuanGeKai-Real.ttf`：仅 1,675 真跡
-- 真字覆盖率 8% 是全局瓶颈；合成字结构 100% 正确，笔锋为程序化近似（v1.3 起有斜切端头与逐笔波动）
+- `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成
+- `build/GuanGeKai-Real.ttf`：仅 1,675 真迹
+- 真字覆盖率 8% 是全局瓶颈；合成字的笔画骨架取自霞鹜文楷，**拓扑与文楷一致（97%），但与刻本真迹仅 47%**——
+  这部分差异继承自内容字体，不是渲染器引入的。笔锋为程序化近似（v1.3 起有斜切端头与逐笔波动）
 
 ## 最短验证命令
 
@@ -37,17 +38,38 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 三条线各自保留产物：**A 带状扫掠**（`--method ribbon`）/ **B zi2zi-GAN** / **C zi2zi-JiT 自训练权重**。
 
-- A：墨量 1.077、端帽 KS 0.101、std 0.229。待做 —— **转折（横折方角）**、锐角内侧空洞、小字号回归。
-- B：40 字无泄漏集 Dice 0.563、墨量 1.013、端帽 KS 0.048（ep100）；训练中（150 ep）。需结构闸门（孔洞/连通域）。
+- A（v1.3.3）：字体级墨量 1.146、端帽 KS 0.124、Dice 0.432。待做 —— **转折（横折方角）**、锐角内侧空洞、小字号回归。
+- B（ep150 已完成）：见过的字 Dice 0.803 / 墨量 0.997 / 端帽 KS 0.048；
+  没见过的字 0.552 / 0.993 / 0.039；书中没有的字拓扑一致 116/150（ribbon 145/150）。需结构闸门。
 - C：上游权重不可用（LICENSE 只覆盖 "Software"）；计划用 MIT 代码 + 自有数据从头训练（`main_jit.py` 已验证可跑）。
 - 换数据源（楷书字典刻本）是唯一能根本改变 8% 覆盖率的路线。
 
 > 字重与风格结论以五项指标同时报告为准：Dice、墨量比、端帽 cap_mid、端帽 KS、笔内 std。
 > Dice 单独会奖励加粗；`18_eval.py` 的 `width_ratio` 对细笔画不稳，不得用于字重结论。
 
+## 发布流程（顺序固定，勿跳步）
+
+改文档 / 改代码之后，**必须按这个顺序走完才算发布完成**：
+
+```bash
+python3 scripts/07_build_real.py            # 1. 真字子集
+python3 scripts/11_build_full.py            # 2. 完整字体
+python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检
+rm -rf release && python3 scripts/14_package.py               # 4. 重新打包（会复制根 README）
+cd release && zip -q -r ../GuanGeKai-vX.Y.Z.zip . && cd ..    # 5. 出 zip
+shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验和到 DATA.md / PROJECT_STATE.md
+```
+
+**已知踩过两次的坑**：先打包、后改 README，导致包内说明落后于仓库。
+只要动过 `README.md`，就必须重跑第 4–6 步。
+
 ## 文档约定
 
-- 正文一律**简体中文**；`README.md` 面向使用者，保留繁体。
+- **`README.md` 保留繁体**（面向使用者）；**其余文档一律简体中文**。
+- 三处例外，保持原样不转换：
+  1. 书名《四书白文》在简体文档中写作简体；引用原书原名时可保留繁体；
+  2. OFL 保留字体名的正式写法 `霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW` 原样引用（DATA §3）；
+  3. 讨论异体字时的对照形式（如 `爲/为`、`雲/云`）保留繁体一侧。
 - 表格里只对**数字**与**判定**加粗；正文不用 emoji（总表的判定列除外）。
 - 少用“也就是说/换句话说”，少用连续破折号；结论直接写，过程记录放进 REPORTS 的尾注。
 

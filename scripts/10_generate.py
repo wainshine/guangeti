@@ -65,7 +65,7 @@ def field_chunk(args):
         if mode == 'ribbon':
             w = np.power(ds, 1.4)
             w = w / max(1e-6, float(w.mean()))     # keep mean ink at 1.0
-            m = bl.render_ribbon(fr, scale=0.82, dips=w,
+            m = bl.render_ribbon(fr, scale=0.78, dips=w,
                                  end_skew=0.9, taper=0.2, ss=ss).astype(np.uint8)
         else:
             m = bl.render_field(fr, scale=0.9, dips=ds, ss=ss).astype(np.uint8)
@@ -85,7 +85,7 @@ def trace_chunk(args):
         base_ok = tag["ok"][i]
         ch = chars[i]
         try:
-            cs = trace(mask, turdsize=4, alphamax=1.0, opttol=0.25)
+            cs = trace(mask, turdsize=4, alphamax=0.4, opttol=0.25)
             if not cs:
                 continue
             em = raster_to_em(cs, S)
@@ -95,7 +95,7 @@ def trace_chunk(args):
                 from PIL import ImageFont as _IF
                 _f = _IF.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
                 mask2 = _rb(_f, ch, S) > 127
-                cs = trace(mask2, turdsize=4, alphamax=1.0, opttol=0.25)
+                cs = trace(mask2, turdsize=4, alphamax=0.4, opttol=0.25)
                 em = raster_to_em(cs, S)
             except Exception:
                 continue
