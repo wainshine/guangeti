@@ -18,6 +18,8 @@ from scipy.stats import ks_2samp
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import brush_lib as B
+from fontbuild import VERSION  # noqa: E402
+from generate_lib import ribbon_scale as _rs  # noqa: E402
 from importlib import import_module
 ev = import_module("18_eval")
 from importlib.util import spec_from_file_location, module_from_spec
@@ -170,7 +172,15 @@ def main():
         for name, r in rows.items():
             print(f"{name:18s} {r['n']:4d} {r.get('dice',0):6.3f} {r['ink']:6.3f} {r.get('cap_mid',0):6.3f} "
                   f"{r.get('cap_ks',0):6.3f} {r.get('stroke_std') or 0:6.3f} {r.get('hole_agree','-'):>8s}")
-    json.dump(out, open(ROOT / "work/bench_results.json", "w"), ensure_ascii=False, indent=1)
+    dump = ROOT / "work/bench_results.json"
+    merged = {}
+    if dump.exists():
+        try:
+            merged = json.loads(dump.read_text())
+        except Exception:
+            merged = {}
+    merged.update(out)          # keep classes measured in earlier runs
+    dump.write_text(json.dumps(merged, ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":

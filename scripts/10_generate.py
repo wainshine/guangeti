@@ -164,6 +164,98 @@ def field_chunk(args):
     return lo, out, ok
 
 
+SIMPLIFY = 0.0
+
+
+def _simplify(contours, eps):
+    """Replace curves with a polyline and drop points within eps (font units)."""
+    res = []
+    for c in contours:
+        pts = [np.array(c["start"], float)]
+        for sg in c["segs"]:
+            if sg[0] == "L":
+                pts.append(np.array(sg[1:3], float))
+            else:
+                p0 = pts[-1]
+                p1 = np.array(sg[1:3], float); p2 = np.array(sg[3:5], float); p3 = np.array(sg[5:7], float)
+                n = max(2, int(np.linalg.norm(p3 - p0) / 1.5))
+                for t in np.linspace(0, 1, n)[1:]:
+                    u = 1 - t
+                    pts.append(u ** 3 * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t ** 3 * p3)
+        poly = np.array(pts, np.float32).reshape(-1, 1, 2)
+        import cv2 as _cv
+        ap = _cv.approxPolyDP(poly, eps, True).reshape(-1, 2)
+        if len(ap) < 3:
+            res.append(c)
+            continue
+        res.append({"start": [float(ap[0][0]), float(ap[0][1])],
+                    "segs": [["L", float(p[0]), float(p[1])] for p in ap[1:]]})
+    return res
+
+
+def gen_chunk(args):
+    """Single-phase worker: render mask -> structural guard -> trace -> em units.
+
+    Runs at any resolution (--res), so the potrace half-pixel tax can be reduced
+    by tracing at 512 instead of 256. No global mask array is needed.
+    """
+    lo, hi, chars, font_path, S, ss, mode = args
+    import importlib
+    import cv2 as _cv
+    import torch as _torch
+    bl = importlib.import_module("brush_lib")
+    gl = importlib.import_module("generate_lib")
+    cg = importlib.import_module("19_cap_geom")
+    rel = np.load(ROOT / "work" / "stroke_rel_width.npy")
+    font = ImageFont.truetype(font_path, S)
+    out = []
+    for k, ch in enumerate(chars[lo:hi]):
+        bm = render_base(font, ch, S) > 127
+        fr = bl.glyph_frames(bm, S)
+        rng = np.random.RandomState(ord(ch) % (2 ** 31))
+        ds = rng.choice(rel, size=len(fr), replace=True) if len(fr) else np.ones(max(1, len(fr)))
+        ds = ds / max(1e-6, float(ds.mean()))
+        w = np.power(ds, 1.4)
+        w = w / max(1e-6, float(w.mean()))
+        comp = float(bm.sum()) * (256.0 / S) ** 2          # complexity in 256-px units
+        m = bl.render_ribbon(fr, scale=gl.ribbon_scale(comp), dips=w,
+                             end_skew=0.9, taper=0.2, size=S, ss=ss).astype(np.uint8)
+
+        def _topo(mask):
+            mb = mask.astype(bool)
+            n, _lab, st, _ = _cv.connectedComponentsWithStats(mb.astype(np.uint8), 8)
+            comps = sum(1 for i in range(1, n) if st[i, 4] >= 20 * (S / 256.0) ** 2)
+            nh, _hl, hs, _ = _cv.connectedComponentsWithStats((~mb).astype(np.uint8), 8)
+            amin = 20 * (S / 256.0) ** 2
+            holes = sum(1 for i in range(1, nh) if hs[i, 4] >= amin
+                        and hs[i, 0] > 1 and hs[i, 1] > 1
+                        and hs[i, 0] + hs[i, 2] < mask.shape[1] - 1
+                        and hs[i, 1] + hs[i, 3] < mask.shape[0] - 1)
+            return comps, holes
+
+        inter = int((m & bm).sum()); union = max(1, int((m | bm).sum()))
+        good = (_topo(m) == _topo(bm) or inter / union >= 0.7) and m.sum() > bm.sum() * 0.5
+        keep = m if good else bm.astype(np.uint8)
+        try:
+            cs = trace(keep.astype(bool), turdsize=4, alphamax=0.4, opttol=0.25)
+            if not cs:
+                raise ValueError("empty trace")
+            em = raster_to_em(cs, S)
+        except Exception:
+            continue
+        if CAPS:
+            try:
+                hd = np.load(ROOT / "work" / "cap_h_fit.npy") * CAP_K
+                em = cg.apply_caps(em, keep, hd, ord(ch))
+            except Exception:
+                pass
+        em = normalize_to_base(em, ch, blend=1.0, min_scale=0.8, max_scale=1.25)
+        if SIMPLIFY > 0:
+            em = _simplify(em, SIMPLIFY)
+        out.append((ch, em, "gen" if good else "base"))
+    return lo, out
+
+
 def trace_chunk(args):
     lo, hi, chars, tag = args
     masks = np.load(MASKFILE, mmap_mode="r")
@@ -211,6 +303,10 @@ def main():
     ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated"], default="ribbon",
                     help="default = the shipped method (v1.3.x); brush/field/model are historical")
     ap.add_argument("--field-ss", type=int, default=2)
+    ap.add_argument("--simplify", type=float, default=0.0,
+                    help="polygon simplification tolerance in font units (2.0 at 512px keeps quality, cuts nodes ~30%%)")
+    ap.add_argument("--res", type=int, default=256,
+                    help="render/trace resolution; 512 removes most of the potrace ink tax")
     ap.add_argument("--reuse-masks", action="store_true")
     ap.add_argument("--caps", action="store_true", help="apply vector cap replacement")
     ap.add_argument("--cap-k", type=float, default=1.2)
@@ -218,8 +314,9 @@ def main():
     ap.add_argument("--threshold", type=float, default=0.5)
     ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args()
-    global CAPS, CAP_K
+    global CAPS, CAP_K, SIMPLIFY
     CAPS = bool(getattr(args, "caps", False))
+    SIMPLIFY = float(getattr(args, "simplify", 0.0))
     CAP_K = float(getattr(args, "cap_k", 1.2))
 
     real = {json.loads(l)["label"] for l in open(ROOT / "work" / "chosen.jsonl")}
@@ -247,56 +344,36 @@ def main():
         model.load_state_dict(torch.load(args.ckpt, map_location=device))
         model.eval()
 
+    if args.method in ("field", "ribbon", "gan_gated") and not args.reuse_masks:
+        import multiprocessing as mp
+        S2 = int(args.res)
+        ctx = mp.get_context("fork")
+        step = 60 if S2 >= 512 else (100 if args.method == "gan_gated" else 200)
+        step = max(8, int(step * (256.0 / S2) ** 2)) if S2 > 256 else step
+        tasks = [(i, min(i + step, len(chars)), chars,
+                  str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S2, args.field_ss,
+                  args.method) for i in range(0, len(chars), step)]
+        done = 0
+        results = {}
+        with ctx.Pool(args.workers) as pool, open(args.out, "w") as fh:
+            for lo, rows in pool.imap_unordered(gen_chunk, tasks):
+                results[lo] = rows
+                while results and next(iter(sorted(results))) == min(results):
+                    key = min(results)
+                    for ch, em, tag in results.pop(key):
+                        fh.write(json.dumps({"char": ch, "contours": em, "src": tag},
+                                            ensure_ascii=False) + "\n")
+                    done += 1
+                if done % 10 == 0:
+                    print(f"  chunks {done}/{len(tasks)} at {S2}px", flush=True)
+        print(f"done {sum(1 for _ in open(args.out))} of {len(chars)} at {S2}px", flush=True)
+        return
+
     masks = np.zeros((len(chars), S, S), dtype=np.uint8)
     ok = np.zeros(len(chars), dtype=bool)
     if args.reuse_masks and MASKFILE.exists():
         masks = np.load(MASKFILE)
         print("masks reused:", masks.shape, flush=True)
-    elif args.method in ("field", "ribbon", "gan_gated"):
-        import multiprocessing as mp
-        ctx = mp.get_context("fork")
-        step = 100 if args.method == "gan_gated" else 200
-        gated = args.method == "gan_gated"
-        tasks = [(i, min(i + step, len(chars)), chars,
-                  str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S, args.field_ss,
-                  args.method) if not gated else
-                 (i, min(i + step, len(chars)), chars,
-                  str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
-                 for i in range(0, len(chars), step)]
-        chunk_fn = gated_chunk if gated else field_chunk
-        with ctx.Pool(args.workers) as pool:
-            for lo, arr, okv in pool.imap_unordered(chunk_fn, tasks):
-                masks[lo:lo + len(arr)] = arr
-                ok[lo:lo + len(okv)] = okv
-        np.save(MASKFILE, masks)
-        print("masks saved (field); tracing...", flush=True)
-    else:
-      B = 64
-      for start in range(0, len(chars), B):
-          chunk = chars[start:start + B]
-          base = np.stack([render_base(font, ch, S) for ch in chunk])
-          base_mask = (base > 127).astype(np.uint8)
-          if model is not None:
-              import torch
-              x = torch.from_numpy(base).float().unsqueeze(1) / 255.0
-              xd = torch.from_numpy(np.stack([dist_channel(a) for a in base])).float().unsqueeze(1)
-              with torch.no_grad():
-                  y = torch.sigmoid(model(torch.cat([x, xd], 1).to(device))).cpu().numpy()[:, 0]
-              cand = (y > args.threshold).astype(np.uint8)
-          else:
-              cand = np.stack([brush_style(a) for a in base])
-          for i in range(len(chunk)):
-              m = cand[i]
-              inter = (m & base_mask[i]).sum()
-              union = max(1, (m | base_mask[i]).sum())
-              iou = inter / union
-              good = iou >= 0.7 and m.sum() > base_mask[i].sum() * 0.7
-              masks[start + i] = m if good else base_mask[i]
-              ok[start + i] = good
-          if start % (B * 10) == 0:
-              print(f"masks {start}/{len(chars)}", flush=True)
-    np.save(MASKFILE, masks)
-    print("masks saved; tracing...", flush=True)
 
     import multiprocessing as mp
     ctx = mp.get_context("fork")

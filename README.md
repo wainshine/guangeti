@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.3.4（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> **狀態：v1.3.5（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
 > 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的刻刀筆鋒**；
 > 與刻本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
@@ -65,7 +65,7 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 21 組實驗（E1–E21）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.3.4.md](docs/RELEASE-v1.3.4.md) | 想了解本版改了什麼的人 | v1.3.4 的變更、檔案、校驗和、已知限制 |
+| [docs/RELEASE-v1.3.5.md](docs/RELEASE-v1.3.5.md) | 想了解本版改了什麼的人 | v1.3.5 的變更、檔案、校驗和、已知限制 |
 | [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 想知道下一步的人 | v1.4.0 起三線並行的分工、產物命名與評估口徑 |
 | [docs/REPORTS/](docs/REPORTS/) | 想看實測數據的人 | 每次橫向評測的完整報告（指標表 + 兩個面板） |
 

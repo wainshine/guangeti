@@ -19,9 +19,9 @@
   只允许 OFL / Apache-2.0 / UFL 等自由许可字体；基于专有字体测出的数字也不得作为决策依据。
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 
-## 当前状态（v1.3.4）
+## 当前状态（v1.3.5）
 
-- `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成（90.0% 经 ribbon 风格化，10.0% 回退裸文楷）
+- `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成（88.3% 经 ribbon 风格化，11.7% 回退裸文楷）
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真迹
 - 真字覆盖率 8% 是全局瓶颈；合成字的笔画骨架取自霞鹜文楷，**拓扑与文楷一致（97%），但与刻本真迹仅 47%**——
   这部分差异继承自内容字体，不是渲染器引入的。笔锋为程序化近似（v1.3 起有斜切端头与逐笔波动）
@@ -38,8 +38,8 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 三条线各自保留产物：**A 带状扫掠**（`--method ribbon`）/ **B zi2zi-GAN** / **C zi2zi-JiT 自训练权重**。
 
-- A（v1.3.4）：掩膜级 Dice 0.414 / 墨量 1.068 / 端帽 KS 0.063；90.0% 合成字经风格化。
-  待做 —— **转折（横折方角，建议 miter join）**、高分辨率矢量化（512px 可把 potrace 税从 +10% 降到 +5%）、小字号回归。
+- A（v1.3.5）：512 渲染+矢量化（potrace 税 +6.2%→0）、轮廓简化（23.3→14.9 MB）；88.3% 合成字经风格化。
+  待做 —— **转折（横折方角，建议 miter join）**、小字号回归。
 - B（ep150 已完成）：见过的字 Dice 0.803 / 墨量 0.997 / 端帽 KS 0.048；
   没见过的字 0.552 / 0.993 / 0.039；书中没有的字拓扑一致 116/150（ribbon 145/150）。
   **拓扑闸门已试（E20）**：混合方案 Dice 0.490、拓扑 147/150，但因依赖 390 MB 检查点与三个经验门限，**未发布**。
@@ -54,7 +54,7 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 改文档 / 改代码之后，**必须按这个顺序走完才算发布完成**：
 
 ```bash
-python3 scripts/07_build_real.py            # 1. 真字子集
+python3 scripts/07_build_real.py --reuse-contours   # 1. 真字子集（无 work/masks 时用缓存）
 python3 scripts/11_build_full.py            # 2. 完整字体
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应打印 real-subset ... OK）
 python3 scripts/23_compare_all.py --n 120 --set work/eval_clean3.json  # 3.5 重出对比面板（docs/images/eval-panel*.png）
@@ -69,7 +69,7 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 |---|---|
 | `13_qa` 覆盖率 | `20992/20992` |
 | `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
-| `ls -lh build/*.ttf` | Regular ~22 MB、**Real ~3.1 MB**（若是 KB 级，说明真字没建出来） |
+| `ls -lh build/*.ttf` | Regular ~14.9 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
 
 **踩过的坑**：
 1. 先打包、后改 README，导致包内说明落后于仓库（改过 README 必须重跑第 4–6 步）。

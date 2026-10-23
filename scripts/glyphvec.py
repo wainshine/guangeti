@@ -100,10 +100,12 @@ class GlyphSpec:
     box: tuple
 
 
-def vectorize(img: np.ndarray, scale: float, cx: float, cy: float) -> list:
+def vectorize(img: np.ndarray, scale: float, page_x0: float, page_y0: float,
+              slot_cx: float, slot_cy: float) -> list:
+    """Deprecated: the live path is generate_lib.raster_to_em; kept for reference."""
     ink = binarize(img)
     cs = trace(ink)
-    return to_em(cs, img.shape, scale, cx, cy)
+    return to_em(cs, scale, page_x0, page_y0, slot_cx, slot_cy)
 
 
 _BASE = None

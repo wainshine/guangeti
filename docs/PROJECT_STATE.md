@@ -19,7 +19,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 ```
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，22.8 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.2 MB）
-- 发布包：`release/`、`GuanGeKai-v1.3.4.zip`
+- 发布包：`release/`、`GuanGeKai-v1.3.5.zip`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
 
@@ -42,9 +42,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.3.4）；1,675 真迹 + 19,317 合成 | 23.3 MB | `cc1337067ad2f5bb` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹（风格名 Real） | 3.3 MB | `cd7f630debd30d7a` |
-| `GuanGeKai-v1.3.4.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 19.3 MB | `aeeeeaaad9ccb187` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.3.5）；1,675 真迹 + 19,317 合成 | 14.9 MB | `b48fe367e2090469` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹（风格名 Real） | 3.3 MB | `2c690b15a431ca41` |
+| `GuanGeKai-v1.3.5.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 14.6 MB | `373fab7e5a8ea172` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
@@ -287,18 +287,25 @@ v1.2.0 只做纵向腐蚀，重量与对比度同时落回刻本区间。
 
 ## 14. v1.3.x 变更（2026-10-23）
 
+### v1.3.5
+
+- **512 渲染 + 512 矢量化**（`--res 512`）：potrace 半像素外扩对应的字体单位从 3.9 降到 1.95，
+  轮廓墨量税从 +6.2% 降到 0。合成字与真迹的轮廓墨量由 +6.9% 变为 −0.5%。
+- **轮廓简化**（`--simplify 2.0`，即 2/1000 em）：曲线采样成折线后 Douglas-Peucker 简化，
+  节点 266→194/字；字体 **23.3 MB → 14.9 MB**（相对 v1.3.3 的 22.8 MB 也更小），12–512px 逐级比对肉眼无差别。
+- **单阶段 worker**：渲染→守卫→矢量化一气呵成，不再写 1.2 GB 的 `gen_masks.npy`。
+- 掩膜级 Dice 0.413 / 端帽 KS 0.063；88.3% 合成字经风格化。
+
 ### v1.3.4
 
-- **修掉静默回退**：`10_generate.py` 的守卫从「IoU ≥ 0.7」改为「拓扑不变 或 IoU ≥ 0.7」。
-  v1.3.3 的 19,317 个合成字里有 4,043 个（20.9%）实际是裸文楷矢量化，文档从未披露；
-  现在降到 **1,941 个（10.0%）**，2,418 个字重新获得风格化。
+- **修掉静默回退**：守卫从「IoU ≥ 0.7」改为「拓扑不变 或 IoU ≥ 0.7」。
+  v1.3.3 的 19,317 个合成字里有 4,043 个（20.9%）实际是裸文楷矢量化，文档从未披露。
 - **墨量按复杂度自适应**：全局 `scale=0.78` 换成逐字
   `scale = 20.619 × 文楷墨量^-0.330 / 1.06`（拟合自 1,675 对真迹）。
   简单字（8k 墨量）从 −8.7% 修到 +2.1%，密集字（20k）从 +13.1% 降到 +7.8%。
 - **评测口径与成品对齐**：`ribbon_scale()` 收敛到 `generate_lib`，生成器与
   `23_compare_all` / `26_bench` / `25_eval_singles` 共用同一实现（此前四处各写 `scale=0.78`）。
 - 指标：掩膜级 Dice 0.414 / 墨量 1.068 / 端帽 KS 0.063；体积 23.3 MB。
-  字体级按实际渲染口径（PIL 渲染 vs 原书栅格）合成与真迹都是 1.009，基本等重。
 
 ### v1.3.3
 

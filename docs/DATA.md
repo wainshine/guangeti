@@ -95,9 +95,9 @@
 
 
 ```
-cc1337067ad2f5bb717c92e722d6d2a95866e065a8eeef69327230a6dd778c06  build/GuanGeKai-Regular.ttf
-cd7f630debd30d7a4ec46db8d515c1309e10fb0f9ae67afcc19b0a4377a72df8  build/GuanGeKai-Real.ttf
-aeeeeaaad9ccb187d2b51bfba54ee846fb15f2be9fe729945899859432ab3977  GuanGeKai-v1.3.4.zip
+b48fe367e20904690774ebc01322046c8c2087c45aa595fbb19de54f263c3e81  build/GuanGeKai-Regular.ttf
+2c690b15a431ca41ba4cc50c826be4b6c99d237ace4981d756ade8ce07e50505  build/GuanGeKai-Real.ttf
+373fab7e5a8ea17220c5f6b1108b55feaf9fa73b06bc9edbc440771d3e4db291  GuanGeKai-v1.3.5.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -140,7 +140,8 @@ python3 scripts/04_label.py             # 标注
 python3 scripts/05_select.py            # 每字选优
 python3 scripts/06_norm.py              # 归一化参数
 python3 scripts/07_build_real.py        # 真字子集字体
-python3 scripts/10_generate.py --method ribbon --workers 12 --out work/generated.jsonl  # 合成缺字
+python3 scripts/10_generate.py --method ribbon --workers 12 --res 512 --simplify 2.0 \
+        --out work/generated.jsonl    # 合成缺字（512 渲染+矢量化，轮廓简化 2/1000 em）
 python3 scripts/11_build_full.py        # 合成完整字体
 python3 scripts/12_specimen.py          # 样张
 python3 scripts/13_qa.py                # 覆盖率质检
@@ -163,7 +164,7 @@ python3 scripts/14_package.py           # 发布包
 | 已删除 | 原大小 | 重建方式 | 重建耗时 |
 |---|---|---|---|
 | `work/cells/`、`work/masks/` | 2.1 GB | `python3 scripts/01_segment.py` | 约 5 分钟 |
-| 6 份历史 `work/generated_*.jsonl`（只留当前 `generated.jsonl`） | 2.2 GB | `10_generate.py --method ribbon` 各版本 | 各约 5 分钟 |
+| 6 份历史 `work/generated_*.jsonl`（只留当前 `generated.jsonl`） | 2.2 GB | `10_generate.py --method ribbon --res 512 --simplify 2.0` | 各约 5 分钟 |
 | `work/gen_masks.npy` | 1.2 GB | 生成时自动重建 | — |
 | 8 个历史 U-Net 检查点（保留 `style_unet.pt`、`style_dice.pt`） | 240 MB | `09_train*.py` | 各约 1 小时 |
 | `data/scratch_test/`（1 epoch 试验） | 3.6 GB | `main_jit.py` | — |
