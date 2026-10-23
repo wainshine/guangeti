@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -139,24 +140,27 @@ def metrics(m, ref=None):
 
 
 # ------------------------------------------------------------------ modes
-def build_eval_set():
+def build_eval_set(out_path=None):
     chars, X, Y = load_pairs()
-    ends = [len(tip_descriptors(Y[i] > 127)) for i in range(len(chars))]
+    ends = [len(cap_profiles(Y[i] > 127)) for i in range(len(chars))]
     order = np.argsort(ends)
     q = np.array_split(order, 4)
     rng = np.random.RandomState(2026)
     sel = []
     for part in q:
         sel.extend(rng.choice(part, 50, replace=False).tolist())
-    EVAL_SET.parent.mkdir(exist_ok=True)
-    EVAL_SET.write_text(json.dumps({
+    out_p = Path(out_path) if out_path else EVAL_SET
+    if out_p.exists() and not os.environ.get("EVAL_SET_FORCE"):
+        raise SystemExit(f"refusing to overwrite {out_p}; set EVAL_SET_FORCE=1 to replace it")
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+    out_p.write_text(json.dumps({
         "seed": 2026,
         "n": len(sel),
         "note": "stratified by number of free stroke ends; fit on the remaining characters only",
         "chars": [chars[i] for i in sel],
         "indices": sel,
     }, ensure_ascii=False, indent=1))
-    print(f"eval set: {len(sel)} chars -> {EVAL_SET}")
+    print(f"eval set: {len(sel)} chars -> {out_p}")
 
 
 def run_compare(kind_a="real", kind_b="synth", limit=None):

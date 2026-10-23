@@ -74,6 +74,9 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 2. 删掉 `work/masks` 后重跑 `07_build_real.py`，它产出 0 字形却仍写出文件，并把
    `work/real_contours.jsonl` 截断为 0 字节；因为输出被重定向到 /dev/null，没人看到 `glyphs 0`，
    最终打出了只有 1 个字形的 `GuanGeKai-Real.ttf`。**现在 07/11/13 都会在数量异常时中止。**
+3. 把人工策展的 `docs/images/book-vs-font.png`（左：原书页面；右：同段文字用本字体排版）
+   当成"可自动生成的图"覆盖掉了。**人工资产不在脚本的生成范围内：覆盖任何图片/文档前先看内容，
+   能生成的图与手工拼图分开命名（如 `glyph-pairs.png` 与 `book-vs-font.png`）。**
 
 ## 文档约定
 

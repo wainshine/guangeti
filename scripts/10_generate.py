@@ -185,7 +185,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
-    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated"], default="brush")
+    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated"], default="ribbon",
+                    help="default = the shipped method (v1.3.x); brush/field/model are historical")
     ap.add_argument("--field-ss", type=int, default=2)
     ap.add_argument("--reuse-masks", action="store_true")
     ap.add_argument("--caps", action="store_true", help="apply vector cap replacement")

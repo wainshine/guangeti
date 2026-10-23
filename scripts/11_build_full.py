@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from fontbuild import build_font  # noqa: E402
+from fontbuild import VERSION, build_font  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 BLOCK = (0x4E00, 0x9FFF)
@@ -46,7 +46,7 @@ def main():
         raise SystemExit(
             f"ABORT: real={len(real)} missing={missing} — refusing to write a font "
             f"whose real glyphs are absent (run 07_build_real.py first)")
-    build_font(glyphs, Path(args.out), family="GuanGe Kai", version="1.3.3",
+    build_font(glyphs, Path(args.out), family="GuanGe Kai", version=VERSION,
                copyright_text=(
                    "GuanGe Kai (館閣楷). Real glyphs extracted from the Ming woodblock print "
                    "四書白文 (attributed to 姜立綱), scans courtesy of 書格 shuge.org / 宮内庁書陵部. "

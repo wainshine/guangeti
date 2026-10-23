@@ -10,6 +10,7 @@ from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.reverseContourPen import ReverseContourPen
 
 EM = 1000
+VERSION = "1.3.3"  # single source of truth for the font version
 OFL_TEXT = (
     "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
     "This license is available with a FAQ at: https://openfontlicense.org"
@@ -69,7 +70,7 @@ def _orient(contours):
 
 
 def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Kai",
-               style: str = "Regular", version: str = "1.3.3",
+               style: str = "Regular", version: str = VERSION,
                copyright_text: str = "", upm: int = EM) -> None:
     """glyphs: {char: [contour, ...]} in font units."""
     chars = sorted(glyphs)
@@ -146,7 +147,7 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
     fb.font["head"].flags = 0b00000011
     # Reproducible builds: pin the timestamps so two rebuilds are byte-identical.
     import os as _os
-    unix = int(_os.environ.get("SOURCE_DATE_EPOCH", "1761177600"))  # 2025-10-23T00:00:00Z
+    unix = int(_os.environ.get("SOURCE_DATE_EPOCH", "1792713600"))  # 2026-10-23T00:00:00Z
     stamp = unix + 2082844800  # fontTools stores seconds since 1904-01-01
     fb.font["head"].created = stamp
     fb.font["head"].modified = stamp

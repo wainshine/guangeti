@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent))
-from fontbuild import build_font  # noqa: E402
+from fontbuild import VERSION, build_font  # noqa: E402
 from glyphvec import binarize, clean_ink, trace, to_em, normalize_to_base, transform  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,7 +72,7 @@ def main():
     with open(ROOT / "work" / "real_contours.jsonl", "w") as fh:
         for ch, cs in glyphs.items():
             fh.write(json.dumps({"char": ch, "contours": cs, "src": "real"}, ensure_ascii=False) + "\n")
-    build_font(glyphs, Path(args.out), family="GuanGe Kai", style="Real", version="1.3.3",
+    build_font(glyphs, Path(args.out), family="GuanGe Kai", style="Real", version=VERSION,
                copyright_text="GuanGe Kai — extracted from 四書白文 (Ming, attributed to 姜立綱). Scans: 書格 shuge.org / 宮内庁書陵部. SIL OFL 1.1.")
     print("wrote", args.out)
     with open(ROOT / "work" / "real_glyph_sources.json", "w") as fh:

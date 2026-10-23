@@ -84,16 +84,20 @@
 | `provenance.json` | 逐字 real/gen |
 | `coverage.txt` | 覆盖码位清单 |
 | `stats.json` / `SHA256SUMS` | 统计与自校验 |
-| `specimen.png` / `book-vs-font.png` | 样张与刻本对照 |
+| `specimen.png` | 字体样张（`12_specimen.py` 可重建） |
+| `book-vs-font.png` | **静态图**：左为原书页面，右为同段文字用本字体排版。图中所排皆为真迹字，故不随版本变化；左图取自彩色扫描，无法由本仓库重建 |
 
 > 分析用的对比面板（`docs/images/eval-panel*.png`）**不进发布包**，只留在仓库里。
 
 ## 5. 校验和
 
+> 体积单位为十进制 MB（1 MB = 10⁶ 字节），与 Finder 显示一致。
+
+
 ```
-312ed6d9ed11776f739459bf23d70e1c7f30276ae5d006bb0e1884b397922277  build/GuanGeKai-Regular.ttf
-9ead5ad7416b7ec39b1abc179435a44da7a514873030531e73eb967d8c037b12  build/GuanGeKai-Real.ttf
-c54ef18d5d574e4e814628cdea9f97986140b7240b8d310e6e32efc48247ea2d  GuanGeKai-v1.3.3.zip
+bf5f897bcdb8b03637087184d82e9f23a1d4407e09d1f30243dadc1c128c9850  build/GuanGeKai-Regular.ttf
+3599a0036f7bfd0e5a7ede876289d8ac67eab81f7c8c33496896856319faffb9  build/GuanGeKai-Real.ttf
+da8571a3ba9fed475334823286a51073eef626e2a2b84d22c04dca3b007edb46  GuanGeKai-v1.3.3.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -116,7 +120,7 @@ c54ef18d5d574e4e814628cdea9f97986140b7240b8d310e6e32efc48247ea2d  GuanGeKai-v1.3
 
 | 文件 | 字数 | 用途 |
 |---|---|---|
-| `work/eval_set.json` | 200 | 分层留出（按自由端数），评测的总体抽样框 |
+| `data/eval_set.json` | 200 | 分层留出（按自由端数），评测的总体抽样框 |
 | `work/eval_clean3.json` | 120 | 模型训练时未见的全部字，**主力评估集** |
 | `work/eval_clean2.json` | 91 | 同时不在 LoRA 训练集内，用于与 JiT 对比 |
 | `work/pairs_single.npz` | 617 | **只出现一次、从未参与训练**的字，独立外部测试集 |
@@ -180,7 +184,7 @@ python3 scripts/14_package.py           # 发布包
 
 | 路径 | 体积 | 说明 |
 |---|---|---|
-| `data/fonts_target/GuangeKai-Real.ttf` | 3.1 MB | 旧拼写残留，与 `build/` 重复 |
+| `data/fonts_target/GuangeKai-Real.ttf` | 3.2 MB | 旧拼写残留，与 `build/` 重复 |
 | `data/ids/Unihan_IRGSources.txt` | 13 MB | 该版本不含 kIDS，从未使用 |
 | `data/zi2zi_ds/`、`data/zi2zi_ds2/` | 140 MB | zi2zi 实验数据集，可由脚本重建 |
 | `data/base/cg/ComputerGrassRegular.ttf` | 55 MB | Arphic PL，仅评估用 |

@@ -130,9 +130,11 @@ def main():
         rows = {}
         for name, fn in methods:
             D, ink, cap, st, hok, hn = [], [], [], [], 0, 0
+            missing = 0
             for c in cs:
                 m = fn(c)
                 if m is None:
+                    missing += 1
                     continue
                 if key in ("A", "B"):
                     t = Y[pos[c]] > 127
@@ -148,6 +150,9 @@ def main():
                     base = em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", c)
                     ink.append(m.sum() / max(1, base.sum()))
                     hok += int(holes(m) == holes(base)); hn += 1
+            if missing:
+                print(f"  WARNING: {name} has no output for {missing}/{len(cs)} chars "
+                      f"(missing input dirs?) — its row is not comparable")
             r = {"n": len(ink)}
             if key in ("A", "B") and D:
                 r.update(dice=round(float(np.mean(D)), 3),
