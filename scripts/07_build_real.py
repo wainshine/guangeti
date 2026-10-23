@@ -65,6 +65,10 @@ def main():
         glyphs[ch] = em
         used_files[ch] = f
     print("glyphs", len(glyphs))
+    if len(glyphs) < 1000:
+        raise SystemExit(f"ABORT: only {len(glyphs)} real glyphs — refusing to overwrite "
+                         f"build/GuanGeKai-Real.ttf and work/real_contours.jsonl "
+                         f"(check that work/masks/ and work/cells/ exist)")
     with open(ROOT / "work" / "real_contours.jsonl", "w") as fh:
         for ch, cs in glyphs.items():
             fh.write(json.dumps({"char": ch, "contours": cs, "src": "real"}, ensure_ascii=False) + "\n")

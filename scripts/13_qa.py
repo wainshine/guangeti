@@ -17,6 +17,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--font", default=str(ROOT / "build" / "GuanGeKai-Regular.ttf"))
     ap.add_argument("--outdir", default=str(ROOT / "work" / "qa"))
+    ap.add_argument("--real", default=str(ROOT / "build" / "GuanGeKai-Real.ttf"))
     args = ap.parse_args()
     out = Path(args.outdir)
     out.mkdir(parents=True, exist_ok=True)
@@ -57,6 +58,15 @@ def main():
             d.text((x + 2, y), ch, font=fnt, fill="black")
         sheet.save(out / f"sheet_{s//per:03d}.png")
     print("sheets:", (len(chars) + per - 1) // per, "->", out)
+    real_path = Path(args.real)
+    if real_path.exists():
+        rf = TTFont(str(real_path))
+        n_real = rf["maxp"].numGlyphs - 1
+        cm_real = len(rf.getBestCmap())
+        status = "OK" if n_real >= 1600 and cm_real >= 1600 else "BROKEN"
+        print(f"real-subset glyphs {n_real} cmap {cm_real} -> {status}")
+        if status != "OK":
+            raise SystemExit("ABORT: GuanGeKai-Real.ttf looks like a stub")
     stats = dict(coverage=len(have), empty=len(empty), tiny=tiny[:50], huge=huge[:50])
     (out / "stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=1))
 

@@ -44,6 +44,71 @@ def brush_style(a, k1=0, k2=1):
     return (b > 0).astype(np.uint8)
 
 
+_GAN_CACHE = None
+
+
+def gated_chunk(args):
+    """GAN -> topology repair (vs content font) -> ribbon fallback, per chunk."""
+    global _GAN_CACHE
+    lo, hi, chars, font_path, S = args
+    import importlib, importlib.util as iu
+
+    import torch
+    from PIL import ImageFont
+    torch.set_num_threads(1)
+    if _GAN_CACHE is None:
+        spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
+        m = iu.module_from_spec(spec); spec.loader.exec_module(m)
+        g = m.Generator()
+        g.load_state_dict(torch.load(ROOT / "work" / "zi2zi_gan.pt", map_location="cpu")["G"])
+        g.eval()
+        _GAN_CACHE = g
+    gan = _GAN_CACHE
+    bl = importlib.import_module("brush_lib")
+    rel = np.load(ROOT / "work" / "stroke_rel_width.npy")
+    font = ImageFont.truetype(font_path, S)
+    n = hi - lo
+    out = np.zeros((n, S, S), np.uint8)
+    okv = np.zeros(n, bool)
+
+    def _holes(m, minarea=20):
+        import cv2
+        k, lab, stats, _ = cv2.connectedComponentsWithStats((~m).astype(np.uint8), 8)
+        res = []
+        for i in range(1, k):
+            x, y, w, h, a = stats[i]
+            if a < minarea or x <= 1 or y <= 1 or x + w >= m.shape[1] - 1 or y + h >= m.shape[0] - 1:
+                continue
+            res.append((a, (lab == i)))
+        return res
+
+    def _gate(m, ref, tiny=60):
+        """Never reshape the glyph: fill only tiny speck holes, then accept or fall back."""
+        hm, hr = _holes(m, 8), _holes(ref)
+        if len(hm) > len(hr):
+            for a, mask in hm:
+                if a < tiny and not any((mask & rmask).any() for _, rmask in hr):
+                    m |= mask
+        return m
+
+    for j, ch in enumerate(chars[lo:hi]):
+        base = render_base(font, ch, S)
+        ref = base > 127
+        a = (base.astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
+        with torch.no_grad():
+            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > 0
+        g = _gate(g, ref)
+        if len(_holes(g)) != len(_holes(ref)):
+            fr = bl.glyph_frames(ref)
+            rng = np.random.RandomState(ord(ch) % (2 ** 31))
+            raw = rng.choice(rel, size=len(fr), replace=True)
+            w = np.power(raw, 1.4); w = w / max(1e-6, float(w.mean()))
+            g = bl.render_ribbon(fr, scale=0.78, dips=w, end_skew=0.9, taper=0.2)
+        out[j] = g.astype(np.uint8)
+        okv[j] = True
+    return lo, out, okv
+
+
 def field_chunk(args):
     lo, hi, chars, font_path, S, ss, mode = args
     import importlib
@@ -120,7 +185,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
-    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon"], default="brush")
+    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated"], default="brush")
     ap.add_argument("--field-ss", type=int, default=2)
     ap.add_argument("--reuse-masks", action="store_true")
     ap.add_argument("--caps", action="store_true", help="apply vector cap replacement")
@@ -140,6 +205,16 @@ def main():
     print("to generate", len(chars), "method", args.method, flush=True)
     font = ImageFont.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
 
+    gan = None
+    if args.method == "gan_gated":
+        import torch
+        import importlib.util as _iu
+        _spec = _iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
+        _m = _iu.module_from_spec(_spec); _spec.loader.exec_module(_m)
+        gan = _m.Generator()
+        gan.load_state_dict(torch.load(ROOT / "work" / "zi2zi_gan.pt", map_location="cpu")["G"])
+        gan.eval()
+
     model = None
     if args.method == "model":
         import torch
@@ -153,16 +228,20 @@ def main():
     if args.reuse_masks and MASKFILE.exists():
         masks = np.load(MASKFILE)
         print("masks reused:", masks.shape, flush=True)
-    elif args.method in ("field", "ribbon"):
+    elif args.method in ("field", "ribbon", "gan_gated"):
         import multiprocessing as mp
         ctx = mp.get_context("fork")
-        step = 200
+        step = 100 if args.method == "gan_gated" else 200
+        gated = args.method == "gan_gated"
         tasks = [(i, min(i + step, len(chars)), chars,
                   str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S, args.field_ss,
-                  args.method)
+                  args.method) if not gated else
+                 (i, min(i + step, len(chars)), chars,
+                  str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
                  for i in range(0, len(chars), step)]
+        chunk_fn = gated_chunk if gated else field_chunk
         with ctx.Pool(args.workers) as pool:
-            for lo, arr, okv in pool.imap_unordered(field_chunk, tasks):
+            for lo, arr, okv in pool.imap_unordered(chunk_fn, tasks):
                 masks[lo:lo + len(arr)] = arr
                 ok[lo:lo + len(okv)] = okv
         np.save(MASKFILE, masks)

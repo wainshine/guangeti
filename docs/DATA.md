@@ -91,9 +91,9 @@
 ## 5. 校验和
 
 ```
-f341247d7e25c7b62283905e88d053ac33dfc7b6fdfc6751e04a6e7de46104fd  build/GuanGeKai-Regular.ttf
-42592d7d4085aa1c33daec345d2b6b70010d02a4a3fad47960e47097bb0537f6  build/GuanGeKai-Real.ttf
-0e2c93c7952b367dbcf671e6938154b94e4a66d227e184b9468e774f0e2dc3ad  GuanGeKai-v1.3.3.zip
+312ed6d9ed11776f739459bf23d70e1c7f30276ae5d006bb0e1884b397922277  build/GuanGeKai-Regular.ttf
+9ead5ad7416b7ec39b1abc179435a44da7a514873030531e73eb967d8c037b12  build/GuanGeKai-Real.ttf
+c54ef18d5d574e4e814628cdea9f97986140b7240b8d310e6e32efc48247ea2d  GuanGeKai-v1.3.3.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -151,6 +151,28 @@ python3 scripts/14_package.py           # 发布包
 （每字取自哪一页、哪一栏、哪一格）。
 
 ---
+
+## 6.5 已清理的大体积过程文件（2026-10-23）
+
+为控制仓库体积，以下目录已删除，**均可用仓库内脚本重建**：
+
+| 已删除 | 原大小 | 重建方式 | 重建耗时 |
+|---|---|---|---|
+| `work/cells/`、`work/masks/` | 2.1 GB | `python3 scripts/01_segment.py` | 约 5 分钟 |
+| 6 份历史 `work/generated_*.jsonl`（只留当前 `generated.jsonl`） | 2.2 GB | `10_generate.py --method ribbon` 各版本 | 各约 5 分钟 |
+| `work/gen_masks.npy` | 1.2 GB | 生成时自动重建 | — |
+| 8 个历史 U-Net 检查点（保留 `style_unet.pt`、`style_dice.pt`） | 240 MB | `09_train*.py` | 各约 1 小时 |
+| `data/scratch_test/`（1 epoch 试验） | 3.6 GB | `main_jit.py` | — |
+| `data/models/`（JiT 预训练权重，许可不允许发布） | 2.4 GB | 上游 Google Drive 重新下载 | — |
+| `data/lora_run/`、`data/lora_long/`（LoRA 检查点） | 1.5 GB | 重新训练 | 各约 1–1.5 小时 |
+| `data/zi2zi_ds/`、`zi2zi_ds2` 训练集以外的 `zi2zi_glyphs/`、`zi2zi_out3/` | 180 MB | `generate_glyph_dataset.py` | — |
+| `data/base/cg/`（computer-grass 字体，仅评估用） | 55 MB | 上游发布页 | — |
+| `work/preview/`、`work/qa/` | 180 MB | 评测脚本自动生成 | — |
+
+保留：两份 PDF、`build/`、`release/`、zip、`work/` 的索引与配对数据、GAN 检查点（B 线结果）。
+
+> 两份 PDF 都**不要删**：`四书白文` 是本项目源数据；`史记` 是另一个（暂缓的）项目的源数据，
+> 用户明确要求保留。它们都不入库（见 §1）。
 
 ## 7. 工作区残留（可删除，不影响复现）
 

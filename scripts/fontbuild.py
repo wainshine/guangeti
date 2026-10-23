@@ -144,5 +144,11 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
     except Exception:
         pass
     fb.font["head"].flags = 0b00000011
+    # Reproducible builds: pin the timestamps so two rebuilds are byte-identical.
+    import os as _os
+    unix = int(_os.environ.get("SOURCE_DATE_EPOCH", "1761177600"))  # 2025-10-23T00:00:00Z
+    stamp = unix + 2082844800  # fontTools stores seconds since 1904-01-01
+    fb.font["head"].created = stamp
+    fb.font["head"].modified = stamp
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fb.save(str(out_path))

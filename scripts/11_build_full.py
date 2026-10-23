@@ -42,6 +42,10 @@ def main():
     print(f"real {len(real)} gen {len(gen)} total {len(glyphs)} / {BLOCK[1]-BLOCK[0]+1}")
     missing = (BLOCK[1] - BLOCK[0] + 1) - len(glyphs)
     print("missing", missing)
+    if len(real) < 1000 or missing > 0:
+        raise SystemExit(
+            f"ABORT: real={len(real)} missing={missing} — refusing to write a font "
+            f"whose real glyphs are absent (run 07_build_real.py first)")
     build_font(glyphs, Path(args.out), family="GuanGe Kai", version="1.3.3",
                copyright_text=(
                    "GuanGe Kai (館閣楷). Real glyphs extracted from the Ming woodblock print "

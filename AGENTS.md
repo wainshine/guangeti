@@ -5,7 +5,7 @@
 **先读这三个文件，再动手：**
 
 1. [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) —— 现状、决策、已知缺陷、未决问题、审计方法
-2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 19 组实验（E1–E19）的配置/指标/复现命令（含"第几轮训练"）
+2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 20 组实验（E1–E20）的配置/指标/复现命令（含"第几轮训练"）
 3. [`docs/DATA.md`](docs/DATA.md) —— 数据来源、许可、校验和、重建步骤
 
 ## 硬性约束
@@ -40,7 +40,8 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 - A（v1.3.3）：字体级墨量 1.146、端帽 KS 0.124、Dice 0.432。待做 —— **转折（横折方角）**、锐角内侧空洞、小字号回归。
 - B（ep150 已完成）：见过的字 Dice 0.803 / 墨量 0.997 / 端帽 KS 0.048；
-  没见过的字 0.552 / 0.993 / 0.039；书中没有的字拓扑一致 116/150（ribbon 145/150）。需结构闸门。
+  没见过的字 0.552 / 0.993 / 0.039；书中没有的字拓扑一致 116/150（ribbon 145/150）。
+  **拓扑闸门已试（E20）**：混合方案 Dice 0.490、拓扑 147/150，但因依赖 390 MB 检查点与三个经验门限，**未发布**。
 - C：上游权重不可用（LICENSE 只覆盖 "Software"）；计划用 MIT 代码 + 自有数据从头训练（`main_jit.py` 已验证可跑）。
 - 换数据源（楷书字典刻本）是唯一能根本改变 8% 覆盖率的路线。
 
@@ -54,14 +55,25 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 ```bash
 python3 scripts/07_build_real.py            # 1. 真字子集
 python3 scripts/11_build_full.py            # 2. 完整字体
-python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检
+python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应打印 real-subset ... OK）
 rm -rf release && python3 scripts/14_package.py               # 4. 重新打包（会复制根 README）
 cd release && zip -q -r ../GuanGeKai-vX.Y.Z.zip . && cd ..    # 5. 出 zip
 shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验和到 DATA.md / PROJECT_STATE.md
 ```
 
-**已知踩过两次的坑**：先打包、后改 README，导致包内说明落后于仓库。
-只要动过 `README.md`，就必须重跑第 4–6 步。
+**发布前必须核对三个数字**（任何一项不对就停下）：
+
+| 检查 | 期望 |
+|---|---|
+| `13_qa` 覆盖率 | `20992/20992` |
+| `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
+| `ls -lh build/*.ttf` | Regular ~22 MB、**Real ~3.1 MB**（若是 KB 级，说明真字没建出来） |
+
+**踩过的坑**：
+1. 先打包、后改 README，导致包内说明落后于仓库（改过 README 必须重跑第 4–6 步）。
+2. 删掉 `work/masks` 后重跑 `07_build_real.py`，它产出 0 字形却仍写出文件，并把
+   `work/real_contours.jsonl` 截断为 0 字节；因为输出被重定向到 /dev/null，没人看到 `glyphs 0`，
+   最终打出了只有 1 个字形的 `GuanGeKai-Real.ttf`。**现在 07/11/13 都会在数量异常时中止。**
 
 ## 文档约定
 
