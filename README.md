@@ -63,7 +63,7 @@ GuanGeKai (20,992 字)
 |---|---|---|
 | [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
-| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 20 組實驗（E1–E20）的配置、指標、判定、复現命令 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 21 組實驗（E1–E21）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
 | [docs/RELEASE-v1.3.3.md](docs/RELEASE-v1.3.3.md) | 想了解本版改了什麼的人 | v1.3.3 的變更、檔案、校驗和、已知限制 |
 | [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 想知道下一步的人 | v1.4.0 起三線並行的分工、產物命名與評估口徑 |

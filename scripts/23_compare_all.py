@@ -75,7 +75,7 @@ def build_methods():
         ("真迹", None),
         ("思源宋体", lambda ch: em_render(ROOT / "data/base/NotoSerifSC-Light.otf", ch)),
         ("霞鹜文楷", lambda ch: em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", ch)),
-        ("v1.3 ribbon", ribbon),
+        ("A·ribbon (v1.3.3)", ribbon),
         ("U-Net (E3)", unet),
         ("JiT 零样本", lambda ch: jit_img("data/zi2zi_eval_zerob", ch)),
         ("JiT LoRA-40", lambda ch: jit_img("data/zi2zi_eval_lora40b", ch)),
@@ -146,7 +146,12 @@ def main():
     # panel: 8 chars x methods that can actually render them
     probe = clean[0]
     usable = [(n, f) for n, f in methods if f is None or f(probe) is not None]
-    sel = [c for c in clean[:8] if all((fn is None) or (fn(c) is not None) for _, fn in usable)]
+    sel = []
+    for c in clean:
+        if len(sel) >= 8:
+            break
+        if all((fn is None) or (fn(c) is not None) for _, fn in usable):
+            sel.append(c)
     methods = usable
     H = len(methods); W = len(sel)
     if W == 0:
@@ -157,6 +162,7 @@ def main():
         for c, ch in enumerate(sel):
             m = Y[pos[ch]] > 127 if fn is None else fn(ch)
             sheet.paste(Image.fromarray((np.asarray(m) * 255).astype(np.uint8)), (c * S, r * S))
+    (ROOT / "work/preview").mkdir(parents=True, exist_ok=True)
     sheet.save(ROOT / "work/preview/eval_panelA_raw.png")
     lab = Image.new("L", (S * W + 160, S * H), 0)
     lab.paste(sheet, (160, 0))
@@ -184,7 +190,7 @@ def main():
         ImageDraw.Draw(im).text((0, 880 * S / 1000), ch, fill=255, font=ship, anchor="ls")
         return np.array(im) > 127
 
-    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", "v1.3 ribbon", "zi2zi-GAN")]
+    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", "A·ribbon (v1.3.3)", "zi2zi-GAN")]
     rows_b.append(("已发布字体", shipped))
     pb = Image.new("L", (S * len(gen_chars) + 160, S * len(rows_b)), 0)
     for r, (name, fn) in enumerate(rows_b):
