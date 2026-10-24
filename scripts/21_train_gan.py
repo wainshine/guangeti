@@ -98,9 +98,34 @@ class Discriminator(nn.Module):
         return self.fc(h.flatten(1))
 
 
+class PatchDiscriminator(nn.Module):
+    """PatchGAN: one score per local patch instead of one score per glyph.
+
+    Four stride-2/1 convs over 256px give a ~46px receptive field, not the 70px of
+    the original pix2pix net (which uses five layers). Smaller patches are not
+    necessarily worse, but the number in the comment must match the code.
+    
+
+    A global FC head is layout-sensitive and gives weak gradients on local texture
+    (终端、转折), which is exactly what the print differs in.
+    """
+
+    def __init__(self, base=64):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Conv2d(6, base, 4, 2, 1), nn.LeakyReLU(0.2),
+            *conv_bn(base, base * 2, stride=2), nn.LeakyReLU(0.2),
+            *conv_bn(base * 2, base * 4, stride=2), nn.LeakyReLU(0.2),
+            nn.Conv2d(base * 4, 1, 4, 1, 1),
+        )
+
+    def forward(self, x, y):
+        return self.net(torch.cat([x, y], 1))
+
+
 class Pairs(Dataset):
-    def __init__(self, idx):
-        d = np.load(ROOT / "work/pairs/pairs.npz", allow_pickle=True)
+    def __init__(self, idx, path=None):
+        d = np.load(path or (ROOT / "work/pairs/pairs.npz"), allow_pickle=True)
         self.X = d["X"][idx].astype(np.float32) / 127.5 - 1.0
         self.Y = d["Y"][idx].astype(np.float32) / 127.5 - 1.0
 
@@ -119,27 +144,51 @@ def main():
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--out", default=str(ROOT / "work" / "zi2zi_gan.pt"))
+    ap.add_argument("--ckpt-dir", default=str(ROOT / "work" / "ckpt"),
+                    help="periodic + best-val snapshots live here; never delete them")
+    ap.add_argument("--save-every", type=int, default=5)
     ap.add_argument("--sample", default=str(ROOT / "work" / "preview" / "gan_sample.png"))
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--data", default=str(ROOT / "work" / "pairs" / "pairs.npz"),
+                    help="npz with X/Y/chars; work/pairs_multi.npz for multi-instance")
+    ap.add_argument("--patchgan", action="store_true",
+                    help="70x70 PatchGAN (conditioned on the input) instead of the global FC head")
     args = ap.parse_args()
 
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
-    d = np.load(ROOT / "work/pairs/pairs.npz", allow_pickle=True)
+    d = np.load(args.data, allow_pickle=True)
     n = len(d["chars"])
     rng = np.random.RandomState(0)
-    perm = rng.permutation(n)
-    val = perm[:120]
-    tr = perm[120:]
+    # Split by *character*, not by pair: with multi-instance data the same char
+    # appears K times, so a pair-wise split leaks the character into training and
+    # makes valDice measure memorisation instead of generalisation.
+    all_chars = [str(c) for c in d["chars"]]
+    uniq = sorted(set(all_chars))
+    rng.shuffle(uniq)
+    val_chars = set(uniq[:max(1, len(uniq) // 40)])      # ~2.5% of characters
+    val = np.array([i for i, c in enumerate(all_chars) if c in val_chars], dtype=int)
+    tr = np.array([i for i, c in enumerate(all_chars) if c not in val_chars], dtype=int)
     if args.limit:
         tr = tr[:args.limit]
-    dl = DataLoader(Pairs(tr), batch_size=args.batch, shuffle=True, drop_last=True, num_workers=0)
+    dl = DataLoader(Pairs(tr, args.data), batch_size=args.batch, shuffle=True, drop_last=True, num_workers=0)
     print(f"train {len(tr)} val {len(val)} device {dev}", flush=True)
+    # Record the split so evaluation can tell whether a benchmark class was seen.
+    split_path = Path(args.out).with_suffix("")
+    split_path = split_path.parent / (split_path.name + "_split.json")
+    split_path.parent.mkdir(parents=True, exist_ok=True)
+    split_path.write_text(json.dumps({
+        "val_chars": sorted(val_chars),
+        "train_chars": sorted(set(all_chars) - val_chars),
+        "n_train_pairs": int(len(tr)), "n_val_pairs": int(len(val)),
+    }, ensure_ascii=False))
+    print(f"split -> {split_path.name} (val {len(val_chars)} chars)", flush=True)
 
     G = Generator().to(dev)
-    D = Discriminator().to(dev)
+    D = (PatchDiscriminator() if args.patchgan else Discriminator()).to(dev)
     optG = torch.optim.Adam(G.parameters(), lr=args.lr, betas=(0.5, 0.999))
     optD = torch.optim.Adam(D.parameters(), lr=args.lr, betas=(0.5, 0.999))
     bce = nn.BCEWithLogitsLoss()
+    best_dice = -1.0
 
     for ep in range(args.epochs):
         t0 = time.time()
@@ -150,14 +199,18 @@ def main():
             # ---- D
             with torch.no_grad():
                 fake = G(a)
-            real_logit = D(b)
-            fake_logit = D(fake.detach())
+            if args.patchgan:
+                real_logit = D(a, b)
+                fake_logit = D(a, fake.detach())
+            else:
+                real_logit = D(b)
+                fake_logit = D(fake.detach())
             d_loss = bce(real_logit, torch.ones_like(real_logit)) + \
                      bce(fake_logit, torch.zeros_like(fake_logit))
             optD.zero_grad(); d_loss.backward(); optD.step()
             # ---- G
             fake = G(a)
-            fake_logit = D(fake)
+            fake_logit = D(a, fake) if args.patchgan else D(fake)
             adv = bce(fake_logit, torch.ones_like(fake_logit))
             l1 = F.l1_loss(fake, b) * 100.0
             enc_real, _ = G.encode(b)
@@ -167,10 +220,11 @@ def main():
             optG.zero_grad(); g_loss.backward(); optG.step()
             gl += float(g_loss); dls += float(d_loss); nb += 1
         msg = f"ep {ep+1}/{args.epochs} G {gl/max(1,nb):.2f} D {dls/max(1,nb):.2f} {time.time()-t0:.0f}s"
+        val_dice = None
         if (ep + 1) % 5 == 0 or ep == 0:
             G.eval()
             with torch.no_grad():
-                vb = Pairs(val[:8])
+                vb = Pairs(val[:8], args.data)
                 xa = torch.stack([vb[i][0] for i in range(8)]).to(dev)
                 yb = torch.stack([vb[i][1] for i in range(8)]).cpu().numpy()
                 ya = xa.cpu().numpy()
@@ -179,7 +233,8 @@ def main():
                 for k in range(8):
                     p = gen[k, 0] > 0; t = yb[k, 0] > 0
                     dice.append(2 * (p & t).sum() / max(1, p.sum() + t.sum()))
-                msg += f" valDice {np.mean(dice):.3f}"
+                val_dice = float(np.mean(dice))
+                msg += f" valDice {val_dice:.3f}"
                 sheet = np.zeros((3 * 256, 8 * 256), np.uint8)
                 for k in range(8):
                     sheet[0:256, k*256:(k+1)*256] = ((ya[k, 0] + 1) * 127.5).astype(np.uint8)
@@ -189,7 +244,20 @@ def main():
                 Image.fromarray(sheet).resize((8*128, 3*128)).save(args.sample)
             G.train()
         print(msg, flush=True)
-        torch.save({"G": G.state_dict(), "D": D.state_dict()}, args.out)
+        torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
+                   args.out)
+        # Periodic snapshot: a 6-hour run must never leave only its last epoch behind.
+        ck = Path(args.ckpt_dir)
+        ck.mkdir(parents=True, exist_ok=True)
+        tag = Path(args.out).stem
+        if (ep + 1) % args.save_every == 0 or ep + 1 == args.epochs:
+            torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
+                       ck / f"{tag}_ep{ep+1:03d}.pt")
+            print(f"  snapshot -> {ck.name}/{tag}_ep{ep+1:03d}.pt", flush=True)
+        if val_dice is not None and val_dice >= best_dice:
+            best_dice = val_dice
+            torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
+                       ck / f"{tag}_best.pt")
     print("done", flush=True)
 
 

@@ -21,13 +21,17 @@ def main():
 
     spec = spec_from_file_location("gan", ROOT / "scripts/21_train_gan.py")
     gan = module_from_spec(spec); spec.loader.exec_module(gan)
-    G = gan.Generator(); G.load_state_dict(torch.load(ROOT / "work/zi2zi_gan.pt", map_location="cpu")["G"]); G.eval()
+    import argparse as _ap
+    _p = _ap.ArgumentParser(); _p.add_argument("--gan", default=str(ROOT / "work" / "zi2zi_gan.pt"))
+    _p.add_argument("--label", default="GAN"); _a = _p.parse_args()
+    G = gan.Generator(); G.load_state_dict(torch.load(_a.gan, map_location="cpu")["G"]); G.eval()
 
     def ribbon(i):
-        fr = B.glyph_frames(X[i] > 127)
+        wm = X[i] > 127
+        fr = B.glyph_frames(wm)
         rng = np.random.RandomState(i); raw = rng.choice(REL, size=len(fr), replace=True)
         w = np.power(raw, 1.4); w = w / max(1e-6, float(w.mean()))
-        return B.render_ribbon(fr, scale=_rs(float(m.sum())), dips=w, end_skew=0.9, taper=0.2)
+        return B.render_ribbon(fr, scale=_rs(float(wm.sum())), dips=w, end_skew=0.9, taper=0.2)
 
     def gan_fn(i):
         a = (X[i].astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]

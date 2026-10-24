@@ -27,11 +27,32 @@ from importlib.util import spec_from_file_location, module_from_spec
 S = 256
 
 
+GAN_PATH = ROOT / "work/zi2zi_gan.pt"
+GAN_LABEL = "B·zi2zi-GAN"
+CLASS_FILES = {"A": str(ROOT / "work" / "bench_seen.json"),
+               "B": str(ROOT / "work" / "bench_unseen.json"),
+               "C": str(ROOT / "work" / "bench_noreal.json")}
+
+
+def leak_note(class_path, ckpt_path):
+    """How many chars of this benchmark class were in the checkpoint's training set."""
+    split = Path(str(ckpt_path).replace(".pt", "_split.json"))
+    if not split.exists():
+        return "unknown"
+    try:
+        tr = set(json.loads(split.read_text())["train_chars"])
+    except Exception:
+        return "unknown"
+    cs = json.loads(Path(class_path).read_text())
+    n = sum(c in tr for c in cs)
+    return f"{n}/{len(cs)}"
+
+
 def load_gan():
     spec = spec_from_file_location("gan", ROOT / "scripts/21_train_gan.py")
     gan = module_from_spec(spec); spec.loader.exec_module(gan)
     g = gan.Generator()
-    g.load_state_dict(torch.load(ROOT / "work/zi2zi_gan.pt", map_location="cpu")["G"]); g.eval()
+    g.load_state_dict(torch.load(GAN_PATH, map_location="cpu")["G"]); g.eval()
     return g
 
 
@@ -101,7 +122,7 @@ def build():
         ("JiT 零样本", lambda ch, k=CLS[0]: jit(JIT[k][0], ch)),
         ("JiT LoRA-40", lambda ch, k=CLS[0]: jit(JIT[k][1], ch)),
         ("JiT LoRA-600", lambda ch, k=CLS[0]: jit(JIT[k][2], ch)),
-        ("B·zi2zi-GAN", gan_fn),
+        (GAN_LABEL, gan_fn),
     ]
 
 
@@ -116,7 +137,13 @@ JIT = {
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--classes", default="A,B,C")
+    ap.add_argument("--gan", default=str(ROOT / "work" / "zi2zi_gan.pt"),
+                    help="checkpoint of the zi2zi-GAN row")
+    ap.add_argument("--gan-label", default="B·zi2zi-GAN")
     args = ap.parse_args()
+    global GAN_PATH, GAN_LABEL
+    GAN_PATH = Path(args.gan)
+    GAN_LABEL = args.gan_label
     sets = {"A": "work/bench_seen.json", "B": "work/bench_unseen.json", "C": "work/bench_noreal.json"}
     d = np.load(ROOT / "work/pairs/pairs.npz", allow_pickle=True)
     chars = [str(c) for c in d["chars"]]; Y = d["Y"]; pos = {c: i for i, c in enumerate(chars)}
@@ -167,7 +194,8 @@ def main():
                 r["hole_agree"] = f"{hok}/{hn}"
             rows[name] = r
         out[key] = rows
-        print(f"\n== class {key} (n={len(cs)})")
+        leak = leak_note(CLASS_FILES.get(key, ""), GAN_PATH) if key in ("A", "B") else "n/a"
+        print(f"\n== class {key} (n={len(cs)})  {GAN_LABEL} 训练集覆盖: {leak}")
         print(f"{'method':18s} {'n':>4s} {'Dice':>6s} {'ink':>6s} {'cap':>6s} {'KS':>6s} {'std':>6s} {'holes':>8s}")
         for name, r in rows.items():
             print(f"{name:18s} {r['n']:4d} {r.get('dice',0):6.3f} {r['ink']:6.3f} {r.get('cap_mid',0):6.3f} "
@@ -179,7 +207,8 @@ def main():
             merged = json.loads(dump.read_text())
         except Exception:
             merged = {}
-    merged.update(out)          # keep classes measured in earlier runs
+    for cls, methods in out.items():          # keep rows from earlier runs
+        merged.setdefault(cls, {}).update(methods)
     dump.write_text(json.dumps(merged, ensure_ascii=False, indent=1))
 
 
