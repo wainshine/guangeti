@@ -59,6 +59,12 @@ def gan_chunk(args):
     from PIL import ImageFont
     from generate_lib import render_base, ribbon_scale
     import importlib.util as iu
+    torch.set_num_threads(1)      # one thread per worker
+    try:
+        import cv2 as _c2
+        _c2.setNumThreads(1)
+    except Exception:
+        pass
     global _GAN_CACHE
     if _GAN_CACHE is None:
         spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
@@ -354,8 +360,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
-    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated", "gan"], default="ribbon",
-                    help="default = the shipped method (v1.3.x); brush/field/model are historical")
+    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated", "gan"],
+                    default="gan",
+                    help="default = the shipped method (v1.5.0: GAN with a cheap guard); "
+                         "ribbon is the fallback renderer and the v1.3.x shipped method")
     ap.add_argument("--field-ss", type=int, default=2)
     ap.add_argument("--simplify", type=float, default=0.0,
                     help="polygon simplification tolerance in font units (2.0 at 512px keeps quality, cuts nodes ~30%%)")
@@ -412,13 +420,14 @@ def main():
             for lo, rows in pool.imap_unordered(gan_chunk, tasks):
                 for ch, g, tag, ok in rows:
                     if not ok:
-                        fb.append(ch)
-                        continue
+                        fb.append(ch)          # recorded, but ribbon contours are still emitted
                     cs = trace(g.astype(bool), turdsize=4, alphamax=0.4, opttol=0.5)
                     if not cs:
                         fb.append(ch); continue
                     em = raster_to_em(cs, S2)
                     em = normalize_to_base(em, ch, blend=1.0, min_scale=0.8, max_scale=1.25)
+                    if SIMPLIFY > 0:
+                        em = _simplify(em, SIMPLIFY)
                     fh.write(json.dumps({"char": ch, "contours": em, "src": tag},
                                         ensure_ascii=False) + "\n")
                 done += 1

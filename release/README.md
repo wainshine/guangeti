@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.3.5（2026-10-23）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為程序化合成。
+> **狀態：v1.5.0（2026-10-25）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（其中 90.5% 由 GAN 生成，9.5% 回退為帶狀掃掠）。
 > 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的刻刀筆鋒**；
 > 與刻本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
@@ -49,11 +49,26 @@ PDF 掃描 (410 頁)
 2,300 個字的標註（保留 1,675 個可交叉校驗的字）
    ↓  potrace 向量化 / 基線與字身框歸一化
 GuanGeKai-Real
-   ↓  缺失字：霞鶩文楷骨架 → 帶狀掃掠（斜切端頭 + 逐筆墨量波動）
-19,317 個生成字形 → 向量化
+   ↓  缺失字（三層結構，見下）
+19,317 個合成字形 → 向量化
    ↓  合併、構建 OpenType
 GuanGeKai (20,992 字)
 ```
+
+### 字庫構成（v1.5.0）
+
+```
+20,992 字
+├─ 1,675  真跡   直接取自刻本，不經過任何模型
+└─ 19,317 合成
+   ├─ 17,484  GAN（m2-ep80）        90.5%  ← 書中沒有的字，由模型生成
+   └─  1,833  帶狀掃掠回退            9.5%  ← 守衛判定 GAN 輸出不可靠時
+```
+
+守衛三條（任一不滿足即整字回退帶狀掃掠）：**空輸出 / 墨量比不在 [0.6, 1.5] / 連通域數與基線字體相差 >3**。
+回退偏向筆畫多的字（回退字平均墨量 13,695，GAN 字 12,479）。
+
+> 有真跡的字**一定**用真跡；GAN 只負責書中沒有的字，且出問題時退回帶狀掃掠。
 
 細節見 [docs/method.md](docs/method.md)。
 
@@ -63,9 +78,9 @@ GuanGeKai (20,992 字)
 |---|---|---|
 | [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
-| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 21 組實驗（E1–E21）的配置、指標、判定、复現命令 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 33 組實驗（E1–E33）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.3.5.md](docs/RELEASE-v1.3.5.md) | 想了解本版改了什麼的人 | v1.3.5 的變更、檔案、校驗和、已知限制 |
+| [docs/RELEASE-v1.5.0.md](docs/RELEASE-v1.5.0.md) | 想了解本版改了什麼的人 | v1.5.0 的變更、檔案、校驗和、已知限制 |
 | [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 想知道下一步的人 | v1.4.0 起三線並行的分工、產物命名與評估口徑 |
 | [docs/REPORTS/](docs/REPORTS/) | 想看實測數據的人 | 每次橫向評測的完整報告（指標表 + 兩個面板） |
 
@@ -91,15 +106,17 @@ python3 scripts/04_label.py            # 切片 -> 字
 python3 scripts/05_select.py           # 每字挑最優樣本（默認剔除僅出現 1 次的字）
 python3 scripts/06_norm.py             # 字身框歸一化參數
 python3 scripts/07_build_real.py       # 真實字形子集字體
-python3 scripts/10_generate.py --method ribbon  # 生成缺失字（發布版：帶狀掃掠）
+python3 scripts/10_generate.py --method gan    # 生成缺失字（發布版：GAN + 守衛）
+python3 scripts/36_fill_fallback.py            # 補齊守衛回退的字（帶狀掃掠）
 python3 scripts/11_build_full.py       # 合成完整字體
 python3 scripts/12_specimen.py         # 樣張
 python3 scripts/13_qa.py               # 覆蓋率質檢
 python3 scripts/14_package.py          # 發布包
 ```
 
-> 訓練步驟（`08_make_pairs.py` → `09_train*.py`）**不是發布版必需**：自訓 U-Net、
-> zi2zi 系列均未達標，發布版用的是**帶狀掃掠渲染**（`render_ribbon`）。
+> **v1.5.0 起發布版依賴訓練**：合成字由 GAN 生成（`--method gan`），
+> 需要檢查點 `work/ckpt/m2_ep080.pt`（380 MB，不入庫；重訓見 `docs/PLAN-v1.5.md`）。
+> 沒有檢查點時可退回 `--method ribbon`——畫質較弱（Dice 0.414 vs 0.549），但不需要模型。
 > 複現實驗見 [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)。
 
 原始 PDF 需放在倉庫根目錄，檔名為 `四书白文.18卷.旧传明.姜立纲.pdf`（版權原因**不入庫**）。
@@ -108,10 +125,11 @@ python3 scripts/14_package.py          # 發布包
 
 ## 已知限制
 
-* 生成字形（19,317 字）的骨架與拓撲來自基線字體（與其 97% 一致），筆形由**帶狀掃掠**
-  （斜切端頭 + 逐筆墨量擾動 + 沿程 taper）程序化生成，並非模型推斷，也非刻本刀鋒；
-  墨量與真跡基本持平（字體級 1.009，同口徑），端帽形狀 KS 0.063（掩膜級），是目前最接近刻本的方案。
-  用於正文小字時建議以真實字形子集為準。
+* 生成字形（19,317 字）的骨架來自基線字體，筆形由 **GAN** 生成（v1.5.0 起；9.5% 觸發守衛時
+  回退為帶狀掃掠）。在 617 個從未參與訓練的字上：Dice 0.549、骨架 chamfer 5.92px
+  （真跡互比地板 5.16px，仍差 15%）。
+* **小字號偏重**：12–14px 下合成字比真跡重 12–20%，16px 起基本持平。用於正文小字時
+  建議以真實字形子集為準。
 * 掃描本只覆蓋《四書》用字（1,675 個校驗後字形），因此大部分現代常用字屬於生成字形。
 * 尚未做 hinting；大字号、印刷級輸出請自行 outline。
 

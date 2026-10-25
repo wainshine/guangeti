@@ -42,7 +42,7 @@ def main():
     for i in sel:
         real_cap += [p[2] / p[-1] for p in ev.cap_profiles(Y[i] > 127)]
     rows = {}
-    for name, fn in (("霞鹜文楷", lambda i: X[i] > 127), ("v1.3 ribbon", ribbon), ("zi2zi-GAN", gan_fn)):
+    for name, fn in (("霞鹜文楷", lambda i: X[i] > 127), ("ribbon", ribbon), (f"GAN {Path(_a.gan).stem}", gan_fn)):
         D, ink, cap = [], [], []
         for i in sel:
             m = fn(i); t = Y[i] > 127

@@ -39,7 +39,7 @@ def build_methods():
     from importlib.util import spec_from_file_location, module_from_spec
     spec = spec_from_file_location("gan", ROOT / "scripts/21_train_gan.py")
     gan = module_from_spec(spec); spec.loader.exec_module(gan)
-    ck = torch.load(ROOT / "work/zi2zi_gan.pt", map_location="cpu")
+    ck = torch.load(ROOT / "work/ckpt/m2_ep080.pt", map_location="cpu")
     G = gan.Generator(); G.load_state_dict(ck["G"]); G.eval()
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
     G.to(dev)
@@ -77,12 +77,12 @@ def build_methods():
         ("真迹", None),
         ("思源宋体", lambda ch: em_render(ROOT / "data/base/NotoSerifSC-Light.otf", ch)),
         ("霞鹜文楷", lambda ch: em_render(ROOT / "data/base/LXGWWenKai-Regular.ttf", ch)),
-        (f"A·ribbon (v{VERSION})", ribbon),
+        ("A·ribbon (v1.3.5)", ribbon),
         ("U-Net (E3)", unet),
         ("JiT 零样本", lambda ch: jit_img("data/zi2zi_eval_zerob", ch)),
         ("JiT LoRA-40", lambda ch: jit_img("data/zi2zi_eval_lora40b", ch)),
         ("JiT LoRA-600", lambda ch: jit_img("data/zi2zi_eval_lora600b", ch)),
-        ("zi2zi-GAN", gan_fn),
+        ("B·GAN m2-ep80", gan_fn),
     ]
 
 
@@ -147,7 +147,15 @@ def main():
         return
     # panel: 8 chars x methods that can actually render them
     probe = clean[0]
+    ship = ImageFont.truetype(str(ROOT / "build/GuanGeKai-Regular.ttf"), S)
+
+    def shipped(ch):
+        im = Image.new("L", (S, S), 0)
+        ImageDraw.Draw(im).text((0, 880 * S / 1000), ch, fill=255, font=ship, anchor="ls")
+        return np.array(im) > 127
+
     usable = [(n, f) for n, f in methods if f is None or f(probe) is not None]
+    usable = usable + [(f"已发布 v{VERSION}", shipped)]
     sel = []
     for c in clean:
         if len(sel) >= 8:
@@ -184,15 +192,8 @@ def main():
                 gen_chars.append(c)
             if len(gen_chars) >= 8:
                 break
-    ship = ImageFont.truetype(str(ROOT / "build/GuanGeKai-Regular.ttf"), S)
-
-    def shipped(ch):
-        im = Image.new("L", (S, S), 0)
-        ImageDraw.Draw(im).text((0, 880 * S / 1000), ch, fill=255, font=ship, anchor="ls")
-        return np.array(im) > 127
-
-    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", f"A·ribbon (v{VERSION})", "zi2zi-GAN")]
-    rows_b.append(("已发布字体", shipped))
+    rows_b = [(n, f) for n, f in methods if n in ("思源宋体", "霞鹜文楷", "A·ribbon (v1.3.5)", "B·GAN m2-ep80")]
+    rows_b.append((f"已发布 v{VERSION}", shipped))
     pb = Image.new("L", (S * len(gen_chars) + 160, S * len(rows_b)), 0)
     for r, (name, fn) in enumerate(rows_b):
         for c, ch in enumerate(gen_chars):

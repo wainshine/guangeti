@@ -78,7 +78,7 @@ def main():
         print(f"{name:24s} Dice {rows[name]['dice']:.3f}  ink {rows[name]['ink']:.3f}")
 
     score("霞鹜文楷原样", wk)
-    score("ribbon v1.3.5", ribbon)
+    score("ribbon (v1.3.5 params)", ribbon)
     for path in args.gan:
         G = load_gan(path)
 
