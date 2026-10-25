@@ -43,13 +43,16 @@ def main():
             shutil.copy2(img, out / name)
 
     real_chars = {json.loads(l)["label"] for l in open(ROOT / "work" / "chosen.jsonl")}
-    gen_chars = set()
+    # three-way provenance: GAN output vs ribbon fallback (guard triggered) vs real
+    gen_kind = {}
     for l in open(ROOT / "work" / "generated.jsonl"):
-        gen_chars.add(json.loads(l)["char"])
+        r = json.loads(l)
+        gen_kind[r["char"]] = "gan" if r.get("src") == "gen" else "ribbon_fb"
     provenance = {}
     for c in range(BLOCK[0], BLOCK[1] + 1):
         ch = chr(c)
-        provenance[ch] = "real" if ch in real_chars else ("gen" if ch in gen_chars else "missing")
+        provenance[ch] = ("real" if ch in real_chars
+                          else gen_kind.get(ch, "missing"))
     (out / "provenance.json").write_text(json.dumps(provenance, ensure_ascii=False))
 
     f = TTFont(full)
@@ -59,7 +62,9 @@ def main():
     stats = dict(
         codepoints=len(covered),
         real=sum(1 for v in provenance.values() if v == "real"),
-        generated=sum(1 for v in provenance.values() if v == "gen"),
+        generated=sum(1 for v in provenance.values() if v in ("gan", "ribbon_fb")),
+        gan=sum(1 for v in provenance.values() if v == "gan"),
+        ribbon_fallback=sum(1 for v in provenance.values() if v == "ribbon_fb"),
         missing=sum(1 for v in provenance.values() if v == "missing"),
         upm=f["head"].unitsPerEm,
         glyphs=f["maxp"].numGlyphs,

@@ -8,6 +8,7 @@ from scipy.stats import ks_2samp
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import brush_lib as B
+from generate_lib import ribbon_scale as _rs
 from importlib import import_module
 ev = import_module("18_eval")
 from importlib.util import spec_from_file_location, module_from_spec

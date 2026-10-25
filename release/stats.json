@@ -2,6 +2,8 @@
  "codepoints": 20992,
  "real": 1675,
  "generated": 19317,
+ "gan": 17484,
+ "ribbon_fallback": 1833,
  "missing": 0,
  "upm": 1000,
  "glyphs": 20993,

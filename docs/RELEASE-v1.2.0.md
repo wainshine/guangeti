@@ -1,6 +1,6 @@
 # GuanGe Kai v1.2.0
 
-> **状态：历史版本说明（superseded by v1.3.3）** —— 当前发布说明见 `README.md` 与 `docs/PROJECT_STATE.md` §14。
+> **状态：历史版本说明（superseded by v1.3.3）** —— 当前发布说明见 `README.md` 与 `docs/PROJECT_STATE.md` §12（最新版本变更）与 `docs/RELEASE-v1.5.0.md`。
 
 
 

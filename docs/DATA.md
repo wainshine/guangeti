@@ -95,9 +95,9 @@
 
 
 ```
-39296dcd946151b897e4f519118b4022b4ddd2e31b21c4a0085f156eb341f416  build/GuanGeKai-Regular.ttf
-477cb437292ba26d69cdedae8ef1320cab025bb10b7a4e6c3896015becefac10  build/GuanGeKai-Real.ttf
-80733843e5ee19c4e572c4d75f400307217b3a6024c70eda9b2ba61d239ebcd0  GuanGeKai-v1.5.0.zip
+858c99fbb558e7877ff4a473c1c94904550b07b43a670de844f6a96ba81e01e7  build/GuanGeKai-Regular.ttf
+46b81e55d023df851b6506d136d99ea566ab33370cf72fef4d2700dec92c00ff  build/GuanGeKai-Real.ttf
+21a7a1862a3fed9cebee40ada5dd9d8e1b7fa527be518d8a0a64a8ef260fd74c  GuanGeKai-v1.5.0.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -110,6 +110,14 @@
 |---|---|
 | `scripts/18_eval.py` | 指标库（Dice / 端帽剖面 / 墨量）与留出集评估 |
 | `scripts/22_eval_gan.py` | 单一模型（GAN 检查点）指标 |
+| `scripts/29_gate_eval.py` | 拓扑闸门复测 → `work/gate_eval.json` |
+| `scripts/30_gate_rules.py` | 9 种候选闸门判据对比 → `work/gate_rules.json` |
+| `scripts/31_ckpt_manifest.py` | 从磁盘重建检查点清单 |
+| `scripts/32_eval_clean.py` | **617 干净集标准评估**（泛化结论只认这个） |
+| `scripts/33_struct_metrics.py` | 维度化结构指标（重心/宽高比/横画角 KS） |
+| `scripts/34_struct_score.py` | 分级骨架度量（chamfer/端点/交叉点） |
+| `scripts/35_threshold_sweep.py` | 推理阈值扫描 + 崩坏率 |
+| `scripts/36_fill_fallback.py` | 补齐 GAN 守卫回退的字（ribbon 轮廓） |
 | `scripts/23_compare_all.py --set work/eval_clean3.json --n 120` | **全方案横向对比**，同时生成面板 A/B |
 | `scripts/24_build_singles.py` | 构建 617 个「只出现一次」字的测试集 |
 | `scripts/25_eval_singles.py` | 在该测试集上评估 ribbon / GAN / 文楷 |
@@ -164,10 +172,15 @@ python3 scripts/14_package.py           # 发布包
 
 ### 6.5.1 检查点保留规则
 
-**训练检查点不删。** 一次 40 轮的训练要 6 小时，删掉等于把这 6 小时扔了。
+**训练检查点是有价值的产物，默认不删**；但已退役路线的中间轮次可以清，
+只要保住「最佳 + 最后一轮」两个对比锚点。
 
-- `work/zi2zi_gan.pt`（ep150，单实例基线）、`work/zi2zi_gan_multi.pt`（多实例 + PatchGAN）长期保留；
+- `work/zi2zi_gan.pt`（ep150 单实例基线）、`work/ckpt/m2_*`（v1.5.0 来源）长期保留全部；
 - 每次训练在 `work/ckpt/` 下留 `*_epNNN.pt`（每 5 轮）与 `*_best.pt`（验证集最好）；
+- **保留规则（2026-10-25 起）**：
+  - **正在推进的路线**保留全部快照（当前是 `m2_*`：v1.5.0 的来源，还会继续训）；
+  - **已退役的路线**只保留 **最佳一轮 + 最后一轮** 两个检查点，其余中间轮次删除，
+    便于日后对比而不必重训；
 - `work/ckpt/MANIFEST.json` 由 `python3 scripts/31_ckpt_manifest.py` 从磁盘重建
   （训练会**覆盖同名文件**，手写清单必然失配）；删除任何一项前先看它；
 - 若确实需要腾空间，先确认发布包里已有等价结果，并在本文件记录删了什么、为什么。
@@ -177,16 +190,19 @@ python3 scripts/14_package.py           # 发布包
 | 时间 | 文件 | 大小 | 原因 |
 |---|---|---|---|
 | 2026-10-24 22:05 | `work/ckpt/zi2zi_gan_multi_g_best.pt` | 402 MB | 训练于坏数据集（`08b` 配对把 71% 的目标图映射成空白），valDice 恒为 0，模型不可用。所有者要求删除，避免日后误用；崩溃过程记录在 E23，不依赖该文件 |
+| 2026-10-25 11:25 | `work/zi2zi_gan_multi_g.pt`、`work/zi2zi_gan_multi.pt`、`work/generated_simplified.jsonl` | 989 MB | 前者是坏数据集那轮的最终权重（E23，不可用）；中者与 `ckpt/zi2zi_gan_multi_ep040.pt` 同模型、属重复；后者与 `generated.jsonl` 内容完全相同（sha256 一致）。均在 §7 登记过 |
+| 2026-10-25 11:10 | 15 个已退役路线的中间轮次（见下） | 5.85 GB | 按「最佳 + 最后一轮」规则精简：`zi2zi_gan_multi` ep005–035（保留 best=ep35、ep040）、`attr_multi_gD` ep005–015（保留 best=ep15、ep20）、`attr_single_patch` ep005–015（保留 best=ep15、ep20）、`m1_blur05` ep005/010（保留 best=ep5、ep15）。`m2_*` 全部保留（v1.5.0 来源，还会继续训） |
 
 历史教训：2026-10-23 清理时删掉了 LoRA-600 与 JiT 权重，之后想复用只能重训。
 
 ## 6.5 已清理的大体积过程文件（2026-10-23）
 
-为控制仓库体积，以下目录已删除，**均可用仓库内脚本重建**：
+为控制仓库体积，以下目录**当时**已删除，**均可用仓库内脚本重建**。
+（部分后来又重建了，当前实际占用见 §7；下表是历史记录，不代表现在磁盘上没有。）
 
 | 已删除 | 原大小 | 重建方式 | 重建耗时 |
 |---|---|---|---|
-| `work/cells/`、`work/masks/` | 2.1 GB | `python3 scripts/01_segment.py` | 约 5 分钟 |
+| `work/cells/`、`work/masks/` | 2.1 GB | `python3 scripts/01_segment.py` | 约 5 分钟（**已重建，现占 2.1 GB**，见 §7） |
 | 历史 `work/generated_*.jsonl`（只留当前 `generated.jsonl`） | 数百 MB | 重新生成见 §6 的命令 | ribbon 约 5 分钟；GAN 约 25 分钟（6 worker） |
 | `work/gen_masks.npy` | 1.2 GB | 生成时自动重建 | — |
 | 8 个历史 U-Net 检查点（保留 `style_unet.pt`、`style_dice.pt`） | 240 MB | `09_train*.py` | 各约 1 小时 |
@@ -204,22 +220,54 @@ python3 scripts/14_package.py           # 发布包
 
 ## 7. 工作区残留（可删除，不影响复现）
 
-这些文件只存在于磁盘，**均未被 git 跟踪**（`.gitignore` 已覆盖），删掉不影响发布或复现：
+这些文件只存在于磁盘，**均未被 git 跟踪**（`.gitignore` 已覆盖），删掉不影响发布或复现。
+（2026-10-25 核对：下表已与磁盘实际状态对齐，原表里的一些文件早已删除。）
 
-| 路径 | 体积 | 说明 |
+| 路径 | 现状 | 体积 | 说明 |
+|---|---|---|---|
+| `data/fonts_target/` | **已删除** | — | 旧拼写残留（Guange 拼写），与 `build/` 重复；2026-10-25 清掉 |
+| `data/ids/Unihan_IRGSources.txt` | 存在 | 13 MB | 该版本不含 kIDS，从未使用 |
+| `data/zi2zi_ds/` | **已删除** | — | zi2zi 实验数据集（可由脚本重建） |
+| `data/zi2zi_ds2/` | 存在 | 33 MB | E5/E14 的配对数据集（train/test/inference.npz），`EXPERIMENTS.md` 复现命令引用；可由 `generate_font_dataset.py` 重建 |
+| `data/base/cg/ComputerGrassRegular.ttf` | **已删除** | — | Arphic PL，仅评估用；目录只剩 `ARPHICPL.TXT`（许可证，保留） |
+| `work/zi2zi_gan_multi_g.pt` | **已删除** | — | 坏数据集那轮的最终权重（E23），不可用 |
+| `work/zi2zi_gan_multi.pt` | **已删除** | — | 与 `work/ckpt/zi2zi_gan_multi_ep040.pt` 同模型，去重 |
+| `work/generated_simplified.jsonl` | **已删除** | — | 与 `work/generated.jsonl` 内容完全相同（sha256 一致） |
+| `data/lora_test/` | **已删除** | — | 3 个 88 字节的空 tfevents，训练未真正启动，无信息量 |
+
+### 7.1 实验证据图（**不要删**）
+
+C 线（zi2zi-JiT / LoRA）的推理输出。**权重已删（2026-10-23），且上游许可禁止再分发，
+这些 PNG 是 E5/E14/E17 结论唯一的可视化证据，删了无法重建。**
+`23_compare_all.py` 与 `26_bench.py` 直接读其中几项来出对比面板。
+
+| 路径 | 体积 | 用途 |
 |---|---|---|
-| `data/fonts_target/GuangeKai-Real.ttf` | 3.2 MB | 旧拼写残留，与 `build/` 重复 |
-| `data/ids/Unihan_IRGSources.txt` | 13 MB | 该版本不含 kIDS，从未使用 |
-| `data/zi2zi_ds/`、`data/zi2zi_ds2/` | 140 MB | zi2zi 实验数据集，可由脚本重建 |
-| `data/base/cg/ComputerGrassRegular.ttf` | 55 MB | Arphic PL，仅评估用 |
+| `data/zi2zi_eval_zerob`、`lora40b`、`lora600b` | 7–11 MB | **面板 A 的 JiT 三行**（`23_compare_all.py` 读取） |
+| `data/jit_zeroA`、`jit_l40A`、`jit_l600A` | 11–13 MB | A 组参考输出（`26_bench.py` 读取） |
+| `data/jit_zeroC`、`jit_l40C`、`jit_l600C` | 11–13 MB | C 组参考输出（`26_bench.py` 读取） |
+| `data/zi2zi_eval_base`、`cfg1.5`、`cfg4.0`、`lora`、`lora40` | 11–12 MB | cfg 扫描的样品（E14） |
+| `data/zi2zi_out`、`zi2zi_out2`、`zi2zi_lora_out`、`zi2zi_lora_out26` | 14 MB / 0.7 MB ×3 | 早期零样本与 LoRA 的抽样输出 |
 
-清理：
+合计约 **180 MB**。价值密度低但不可再生，保留。
+
+**仍占空间的残留**（均可重建，未删是因为下一版还要用）：
+
+| 路径 | 体积 | 重建方式 | 重建耗时 |
+|---|---|---|---|
+| `work/cells/` | 1.9 GB | `04_label.py` + `05_select.py`（依赖 OCR 结果） | 约 20 分钟 |
+| `work/masks/` | 212 MB | `07_build_real.py`（去掉 `--reuse-contours`） | 约 5 分钟 |
+| `work/generated_gan.jsonl` | 359 MB | `10_generate.py --method gan` | 约 25 分钟（6 worker） |
+| `work/generated_ribbon_v135.jsonl` | 176 MB | `10_generate.py --method ribbon` | 约 5 分钟 |
+| `work/zi2zi_gan.pt` | 383 MB | 重训 150 轮 | 数小时；**B 线对照基准，不建议删** |
+
+清理（只清确定不再需要的）：
 
 ```bash
-rm -rf data/fonts_target data/ids/Unihan_IRGSources.txt data/zi2zi_ds data/zi2zi_ds2
-rm -rf data/base/cg/ComputerGrassRegular.ttf data/base/cg/cg.zip
+rm -rf data/zi2zi_ds2 data/fonts_target data/ids/Unihan_IRGSources.txt
 ```
 
-> 目前 git 跟踪的 75 个文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
+> 目前 git 跟踪的文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
 > 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
 > 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。
+
