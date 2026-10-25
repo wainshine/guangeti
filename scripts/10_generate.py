@@ -77,16 +77,21 @@ def gan_chunk(args):
     bl = importlib.import_module("brush_lib")
     rel = np.load(ROOT / "work" / "stroke_rel_width.npy")
     lo, hi, chars, font_path, S = args
+    GAN_RES = 256                      # must equal the training resolution
     font = ImageFont.truetype(font_path, S)
+    font_gan = ImageFont.truetype(font_path, GAN_RES)
     out = []
     for ch in chars[lo:hi]:
         base = render_base(font, ch, S)
         wm = base > 127
-        a = (base.astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
+        # Feed the model at its training resolution (256). Running it at 512 made every
+        # stroke twice as thick in pixels and the output came out +25% ink (E35).
+        gin = render_base(font_gan, ch, GAN_RES)
+        a = (gin.astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
         with torch.no_grad():
-            # threshold -0.05: M2 sweep shows it puts median ink at 0.999
-            # (threshold is a weak lever here: Dice varies only 0.547–0.554 across the range)
             g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+        if S != GAN_RES:
+            g = _cv.resize(g.astype(np.uint8) * 255, (S, S), interpolation=_cv.INTER_LINEAR) > 127
         # ---- cheap guard
         n, _l, st, _ = _cv.connectedComponentsWithStats(g.astype(np.uint8), 8)
         comps = sum(1 for i in range(1, n) if st[i, 4] >= 20)

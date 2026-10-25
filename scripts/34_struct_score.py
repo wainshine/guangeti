@@ -88,7 +88,7 @@ def score(mask, ref):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=120)
-    ap.add_argument("--gan", default=str(ROOT / "work" / "ckpt" / "attr_single_patch_ep015.pt"))
+    ap.add_argument("--gan", default=str(ROOT / "work" / "ckpt" / "m2_ep080.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "struct_score.json"))
     args = ap.parse_args()
 

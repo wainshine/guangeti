@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CK = ROOT / "work" / "ckpt"
+# 该文件已于 2026-10-24 22:05 删除（见 DATA §6.5.1），条目保留用于说明历史
 INVALID = {"zi2zi_gan_multi_g_best.pt": "训练于 2026-10-24 05:27，用的是坏数据集"
                                        "（多实例配对 71% 目标空白），模型不可用，仅作记录"}
 

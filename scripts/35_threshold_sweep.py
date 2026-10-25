@@ -30,7 +30,7 @@ S = 256
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--gan", default=str(ROOT / "work" / "ckpt" / "attr_single_patch_ep015.pt"))
+    ap.add_argument("--gan", default=str(ROOT / "work" / "ckpt" / "m2_ep080.pt"))
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--out", default=str(ROOT / "work" / "threshold_sweep.json"))
     args = ap.parse_args()

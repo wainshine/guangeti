@@ -95,9 +95,9 @@
 
 
 ```
-858c99fbb558e7877ff4a473c1c94904550b07b43a670de844f6a96ba81e01e7  build/GuanGeKai-Regular.ttf
-46b81e55d023df851b6506d136d99ea566ab33370cf72fef4d2700dec92c00ff  build/GuanGeKai-Real.ttf
-21a7a1862a3fed9cebee40ada5dd9d8e1b7fa527be518d8a0a64a8ef260fd74c  GuanGeKai-v1.5.0.zip
+394d3a0c22a7c32cdfaef2b5fd2c4859f2ebb118b5b0571a4e44f998f3ac2015  build/GuanGeKai-Regular.ttf
+42ab4007497b2267ee61d0a59570e56df847e6a6219353ceffe6305353ae85ee  build/GuanGeKai-Real.ttf
+c998d6df4bce9506a94744ce8147908c0336635083c03f50ebc99f03fcbfc3c6  GuanGeKai-v1.5.0.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
@@ -177,19 +177,31 @@ python3 scripts/14_package.py           # 发布包
 
 - `work/zi2zi_gan.pt`（ep150 单实例基线）、`work/ckpt/m2_*`（v1.5.0 来源）长期保留全部；
 - 每次训练在 `work/ckpt/` 下留 `*_epNNN.pt`（每 5 轮）与 `*_best.pt`（验证集最好）；
-- **保留规则（2026-10-25 起）**：
-  - **正在推进的路线**保留全部快照（当前是 `m2_*`：v1.5.0 的来源，还会继续训）；
-  - **已退役的路线**只保留 **最佳一轮 + 最后一轮** 两个检查点，其余中间轮次删除，
-    便于日后对比而不必重训；
+- **删除动作的最后一步永远是重跑 `31_ckpt_manifest.py`**（已三次出现"清单与磁盘不同步"）。
+- **保留规则（2026-10-25 修订，所有者决定）**：
+  - 训练时**每 10 轮存一个快照**（`--save-every 10`，已设为默认）；
+  - 清理时保留三类：**最终一轮**、**验证最佳一轮**、**核心轮次（50/100/150/200/300/400/500…）**；
+    其余中间轮次可删。核心轮次是将来换配置重训时的对照锚点；
+  - **正在推进的路线**（当前 `m2_*`）在推进期间保留全部；
 - `work/ckpt/MANIFEST.json` 由 `python3 scripts/31_ckpt_manifest.py` 从磁盘重建
   （训练会**覆盖同名文件**，手写清单必然失配）；删除任何一项前先看它；
 - 若确实需要腾空间，先确认发布包里已有等价结果，并在本文件记录删了什么、为什么。
+
+**当前检查点分布（2026-10-25 19:30 核对）**：
+
+| 线路 | 状态 | 快照 | 核心轮次 | 说明 |
+|---|---|---|---|---|
+| `m2`（v1.5.0/1.5.1 来源） | 推进中 | 010–080 每 10 轮共 8 个 + `best` | 050 ✓ | 按规则全留 |
+| `m2e150`（E36，已否证） | 已退役 | 060（valDice 峰值）、150（最终） | 150 ✓ | **050 与 100 在规则生效前已删**，如需补做对照需重训 6.5 小时 |
+| `attr_*`、`m1_blur05`、`zi2zi_gan_multi` | 已退役 | best + 最后一轮 | — | 归因/早期路线，够用 |
 
 **已删除记录**：
 
 | 时间 | 文件 | 大小 | 原因 |
 |---|---|---|---|
 | 2026-10-24 22:05 | `work/ckpt/zi2zi_gan_multi_g_best.pt` | 402 MB | 训练于坏数据集（`08b` 配对把 71% 的目标图映射成空白），valDice 恒为 0，模型不可用。所有者要求删除，避免日后误用；崩溃过程记录在 E23，不依赖该文件 |
+| 2026-10-25 19:20 | 5 个与快照同 epoch 的重复主文件（`m2e150.pt`、`m2e150_best.pt`、`attr_multi_gD.pt`、`attr_single_patch.pt`、`m1_blur05.pt`） | 1.98 GB | 训练结束时另存的同名文件，与对应 `_epNNN.pt` 同为该 epoch，属重复。按「best + 最后一轮」规则保留快照文件，删除重复项 |
+| 2026-10-25 18:50 | `m2e150` 的 13 个中间快照 | 5.2 GB | 加训 150 轮的实验结束（E36：与 80 轮完全持平，「欠训」假设被否证）。按规则留 valDice 峰值 `ep060` 与最后一轮 `ep150`（+ 训练结束时的 `m2e150.pt`），其余删除 |
 | 2026-10-25 11:25 | `work/zi2zi_gan_multi_g.pt`、`work/zi2zi_gan_multi.pt`、`work/generated_simplified.jsonl` | 989 MB | 前者是坏数据集那轮的最终权重（E23，不可用）；中者与 `ckpt/zi2zi_gan_multi_ep040.pt` 同模型、属重复；后者与 `generated.jsonl` 内容完全相同（sha256 一致）。均在 §7 登记过 |
 | 2026-10-25 11:10 | 15 个已退役路线的中间轮次（见下） | 5.85 GB | 按「最佳 + 最后一轮」规则精简：`zi2zi_gan_multi` ep005–035（保留 best=ep35、ep040）、`attr_multi_gD` ep005–015（保留 best=ep15、ep20）、`attr_single_patch` ep005–015（保留 best=ep15、ep20）、`m1_blur05` ep005/010（保留 best=ep5、ep15）。`m2_*` 全部保留（v1.5.0 来源，还会继续训） |
 

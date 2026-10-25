@@ -166,7 +166,7 @@ def main():
     ap.add_argument("--out", default=str(ROOT / "work" / "zi2zi_gan.pt"))
     ap.add_argument("--ckpt-dir", default=str(ROOT / "work" / "ckpt"),
                     help="periodic + best-val snapshots live here; never delete them")
-    ap.add_argument("--save-every", type=int, default=5)
+    ap.add_argument("--save-every", type=int, default=10)
     ap.add_argument("--sample", default=str(ROOT / "work" / "preview" / "gan_sample.png"))
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--data", default=str(ROOT / "work" / "pairs" / "pairs.npz"),
