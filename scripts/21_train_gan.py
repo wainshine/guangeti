@@ -116,26 +116,46 @@ class PatchDiscriminator(nn.Module):
             nn.Conv2d(6, base, 4, 2, 1), nn.LeakyReLU(0.2),
             *conv_bn(base, base * 2, stride=2), nn.LeakyReLU(0.2),
             *conv_bn(base * 2, base * 4, stride=2), nn.LeakyReLU(0.2),
-            nn.Conv2d(base * 4, 1, 4, 1, 1),
+            *conv_bn(base * 4, base * 8, stride=2), nn.LeakyReLU(0.2),
+            nn.Conv2d(base * 8, 1, 4, 1, 1),
         )
 
     def forward(self, x, y):
         return self.net(torch.cat([x, y], 1))
 
 
+def _augment(a, b, rng):
+    """Same geometric jitter for input and target (rotate/shift/scale)."""
+    import cv2 as _cv
+    ang = rng.uniform(-2, 2)
+    tx, ty = rng.uniform(-3, 3), rng.uniform(-3, 3)
+    sc = rng.uniform(0.95, 1.05)
+    M = _cv.getRotationMatrix2D((a.shape[-1] / 2, a.shape[-2] / 2), ang, sc)
+    M[0, 2] += tx; M[1, 2] += ty
+    out = []
+    for im in (a, b):
+        out.append(_cv.warpAffine(im, M, (a.shape[-1], a.shape[-2]),
+                                  flags=_cv.INTER_LINEAR, borderMode=_cv.BORDER_REPLICATE))
+    return out
+
+
 class Pairs(Dataset):
-    def __init__(self, idx, path=None):
+    def __init__(self, idx, path=None, aug=False):
         d = np.load(path or (ROOT / "work/pairs/pairs.npz"), allow_pickle=True)
         self.X = d["X"][idx].astype(np.float32) / 127.5 - 1.0
         self.Y = d["Y"][idx].astype(np.float32) / 127.5 - 1.0
+        self.aug = aug
 
     def __len__(self):
         return len(self.X)
 
     def __getitem__(self, i):
-        a = np.repeat(self.X[i][None], 3, 0)
-        b = np.repeat(self.Y[i][None], 3, 0)
-        return torch.from_numpy(a), torch.from_numpy(b)
+        a0, b0 = self.X[i], self.Y[i]
+        if self.aug:
+            a0, b0 = _augment(a0, b0, np.random)
+        a = np.repeat(a0[None], 3, 0)
+        b = np.repeat(b0[None], 3, 0)
+        return torch.from_numpy(a.copy()), torch.from_numpy(b.copy())
 
 
 def main():
@@ -151,6 +171,8 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--data", default=str(ROOT / "work" / "pairs" / "pairs.npz"),
                     help="npz with X/Y/chars; work/pairs_multi.npz for multi-instance")
+    ap.add_argument("--hinge", action="store_true", help="hinge loss instead of BCE")
+    ap.add_argument("--aug", action="store_true", help="rotate/shift/scale jitter on X and Y")
     ap.add_argument("--patchgan", action="store_true",
                     help="70x70 PatchGAN (conditioned on the input) instead of the global FC head")
     args = ap.parse_args()
@@ -170,7 +192,7 @@ def main():
     tr = np.array([i for i, c in enumerate(all_chars) if c not in val_chars], dtype=int)
     if args.limit:
         tr = tr[:args.limit]
-    dl = DataLoader(Pairs(tr, args.data), batch_size=args.batch, shuffle=True, drop_last=True, num_workers=0)
+    dl = DataLoader(Pairs(tr, args.data, aug=args.aug), batch_size=args.batch, shuffle=True, drop_last=True, num_workers=0)
     print(f"train {len(tr)} val {len(val)} device {dev}", flush=True)
     # Record the split so evaluation can tell whether a benchmark class was seen.
     split_path = Path(args.out).with_suffix("")
@@ -205,13 +227,16 @@ def main():
             else:
                 real_logit = D(b)
                 fake_logit = D(fake.detach())
-            d_loss = bce(real_logit, torch.ones_like(real_logit)) + \
-                     bce(fake_logit, torch.zeros_like(fake_logit))
+            if args.hinge:
+                d_loss = torch.relu(1.0 - real_logit).mean() + torch.relu(1.0 + fake_logit).mean()
+            else:
+                d_loss = bce(real_logit, torch.ones_like(real_logit)) + \
+                         bce(fake_logit, torch.zeros_like(fake_logit))
             optD.zero_grad(); d_loss.backward(); optD.step()
             # ---- G
             fake = G(a)
             fake_logit = D(a, fake) if args.patchgan else D(fake)
-            adv = bce(fake_logit, torch.ones_like(fake_logit))
+            adv = -fake_logit.mean() if args.hinge else bce(fake_logit, torch.ones_like(fake_logit))
             l1 = F.l1_loss(fake, b) * 100.0
             enc_real, _ = G.encode(b)
             enc_fake, _ = G.encode(fake)

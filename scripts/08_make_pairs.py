@@ -80,6 +80,11 @@ def to_ink(gray):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sigma", type=float, default=1.0, help="target blur; 0.5 keeps corners sharper")
+    ap.add_argument("--out", default=str(ROOT / "work" / "pairs" / "pairs.npz"))
+    _a = ap.parse_args()
     meta = {json.loads(l)["file"]: json.loads(l) for l in open(ROOT / "work" / "cells.jsonl")}
     chosen = [json.loads(l) for l in open(ROOT / "work" / "chosen.jsonl")]
     norm = json.load(open(ROOT / "work" / "norm.json"))
@@ -99,12 +104,12 @@ def main():
         ink = (ink > 127).astype(np.uint8) * 255
         g = book_raster_ink(m, ink, nrm)
         chars.append(r["label"])
-        targets.append(cv2.GaussianBlur(g.astype(np.float32), (0, 0), 1.0).astype(np.uint8))
+        targets.append(cv2.GaussianBlur(g.astype(np.float32), (0, 0), _a.sigma).astype(np.uint8))
     bases = render_base(chars, None)
     # stack into a npz
     X = np.stack([bases[c] for c in chars]).astype(np.uint8)
     Y = np.stack(targets).astype(np.uint8)
-    np.savez_compressed(OUT / "pairs.npz", X=X, Y=Y, chars=np.array(chars, dtype=object))
+    np.savez_compressed(_a.out, X=X, Y=Y, chars=np.array(chars, dtype=object))
     print("pairs", X.shape, Y.shape, "chars", len(set(chars)))
     # preview sheet
     n = min(12, len(chars))

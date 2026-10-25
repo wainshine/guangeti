@@ -47,6 +47,58 @@ def brush_style(a, k1=0, k2=1):
 _GAN_CACHE = None
 
 
+def gan_chunk(args):
+    """GAN output with a *cheap* guard: empty / ink out of band / components off by >3.
+
+    This is deliberately NOT the E24 gate (counters must equal WenKai), which reverted 85%
+    of glyphs. Here the GAN is trusted unless the output is obviously broken.
+    """
+    import importlib
+    import cv2 as _cv
+    import torch
+    from PIL import ImageFont
+    from generate_lib import render_base, ribbon_scale
+    import importlib.util as iu
+    global _GAN_CACHE
+    if _GAN_CACHE is None:
+        spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
+        m = iu.module_from_spec(spec); spec.loader.exec_module(m)
+        g = m.Generator()
+        g.load_state_dict(torch.load(ROOT / "work" / "ckpt" / "m2_ep080.pt", map_location="cpu")["G"])
+        g.eval()
+        _GAN_CACHE = g
+    gan = _GAN_CACHE
+    bl = importlib.import_module("brush_lib")
+    rel = np.load(ROOT / "work" / "stroke_rel_width.npy")
+    lo, hi, chars, font_path, S = args
+    font = ImageFont.truetype(font_path, S)
+    out = []
+    for ch in chars[lo:hi]:
+        base = render_base(font, ch, S)
+        wm = base > 127
+        a = (base.astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
+        with torch.no_grad():
+            # threshold -0.05: M2 sweep shows it puts median ink at 0.999
+            # (threshold is a weak lever here: Dice varies only 0.547–0.554 across the range)
+            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+        # ---- cheap guard
+        n, _l, st, _ = _cv.connectedComponentsWithStats(g.astype(np.uint8), 8)
+        comps = sum(1 for i in range(1, n) if st[i, 4] >= 20)
+        nw, _l2, sw, _ = _cv.connectedComponentsWithStats(wm.astype(np.uint8), 8)
+        comps_w = sum(1 for i in range(1, nw) if sw[i, 4] >= 20)
+        ink = float(g.sum()) / max(1.0, float(wm.sum()))
+        ok = g.sum() > 200 and 0.6 <= ink <= 1.5 and abs(comps - comps_w) <= 3
+        if not ok:
+            fr = bl.glyph_frames(wm, S)
+            rng = np.random.RandomState(ord(ch) % (2 ** 31))
+            raw = rng.choice(rel, size=len(fr), replace=True); raw /= max(1e-6, raw.mean())
+            w = np.power(raw, 1.4); w /= max(1e-6, w.mean())
+            g = bl.render_ribbon(fr, scale=ribbon_scale(float(wm.sum())), dips=w,
+                                 end_skew=0.9, taper=0.2, size=S, ss=2)
+        out.append((ch, g, "gen" if ok else "base", ok))
+    return lo, out
+
+
 def gated_chunk(args):
     """GAN -> topology repair (vs content font) -> ribbon fallback, per chunk."""
     global _GAN_CACHE
@@ -96,7 +148,9 @@ def gated_chunk(args):
         ref = base > 127
         a = (base.astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
         with torch.no_grad():
-            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > 0
+            # threshold -0.05: M2 sweep shows it puts median ink at 0.999
+            # (threshold is a weak lever here: Dice varies only 0.547–0.554 across the range)
+            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
         g = _gate(g, ref)
         if len(_holes(g)) != len(_holes(ref)):
             fr = bl.glyph_frames(ref)
@@ -300,7 +354,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
-    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated"], default="ribbon",
+    ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated", "gan"], default="ribbon",
                     help="default = the shipped method (v1.3.x); brush/field/model are historical")
     ap.add_argument("--field-ss", type=int, default=2)
     ap.add_argument("--simplify", type=float, default=0.0,
@@ -343,6 +397,36 @@ def main():
         model = UNet(base=32).to(device)
         model.load_state_dict(torch.load(args.ckpt, map_location=device))
         model.eval()
+
+    if args.method == "gan":
+        import multiprocessing as mp
+        S2 = int(args.res)
+        ctx = mp.get_context("fork")
+        step = 40
+        tasks = [(i, min(i + step, len(chars)), chars,
+                  str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S2)
+                 for i in range(0, len(chars), step)]
+        fb = []
+        done = 0
+        with ctx.Pool(args.workers) as pool, open(args.out, "w") as fh:
+            for lo, rows in pool.imap_unordered(gan_chunk, tasks):
+                for ch, g, tag, ok in rows:
+                    if not ok:
+                        fb.append(ch)
+                        continue
+                    cs = trace(g.astype(bool), turdsize=4, alphamax=0.4, opttol=0.5)
+                    if not cs:
+                        fb.append(ch); continue
+                    em = raster_to_em(cs, S2)
+                    em = normalize_to_base(em, ch, blend=1.0, min_scale=0.8, max_scale=1.25)
+                    fh.write(json.dumps({"char": ch, "contours": em, "src": tag},
+                                        ensure_ascii=False) + "\n")
+                done += 1
+                if done % 20 == 0:
+                    print(f"  chunks {done}/{len(tasks)}", flush=True)
+        (ROOT / "work" / "gan_fallback.json").write_text(json.dumps(fb, ensure_ascii=False))
+        print(f"done {sum(1 for _ in open(args.out))} of {len(chars)}; fallback {len(fb)}", flush=True)
+        return
 
     if args.method in ("field", "ribbon", "gan_gated") and not args.reuse_masks:
         import multiprocessing as mp

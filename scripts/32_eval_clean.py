@@ -41,9 +41,10 @@ def main():
                     help="checkpoint to score; may be repeated")
     ap.add_argument("--n", type=int, default=120)
     ap.add_argument("--out", default=str(ROOT / "work" / "eval_single.json"))
+    ap.add_argument("--eval-data", default=str(ROOT / "work" / "pairs_single.npz"))
     args = ap.parse_args()
 
-    d = np.load(ROOT / "work" / "pairs_single.npz", allow_pickle=True)
+    d = np.load(args.eval_data, allow_pickle=True)
     X, Y = d["X"], d["Y"]
     rng = np.random.RandomState(0)
     sel = rng.choice(len(X), min(args.n, len(X)), replace=False)

@@ -11,6 +11,7 @@ from glyphvec import clean_ink, trace, to_em, contour_bounds, base_bounds
 
 ROOT = Path(__file__).resolve().parents[1]
 S, PAD, BLEND = 256, 6, 0.8
+SIGMA = 1.0   # target blur; keep in sync with 08_make_pairs --sigma
 
 
 def main():
@@ -70,7 +71,14 @@ def main():
         X[i] = np.array(img)
         g = np.array(Image.open(ROOT / "work/cells" / nrm["file"]).convert("L"))
         Y[i] = book_ink(m, (g < 160).astype(np.uint8) * 255, nrm)
-    np.savez_compressed(ROOT / "work/pairs_single.npz", X=X, Y=Y, chars=np.array(chars))
+        if SIGMA >= 0:
+            Y[i] = cv2.GaussianBlur(Y[i].astype(np.float32), (0, 0), SIGMA).astype(np.uint8)
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--sigma", type=float, default=1.0)
+    ap.add_argument("--out", default=str(ROOT / "work" / "pairs_single.npz"))
+    _a = ap.parse_args()
+    globals()["SIGMA"] = _a.sigma
+    np.savez_compressed(_a.out, X=X, Y=Y, chars=np.array(chars))
     json.dump(norm, open(ROOT / "work/norm_single.json", "w"), ensure_ascii=False)
     print(f"singles: {len(chars)} glyphs -> work/pairs_single.npz")
 
