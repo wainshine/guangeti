@@ -6,15 +6,19 @@
 > **這是第二套（B 線）。** 第一套（A 線，家族名 `GuanGe Kai`）的字形來自明刻本
 > 《四書白文》，兩套字形的**來源不同**，可以同機安裝、分別選用。
 
+<p align="center">
+  <img src="docs/images/specimen-b.png" width="820" alt="GuanGe Kai B specimen">
+</p>
+
 ---
 
 ## 1. 這是什麼
 
-**版本**：本包为 **GuanGe Kai B v1.0.1**，随主版本 **GuanGeKai v1.6.1** 一起发布
+**版本**：本包为 **GuanGe Kai B v1.1.0**，随主版本 **GuanGeKai v1.6.2** 一起发布
 （同一项目、两个字形来源：A = 四书刻本 `GuanGe Kai`，B = 史记抄本 `GuanGe Kai B`，
 两套家族名并存，互不覆盖）。
 
-- `GuanGeKai-B-Regular.ttf`：完整字集 **20,992 字**（CJK 基本區 100%）＝ 真跡 4,065 + 生成 16,927；
+- `GuanGeKai-B-Regular.ttf`：完整字集 **20,992 字**（CJK 基本區 100%）＝ 真跡 4,073 + 生成 16,919；
   字型內另有 5 個擴展 A 的真跡字，故 `cmap` 實際 20,997 個碼位
 - `GuanGeKai-B-Real.ttf`：只有 4,078 個真跡字，全部逐字從掃描本切出、向量化
 
@@ -30,6 +34,15 @@
 | UPM | 1000（ASC 880 / DESC −120，字面框 0–880） |
 | 格式 | TrueType（TTF/glyf），無 hinting |
 | 授權 | [SIL Open Font License 1.1](OFL.txt) |
+
+## 1.5 眼見為實：原書與字型對照
+
+左邊是抄本原頁（《平原君虞卿列傳》），右邊是同一段文字用本字型的真跡字豎排。
+可以看到起收筆、轉折與字距的來源：
+
+<p align="center">
+  <img src="docs/images/book-vs-font-b.jpg" width="900" alt="book page vs typeset with GuanGe Kai B">
+</p>
 
 ## 2. 與《四書》版的分工
 

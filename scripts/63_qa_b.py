@@ -126,7 +126,7 @@ def main():
     holes = None
     if args.holes:
         import subprocess, sys as _sys
-        r = subprocess.run([_sys.executable, str(Path(__file__).parent / "71_holes_b.py"),
+        r = subprocess.run([_sys.executable, str(Path(__file__).parent / "71_holes.py"),
                             "--font", args.font, "--n", str(args.holes),
                             "--json", str(out / "holes.json")],
                            capture_output=True, text=True)

@@ -63,6 +63,11 @@ def main():
     readme = Path(args.readme)
     if readme.exists():
         shutil.copy2(readme, out / "README.md")
+        # the packaged README sits next to the images, so strip the docs/images/ prefix
+        # (same rule as 14_package.py); otherwise every <img> in the package is broken
+        rp = out / "README.md"
+        txt = rp.read_text(encoding="utf-8")
+        rp.write_text(txt.replace("docs/images/", ""), encoding="utf-8")
     for name in ("specimen-b.png", "book-vs-font-b.jpg"):
         img = ROOT / "docs" / "images" / name
         if not img.exists():

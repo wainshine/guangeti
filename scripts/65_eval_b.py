@@ -23,6 +23,7 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
+import cv2
 import numpy as np
 import torch
 torch.set_num_threads(1)   # audit 3-25: CPU inference must stay single-threaded
@@ -32,6 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import brush_lib as B  # noqa: E402
 from generate_lib import ribbon_scale_b  # noqa: E402
+from shiji_page import repair_counters  # noqa: E402
 
 S = 256
 
@@ -102,6 +104,12 @@ def main():
     ap.add_argument("--eval-data", default="")
     ap.add_argument("--gan", action="append", default=[])
     ap.add_argument("--n", type=int, default=200)
+    ap.add_argument("--close", type=int, default=4,
+                    help="closing kernel applied to the model output before scoring, in "
+                         "this 256-px space (4 here ~= the 7 px used at 512 in production). "
+                         "Without it the numbers describe an image that is never shipped")
+    ap.add_argument("--no-hole-repair", dest="hole_repair", action="store_false",
+                    help="disable the per-glyph counter repair when scoring")
     ap.add_argument("--thr", type=float, default=0.0,
                     help="GAN output threshold for the headline rows (calibrated so the "
                          "ink ratio is 1.00; see E4's threshold sweep)")
@@ -142,10 +150,17 @@ def main():
         G = load_gan(path)
         thr = args.thr
 
-        def gan_fn(i, G=G, thr=thr):
+        def gan_fn(i, G=G, thr=thr, close=args.close, repair=args.hole_repair):
             a = (X[i].astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
             with torch.no_grad():
-                return G(torch.from_numpy(a).float()).numpy()[0, 0] > thr
+                m = G(torch.from_numpy(a).float()).numpy()[0, 0] > thr
+            # mirror 60_generate_b: closing + per-glyph counter repair before scoring
+            if close:
+                k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (close, close))
+                m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
+            if repair:
+                m, _ = repair_counters(m, chars[i])
+            return m
 
         methods.append((Path(path).stem, gan_fn))
 

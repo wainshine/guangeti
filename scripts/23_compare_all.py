@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 S = 256
 
 
-def load_pairs():
-    d = np.load(ROOT / "work/pairs/pairs.npz", allow_pickle=True)
+def load_pairs(path=None):
+    d = np.load(path or (ROOT / "work/pairs/pairs.npz"), allow_pickle=True)
     return [str(c) for c in d["chars"]], d["X"], d["Y"]
 
 
@@ -110,11 +110,22 @@ def metrics(m, t, store=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=40)
-    ap.add_argument("--set", default=str(ROOT / "work/eval_clean.json"))
+    # audit 2-8: the old default (eval_clean3.json) had 79/120 chars inside the m2
+    # training pool. Default to the 617 never-trained single-occurrence chars instead.
+    ap.add_argument("--set", default=str(ROOT / "work/pairs_single.npz"))
+    ap.add_argument("--seed", type=int, default=7)
     args = ap.parse_args()
-    chars, X, Y = load_pairs()
+    # reference masks must come from the same file the char list came from
+    _src = args.set if str(args.set).endswith(".npz") else None
+    chars, X, Y = load_pairs(_src)
     pos = {c: i for i, c in enumerate(chars)}
-    clean = json.load(open(args.set))[: args.n]
+    if str(args.set).endswith(".npz"):
+        _d = np.load(args.set, allow_pickle=True)
+        _chars = [str(c) for c in _d["chars"]]
+        _idx = np.random.RandomState(args.seed).permutation(len(_chars))[: args.n]
+        clean = [_chars[i] for i in _idx]
+    else:
+        clean = json.load(open(args.set))[: args.n]
     methods = build_methods()
 
     real_store = {"cap": []}

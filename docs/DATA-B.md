@@ -128,12 +128,21 @@ B 线的处理（`shiji_page.ink_mask`）：
 
 结果：20 页抽样里水印假字格 **22 → 0**，页底 7% 区域不再产生任何字格。
 
-## 6. 校验和（v1.0.1）
+## 5.9 `head.fontRevision`
+
+TrueType 的 `fontRevision` 是 **16.16 定点数**。本版（v1.1.0）由共用库按
+`major + minor/10 + patch/100 = 1 + 1/10 + 0 = 1.1` 写入；定点量化后实测
+`1.1000061035`，与 name 表 `Version 1.1.0` 对应。
+
+注意：v1.0.1 时它是截断的 `1.0`（共用库旧行为，审计 3-3）；v1.1.0 起与 name 表一致。
+A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
+
+## 6. 校验和（v1.1.0）
 
 ```
-b76cfc016e1094c8b3299298b52802abb9f8322495b72b6ba38272f984492cec  build/GuanGeKai-B-Regular.ttf
-79aadc231a3bef0b3ddfc14205448aeb705aae8b53ae00b296bcbb426a3d35be  build/GuanGeKai-B-Real.ttf
-f95b5e7fb736e48ed232d16e9f05baab12920a25eb996924fc6898ba0e1f02f1  GuanGeKai-B-v1.0.1.zip
+886ecf25f449c6f160fe6856aad55cf9a6db70a5d329b8cd7d96fdefd988febf  build/GuanGeKai-B-Regular.ttf
+3009c3a0b5d7937b3aa89034ac7e14a04a73f9aa308b0f16fff639aaa84f6e07  build/GuanGeKai-B-Real.ttf
+bd78f57adee6c91cce0b305c84c8c1b959c278d354da8aff4ec23d3424043e62  GuanGeKai-B-v1.1.0.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死

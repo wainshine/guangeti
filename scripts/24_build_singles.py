@@ -17,7 +17,9 @@ SIGMA = 1.0   # target blur; keep in sync with 08_make_pairs --sigma
 def main():
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--sigma", type=float, default=1.0)
+    # default 0: the released clean set (work/pairs_single.npz) is UNBLURRED, while the
+    # training targets use 1.0 — re-running with the old default silently changed it (audit 2-10)
+    ap.add_argument("--sigma", type=float, default=0.0)
     ap.add_argument("--work", default=str(ROOT / "work"),
                     help="working directory (the B line uses work-b)")
     ap.add_argument("--pitch-floor", type=float, default=200.0)

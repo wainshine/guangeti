@@ -74,6 +74,14 @@ def main():
         raise SystemExit(f"ABORT: coverage {len(have)} != {BLOCK[1]-BLOCK[0]+1}")
     if empty or tiny or huge:
         raise SystemExit(f"ABORT: empty={len(empty)} tiny={len(tiny)} huge={len(huge)}")
+    # fontRevision must agree with the name-table version (audit 3-3)
+    _f = TTFont(args.font)
+    _ver = [str(n) for n in _f["name"].names if n.nameID == 5 and n.platformID == 3]
+    if _ver:
+        _p = (_ver[0].replace("Version ", "").split(".") + ["0", "0"])[:3]
+        _want = int(_p[0]) + int(_p[1]) / 10.0 + int(_p[2]) / 100.0
+        if abs(_f["head"].fontRevision - _want) > 1e-3:
+            raise SystemExit(f"ABORT: fontRevision {_f['head'].fontRevision:.4f} != {_want:.3f}")
     stats = dict(coverage=len(have), empty=len(empty), tiny=tiny[:50], huge=huge[:50])
     (out / "stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=1))
 

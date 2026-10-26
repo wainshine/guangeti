@@ -99,8 +99,8 @@
 
 
 ```
-226a4a6da7ae7eaf6169c163b3a43efc05b4454ebef545688ee8ca8e3dcd370c  build/GuanGeKai-Regular.ttf
-62ecaf889b43b94f40031d0b4329446a51e02bf7d5ed72079d0a94a310487d77  build/GuanGeKai-Real.ttf
+a997daf2d7b1ceec03a98ed1a580786672bc9b631abe1af44c8d7c10b11709ec  build/GuanGeKai-Regular.ttf
+2f4bdc12eabfe8cf3357b48255533ada3c14109480e71f8e536a777deeaa3b26  build/GuanGeKai-Real.ttf
 c28f20404593ab302c84d93b90bdc9b6564d8bd1460ef2f0fcd5b7cb9e0b5db6  GuanGeKai-v1.5.0.zip
 5c4c59fa62e089fd7225fc2c19ee008a8bf08ab30f67034e0bfbe5492d926dfe  GuanGeKai-v1.5.1.zip
 c998d6df4bce9506a94744ce8147908c0336635083c03f50ebc99f03fcbfc3c6  GuanGeKai-v1.5.2.zip
@@ -299,4 +299,4 @@ rm -rf data/zi2zi_ds2 data/fonts_target data/ids/Unihan_IRGSources.txt
 > 目前 git 跟踪的文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
 > 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
 > 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。
-da60260a36357b1eb2bb9804c2d60067c49e27598ff30f3e740eff11b0843beb  GuanGeKai-v1.6.1.zip
+42ff45dbf34b64e14e082981faeb1620bab5765f9bb8b0bda24ce5f7c39d8203  GuanGeKai-v1.6.2.zip

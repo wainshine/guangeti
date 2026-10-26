@@ -39,14 +39,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gan", action="append", default=[],
                     help="checkpoint to score; may be repeated")
-    ap.add_argument("--n", type=int, default=120)
+    ap.add_argument("--n", type=int, default=150)
+    ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--out", default=str(ROOT / "work" / "eval_single.json"))
     ap.add_argument("--eval-data", default=str(ROOT / "work" / "pairs_single.npz"))
     args = ap.parse_args()
 
     d = np.load(args.eval_data, allow_pickle=True)
     X, Y = d["X"], d["Y"]
-    rng = np.random.RandomState(0)
+    rng = np.random.RandomState(args.seed)
     sel = rng.choice(len(X), min(args.n, len(X)), replace=False)
 
     font = ImageFont.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)

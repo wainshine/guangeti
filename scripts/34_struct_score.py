@@ -87,14 +87,15 @@ def score(mask, ref):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--n", type=int, default=120)
+    ap.add_argument("--n", type=int, default=150)
+    ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--gan", default=str(ROOT / "work" / "ckpt" / "m2_ep080.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "struct_score.json"))
     args = ap.parse_args()
 
     d = np.load(ROOT / "work" / "pairs_single.npz", allow_pickle=True)
     X, Y = d["X"], d["Y"]
-    sel = np.random.RandomState(0).choice(len(X), args.n, replace=False)
+    sel = np.random.RandomState(args.seed).choice(len(X), args.n, replace=False)
 
     spec = spec_from_file_location("gan", ROOT / "scripts" / "21_train_gan.py")
     gan = module_from_spec(spec); spec.loader.exec_module(gan)

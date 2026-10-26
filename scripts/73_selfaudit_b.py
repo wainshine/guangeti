@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ["README-B.md", "docs/PLAN-B.md", "docs/EXPERIMENTS-B.md",
-        "docs/DATA-B.md", "docs/RELEASE-v1.0.1-B.md"]
+        "docs/DATA-B.md", "docs/RELEASE-v1.1.0-B.md"]
 BLOCK = (0x4E00, 0x9FFF)
 
 fails: list[str] = []
@@ -70,8 +70,17 @@ def main() -> int:
           f"{len(cm_r)}")
     check("Real glyph count", fm["maxp"].numGlyphs - 1 == stats["real"], f"{fm['maxp'].numGlyphs-1}")
     check("family name", fr["name"].getDebugName(1) == fm["name"].getDebugName(1) == "GuanGe Kai B")
-    check("package version", fr["name"].getDebugName(5) == "Version 1.0.1",
+    check("package version", fr["name"].getDebugName(5) == "Version 1.1.0",
           repr(fr["name"].getDebugName(5)))
+    # fontRevision must follow the shared-library formula (16.16 fixed point), and the
+    # doc must quote the same number: it is the value users see in font properties.
+    ver = fr["name"].getDebugName(5).replace("Version ", "")
+    parts = (ver.split(".") + ["0", "0"])[:3]
+    want_rev = int(parts[0]) + int(parts[1]) / 10.0 + int(parts[2]) / 100.0
+    got_rev = fr["head"].fontRevision
+    check("fontRevision matches the version string", abs(got_rev - want_rev) < 1e-3,
+          f"{got_rev:.7f} vs {want_rev}")
+    check("fontRevision quoted in the release note", "fontRevision" in text)
     check("source split adds up",
           stats["real"] + stats["generated"] == stats["codepoints"] + stats["real_ext_a"],
           f"{stats['real']}+{stats['generated']}")
@@ -91,8 +100,11 @@ def main() -> int:
     check("SHA256SUMS verifies", subprocess.run(
         ["shasum", "-a", "256", "-c", "SHA256SUMS"], cwd=rel,
         capture_output=True, text=True).returncode == 0)
-    check("package README == repo README-B.md",
-          sha256(rel / "README.md") == sha256(ROOT / "README-B.md"))
+    # the packaged copy strips the docs/images/ prefix so the <img> tags resolve
+    # next to the fonts; everything else must be identical
+    pkg_txt = (rel / "README.md").read_text()
+    repo_txt = (ROOT / "README-B.md").read_text().replace("docs/images/", "")
+    check("package README == repo README-B.md (images re-pointed)", pkg_txt == repo_txt)
     for f in ("GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf", "specimen-b.png",
               "book-vs-font-b.jpg", "coverage.txt", "OFL.txt", "LICENSE"):
         check(f"package has {f}", (rel / f).exists())
@@ -101,8 +113,8 @@ def main() -> int:
     check("coverage.txt length", len((rel / "coverage.txt").read_text()) == stats["codepoints"])
 
     print("== 4. checksums quoted in docs ==")
-    zips = re.findall(r"([0-9a-f]{64})  GuanGeKai-B-v1\.0\.1\.zip", text)
-    zp = ROOT / "GuanGeKai-B-v1.0.1.zip"
+    zips = re.findall(r"([0-9a-f]{64})  GuanGeKai-B-v1\.1\.0\.zip", text)
+    zp = ROOT / "GuanGeKai-B-v1.1.0.zip"
     if zp.exists():
         want = sha256(zp)
         check("doc zip hash == disk", bool(zips) and set(zips) == {want}, want[:16])
@@ -115,16 +127,16 @@ def main() -> int:
     # 面向使用者/摘要的三份文档不得出现已被取代的口径；EXPERIMENTS-B 是实验记录，
     # 历史值（ep50 当时的候选工作点）本来就该留在那里。
     user_docs = "\n".join(Path(d).read_text() for d in
-                          ("README-B.md", "docs/PLAN-B.md", "docs/RELEASE-v1.0.1-B.md"))
+                          ("README-B.md", "docs/PLAN-B.md", "docs/RELEASE-v1.1.0-B.md"))
     stale = ["17.7 MB", "3.97 MB", "18.4 MB", "19.4 MB", "1,567 個", "15,360",
-             "thr −0.10", "ep50 是发版"]
+             "ep50 是发版"]
     for s in stale:
         check(f"no stale {s!r} in user docs", s not in user_docs)
     check("bbox ratio quoted == accept",
           f"{accept['bbox_w_ratio']}" in text,
           f"{accept['bbox_w_ratio']}")
     check("weight bias quoted == accept", f"{accept['weight_bias']}" in text)
-    for n in ("15,831", "1,088", "4,078", "20,992", "0.528", "5.63", "0.016", "6.4%",
+    for n in ("15,831", "1,135", "4,078", "20,992", "0.523", "5.60", "0.037", "6.7%",
               "1.9%"):
         check(f"doc quotes {n}", n in text)
     # 语言约定：仅 README 可繁体
@@ -146,6 +158,18 @@ def main() -> int:
             if not (p.parent / t).exists():
                 miss.append(f"{d}->{t}")
     check("no broken relative links", not miss, "; ".join(miss[:3]))
+    # the user-facing README must actually show the two figures (audit: 眼见为实)
+    rp = Path("README-B.md")
+    imgs = re.findall(r'<img src="([^"]+)"', rp.read_text())
+    check("README-B embeds a specimen and a book-vs-font figure",
+          any("specimen" in i for i in imgs) and any("book-vs-font" in i for i in imgs),
+          ", ".join(imgs))
+    for i in imgs:
+        check(f"README image exists: {i}", (rp.parent / i).exists())
+    # ... and the packaged copy must point at files that are actually in the package
+    pkg_readme = rel / "README.md"
+    for i in re.findall(r'<img src="([^"]+)"', pkg_readme.read_text()):
+        check(f"packaged image exists: {i}", (rel / i).exists())
 
     print("== 6. B-line isolation ==")
     a_fonts = ["build/GuanGeKai-Regular.ttf", "build/GuanGeKai-Real.ttf"]

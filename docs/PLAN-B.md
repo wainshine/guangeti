@@ -1,6 +1,6 @@
 # B 线计划：用《史記》抄本做 GuanGeKai-B
 
-> 状态：**v1.0.1 已发版**（2026-10-26，随主版本 v1.6.1）。
+> 状态：**v1.1.0 已发版**（2026-10-26，随主版本 v1.6.1）。
 > 本条线（下称 B 线）与四书那条（A 线，`docs/PLAN-v1.5.md`、产物 `GuanGeKai-*`）**完全隔离**：
 > 所有中间产物在 `work-b/`，脚本 `5x_`/`6x_`，文档 `*-B.md`，发布物 `build/GuanGeKai-B-*.ttf`
 > 与 `release-b/`。A 线的 `build/`、`release/`、`work/` 一律不写。
@@ -12,15 +12,15 @@
 | 源数据 | `史记.二十四册.传姜立纲抄本.新加坡国立大学藏.水印.pdf`（1672 页，页 1080×1008 pt，**原生 150 dpi**，JPEG 2250×2100） |
 | 产物 | `build/GuanGeKai-B-Regular.ttf`（全字集）、`build/GuanGeKai-B-Real.ttf`（仅真迹） |
 | 家族名 | `GuanGe Kai B` / PS 名 `GuanGeKai-B-Regular`、`GuanGeKai-B-Real` |
-| 版本 | v1.0.1（随主版本 v1.6.1） |
-| 发布包 | `release-b/` + `GuanGeKai-B-v1.0.1.zip` |
+| 版本 | v1.1.0（随主版本 v1.6.2） |
+| 发布包 | `release-b/` + `GuanGeKai-B-v1.1.0.zip` |
 | 工作目录 | `work-b/` |
 
 与 A 线的差别不只是数据：**史记是墨笔抄本，四书是刀刻刻本**；史记原生分辨率只有
 150 dpi（四书 300 dpi），字面 80×86 px（四书 250×250 px）。因此 A 线的数据侧标定
 一条都不能继承，见 §4。
 
-## 2. 阶段状态（v1.0.1 已完成）
+## 2. 阶段状态（v1.1.0 已完成）
 
 | 阶段 | 脚本 | 状态 | 关键数字 |
 |---|---|---|---|
@@ -37,10 +37,10 @@
 | 干净集评估 | `65_eval_b.py` | **完成** | Dice **0.531** / chamfer **5.66** / 墨量 1.018 / 崩坏率 3.0% |
 | 全量生成 | `60_generate_b.py`（ep80, thr −0.30, `--close 7`） | **完成** | 16,927 字：GAN 15,831 + 回退 1,088（6.4%） |
 | 合字 / 质检 / 验收 | `62/63/68` | **完成** | 20,992/20,992；字重比 1.125 |
-| 打包 | `64_package_b.py` | **完成** | `GuanGeKai-B-v1.0.1.zip`（14 MB） |
+| 打包 | `64_package_b.py` | **完成** | `GuanGeKai-B-v1.1.0.zip`（14 MB） |
 
 **最终交付**：`build/GuanGeKai-B-Regular.ttf`（15.6 MB，20,992 字）、
-`build/GuanGeKai-B-Real.ttf`（3.76 MB，4,078 字）、`release-b/`、`GuanGeKai-B-v1.0.1.zip`。
+`build/GuanGeKai-B-Real.ttf`（3.76 MB，4,078 字）、`release-b/`、`GuanGeKai-B-v1.1.0.zip`。
 真迹覆盖率 **8.0% → 19.4%**（1,675 → 4,078 字）。
 
 ## 3. 纠偏：为什么必须做，做了什么，效果多少
@@ -208,8 +208,8 @@ python3 scripts/69_panel_b.py --gan work-b/ckpt/b_epNNN.pt --n 16
 
 # 5. 打包 + 校验和
 rm -rf release-b && python3 scripts/64_package_b.py
-cd release-b && zip -q -r ../GuanGeKai-B-v1.0.1.zip . && cd ..
-shasum -a 256 build/GuanGeKai-B-*.ttf GuanGeKai-B-v1.0.1.zip
+cd release-b && zip -q -r ../GuanGeKai-B-v1.1.0.zip . && cd ..
+shasum -a 256 build/GuanGeKai-B-*.ttf GuanGeKai-B-v1.1.0.zip
 
 # 6. 复验 A 线未被波及（版本 1.5.2 的 SHA-256 必须逐字节一致）
 python3 scripts/67_verify_a.py

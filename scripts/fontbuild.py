@@ -10,7 +10,7 @@ from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.reverseContourPen import ReverseContourPen
 
 EM = 1000
-VERSION = "1.6.1"  # single source of truth for the font version
+VERSION = "1.6.2"  # single source of truth for the font version
 OFL_TEXT = (
     "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
     "This license is available with a FAQ at: https://openfontlicense.org"
@@ -173,7 +173,11 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
     fb.setupMaxp()
     fb.font["head"].macStyle = 0
     try:
-        fb.font["head"].fontRevision = float(".".join(version.split(".")[:2]))
+        # TrueType fontRevision is a 16.16 fixed point; keep all three segments so
+        # fontRevision agrees with the name table (audit 3-3: 1.6.1 used to read 1.0).
+        _parts = (version.split(".") + ["0", "0"])[:3]
+        fb.font["head"].fontRevision = (
+            int(_parts[0]) + int(_parts[1]) / 10.0 + int(_parts[2]) / 100.0)
     except Exception:
         pass
     fb.font["head"].flags = 0b00000011

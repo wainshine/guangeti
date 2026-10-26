@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Counters (孔洞) audit for the B line — the audit's P0 finding.
+"""Counters (孔洞) audit — generic for both lines (A and B).
 
 For every glyph we render at 256px and count holes with RETR_CCOMP, then compare
 with the same character in WenKai (the content font we learn from).  A hole that
@@ -11,9 +11,10 @@ Two failure modes are reported separately:
   * `fewer`  — we have 0 < holes < WenKai's N            (partly fused)
 
 Usage:
-  python3 scripts/71_holes_b.py --font build/GuanGeKai-B-Regular.ttf --n 300
-  python3 scripts/71_holes_b.py --font build/GuanGeKai-B-Real.ttf --n 0   # all
-  python3 scripts/71_holes_b.py --font build/GuanGeKai-B-Regular.ttf --n 0 --json work-b/holes.json
+  python3 scripts/71_holes.py --font build/GuanGeKai-B-Regular.ttf --n 300
+  python3 scripts/71_holes.py --font build/GuanGeKai-B-Real.ttf --n 0      # every glyph
+  python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json work/holes_a.json
+  python3 scripts/71_holes.py --font build/GuanGeKai-B-Regular.ttf --n 0 --json work-b/holes.json
 """
 from __future__ import annotations
 

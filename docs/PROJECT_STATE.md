@@ -45,9 +45,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.6.1） | 17.7 MB | `226a4a6da7ae7eaf` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `62ecaf889b43b94f` |
-| `GuanGeKai-v1.6.1.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 15.2 MB | `da60260a36357b1e` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.6.2） | 17.7 MB | `a997daf2d7b1ceec` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `2f4bdc12eabfe8cf` |
+| `GuanGeKai-v1.6.2.zip` | 上述 + OFL + 覆盖表 + 逐字来源 + 校验和 | 15.2 MB | `42ff45dbf34b64e1` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。

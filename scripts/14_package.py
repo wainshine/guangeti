@@ -29,6 +29,15 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
 
     full = ROOT / "build" / "GuanGeKai-Regular.ttf"
+    # freshness gate (audit P1-4): the font must be newer than the data it was built from,
+    # otherwise we would ship a package whose provenance describes a different build.
+    _deps = [ROOT / "work" / "chosen.jsonl", ROOT / "work" / "generated.jsonl"]
+    _missing = [str(d.name) for d in _deps if not d.exists()]
+    if _missing:
+        raise SystemExit(f"ABORT: missing build inputs {_missing}")
+    _stale = [d.name for d in _deps if d.stat().st_mtime > full.stat().st_mtime]
+    if _stale:
+        raise SystemExit(f"ABORT: {full.name} is older than {_stale} — rerun 11_build_full.py")
     real = ROOT / "build" / "GuanGeKai-Real.ttf"
     for f in (full, real):
         shutil.copy2(f, out / f.name)
@@ -57,6 +66,9 @@ def main():
         ch = chr(c)
         provenance[ch] = ("real" if ch in real_chars
                           else gen_kind.get(ch, "missing"))
+    _miss = sum(1 for v in provenance.values() if v == "missing")
+    if _miss:
+        raise SystemExit(f"ABORT: {_miss} chars have no provenance (missing glyphs)")
     (out / "provenance.json").write_text(json.dumps(provenance, ensure_ascii=False))
 
     f = TTFont(full)
