@@ -175,6 +175,11 @@ def main():
     ap.add_argument("--aug", action="store_true", help="rotate/shift/scale jitter on X and Y")
     ap.add_argument("--patchgan", action="store_true",
                     help="70x70 PatchGAN (conditioned on the input) instead of the global FC head")
+    ap.add_argument("--resume", default="",
+                    help="continue training from a checkpoint (loads G/D and the epoch "
+                         "counter; Adam state is not stored, so a short transient is normal). "
+                         "The character-level split is deterministic, so the same val "
+                         "characters are held out")
     args = ap.parse_args()
 
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
@@ -207,12 +212,20 @@ def main():
 
     G = Generator().to(dev)
     D = (PatchDiscriminator() if args.patchgan else Discriminator()).to(dev)
+    start_ep = 0
+    if args.resume:
+        ck = torch.load(args.resume, map_location="cpu")
+        G.load_state_dict(ck["G"])
+        if "D" in ck:
+            D.load_state_dict(ck["D"])
+        start_ep = int(ck.get("epoch", 0))
+        print(f"resumed {args.resume} at epoch {start_ep} -> target {args.epochs}", flush=True)
     optG = torch.optim.Adam(G.parameters(), lr=args.lr, betas=(0.5, 0.999))
     optD = torch.optim.Adam(D.parameters(), lr=args.lr, betas=(0.5, 0.999))
     bce = nn.BCEWithLogitsLoss()
     best_dice = -1.0
 
-    for ep in range(args.epochs):
+    for ep in range(start_ep, args.epochs):
         t0 = time.time()
         gl = dls = 0.0
         nb = 0
@@ -249,19 +262,20 @@ def main():
         if (ep + 1) % 5 == 0 or ep == 0:
             G.eval()
             with torch.no_grad():
-                vb = Pairs(val[:8], args.data)
-                xa = torch.stack([vb[i][0] for i in range(8)]).to(dev)
-                yb = torch.stack([vb[i][1] for i in range(8)]).cpu().numpy()
+                nval = min(8, len(val))
+                vb = Pairs(val[:nval], args.data)
+                xa = torch.stack([vb[i][0] for i in range(nval)]).to(dev)
+                yb = torch.stack([vb[i][1] for i in range(nval)]).cpu().numpy()
                 ya = xa.cpu().numpy()
                 gen = G(xa).cpu().numpy()
                 dice = []
-                for k in range(8):
+                for k in range(nval):
                     p = gen[k, 0] > 0; t = yb[k, 0] > 0
                     dice.append(2 * (p & t).sum() / max(1, p.sum() + t.sum()))
                 val_dice = float(np.mean(dice))
                 msg += f" valDice {val_dice:.3f}"
                 sheet = np.zeros((3 * 256, 8 * 256), np.uint8)
-                for k in range(8):
+                for k in range(nval):
                     sheet[0:256, k*256:(k+1)*256] = ((ya[k, 0] + 1) * 127.5).astype(np.uint8)
                     sheet[256:512, k*256:(k+1)*256] = ((gen[k, 0] + 1) * 127.5).astype(np.uint8)
                     sheet[512:768, k*256:(k+1)*256] = ((yb[k, 0] + 1) * 127.5).astype(np.uint8)

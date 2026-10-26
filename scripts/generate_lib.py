@@ -86,6 +86,24 @@ def raster_to_em(contours, S, em_top=880.0, em_bot=-120.0):
     return out
 
 
+# B line (史記 manuscript) fit: book_ink / WenKai_ink = RIBBON_A * ink^-RIBBON_B_EXP over
+# the 4,070 training pairs, median ratio 0.714 (the print of 四書 is 0.824).  See
+# docs/EXPERIMENTS-B.md E4 for the fit and why the A-line curve cannot be reused.
+RIBBON_A_B = 27.1825
+RIBBON_EXP_B = 0.3735
+RIBBON_BASE = 1.149   # measured: ribbon ink = 1.149 * scale on the B pairs
+
+
+def ribbon_scale_b(comp256: float, lo: float = 0.50, hi: float = 1.15) -> float:
+    """Per-character ribbon scale for the 史記 domain.
+
+    `comp256` is the base-font ink area measured at 256x256 (scale it yourself when you
+    render at another resolution).  ribbon ink ~= RIBBON_BASE * scale.
+    """
+    tgt = RIBBON_A_B * max(float(comp256), 1.0) ** (-RIBBON_EXP_B)
+    return float(min(hi, max(lo, tgt / RIBBON_BASE)))
+
+
 def ribbon_scale(comp: float, base: float = 1.06, lo: float = 0.62, hi: float = 1.12) -> float:
     """Per-character ribbon scale.
 

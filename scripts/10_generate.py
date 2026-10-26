@@ -104,7 +104,9 @@ def gan_chunk(args):
             rng = np.random.RandomState(ord(ch) % (2 ** 31))
             raw = rng.choice(rel, size=len(fr), replace=True); raw /= max(1e-6, raw.mean())
             w = np.power(raw, 1.4); w /= max(1e-6, w.mean())
-            g = bl.render_ribbon(fr, scale=ribbon_scale(float(wm.sum())), dips=w,
+            # ribbon_scale was fitted on 256px ink (E-new: audit P1-2); S is the render size
+            comp256 = float(wm.sum()) * (256.0 / S) ** 2
+            g = bl.render_ribbon(fr, scale=ribbon_scale(comp256), dips=w,
                                  end_skew=0.9, taper=0.2, size=S, ss=2)
         out.append((ch, g, "gen" if ok else "base", ok))
     return lo, out

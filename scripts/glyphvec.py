@@ -55,7 +55,12 @@ def binarize(img: np.ndarray) -> np.ndarray:
     return keep[lab]
 
 
-def trace(ink: np.ndarray, turdsize: int = 8, alphamax: float = 1.0, opttol: float = 0.25):
+def trace(ink: np.ndarray, turdsize: int = 2, alphamax: float = 1.0, opttol: float = 0.25):
+    """Vectorise a binary mask.
+
+    turdsize=2 (was 8): small counters (e.g. 年's 4px hole) were being dropped by
+    potrace's speck filter — see audit P0 layer 3.
+    """
     p = potrace.Bitmap(~ink).trace(turdsize=turdsize, alphamax=alphamax,
                                    opticurve=True, opttolerance=opttol)
     H = ink.shape[0]

@@ -99,9 +99,22 @@
 
 
 ```
-394d3a0c22a7c32cdfaef2b5fd2c4859f2ebb118b5b0571a4e44f998f3ac2015  build/GuanGeKai-Regular.ttf
-42ab4007497b2267ee61d0a59570e56df847e6a6219353ceffe6305353ae85ee  build/GuanGeKai-Real.ttf
-c998d6df4bce9506a94744ce8147908c0336635083c03f50ebc99f03fcbfc3c6  GuanGeKai-v1.5.0.zip
+dd295b9b7aad4731460323f65c0635abd87007959b33540b2cb6d9550a3129e1  build/GuanGeKai-Regular.ttf
+a66029e87f753d32b431fb8e7ff3dcf7172776e894c4c417212cf69303741d19  build/GuanGeKai-Real.ttf
+c28f20404593ab302c84d93b90bdc9b6564d8bd1460ef2f0fcd5b7cb9e0b5db6  GuanGeKai-v1.5.0.zip
+5c4c59fa62e089fd7225fc2c19ee008a8bf08ab30f67034e0bfbe5492d926dfe  GuanGeKai-v1.5.1.zip
+c998d6df4bce9506a94744ce8147908c0336635083c03f50ebc99f03fcbfc3c6  GuanGeKai-v1.5.2.zip
+
+B 线（史记本，v1.0.0）：
+
+```
+41c23d1abd3c11da106a0f58b31c669ba057c15a1cc9acb7a05d5765c8baab1b  build/GuanGeKai-B-Regular.ttf
+451d92028fe779022e6f6e12b118334b0b7fdef308d1c11b72fa119bf015b9ab  build/GuanGeKai-B-Real.ttf
+7985dbcdb60c70c51d6f6aad7241fde2bd11ea0c613badd8a4f5eb0d219df262  GuanGeKai-B-v1.0.0.zip
+```
+
+`release-b/SHA256SUMS` 是 B 线发布包的逐文件校验和，已验证通过；B 线的数据与实验记录见 `docs/DATA-B.md` 与 `docs/EXPERIMENTS-B.md`。
+bbaf6727205b9454ade20c47814bb188ab49ad3b21766c7a309dbab44935a50a  GuanGeKai-v1.6.0.zip
 ```
 
 `release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。

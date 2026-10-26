@@ -38,7 +38,8 @@ def main():
             rng = np.random.RandomState(ord(ch) % (2 ** 31))
             raw = rng.choice(rel, size=len(fr), replace=True); raw /= max(1e-6, raw.mean())
             w = np.power(raw, 1.4); w /= max(1e-6, w.mean())
-            m = B.render_ribbon(fr, scale=ribbon_scale(float(wm.sum())), dips=w,
+            comp256 = float(wm.sum()) * (256.0 / S) ** 2   # ribbon_scale is fitted at 256px
+            m = B.render_ribbon(fr, scale=ribbon_scale(comp256), dips=w,
                                 end_skew=0.9, taper=0.2, size=S, ss=2)
             cs = trace(m.astype(bool), turdsize=4, alphamax=0.4, opttol=0.5)
             if not cs:

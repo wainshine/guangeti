@@ -10,7 +10,7 @@ from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.reverseContourPen import ReverseContourPen
 
 EM = 1000
-VERSION = "1.5.2"  # single source of truth for the font version
+VERSION = "1.6.0"  # single source of truth for the font version
 OFL_TEXT = (
     "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
     "This license is available with a FAQ at: https://openfontlicense.org"
@@ -50,17 +50,49 @@ def _inside(pt, pts):
     return inside
 
 
+def _sample_curve(c, n=6):
+    """Points ON the outline (not the control polygon, which can self-intersect)."""
+    pts = [tuple(c["start"])]
+    cur = (c["start"][0], c["start"][1])
+    for s in c["segs"]:
+        if s[0] == "L":
+            cur = (s[1], s[2])
+            pts.append(cur)
+        else:
+            p0, p1, p2, p3 = cur, (s[1], s[2]), (s[3], s[4]), (s[5], s[6])
+            for k in range(1, n + 1):
+                t = k / n
+                mt = 1.0 - t
+                x = (mt ** 3 * p0[0] + 3 * mt * mt * t * p1[0]
+                     + 3 * mt * t * t * p2[0] + t ** 3 * p3[0])
+                y = (mt ** 3 * p0[1] + 3 * mt * mt * t * p1[1]
+                     + 3 * mt * t * t * p2[1] + t ** 3 * p3[1])
+                pts.append((x, y))
+            cur = p3
+    return pts
+
+
 def _orient(contours):
-    """TrueType: outer contours clockwise (negative area), holes counter-clockwise."""
-    reps = [(_contour_points(c), _signed_area(_contour_points(c))) for c in contours]
+    """TrueType: outer contours clockwise (negative area), holes counter-clockwise.
+
+    Nesting depth must be measured on points sampled from the actual outline: the
+    control polygon of a curved contour self-intersects and then a hole's start
+    point tests as "outside", leaving the hole unflipped and filled in (audit P0).
+    """
+    polys = [_sample_curve(c) for c in contours]
+    reps = [(p, _signed_area(p)) for p in polys]
     out = []
     for i, c in enumerate(contours):
         pts = reps[i][0]
+        # sample a handful of on-curve points and take the majority vote
+        step = max(1, len(pts) // 7)
+        probes = pts[::step]
         depth = 0
         for j, (p2, _) in enumerate(reps):
             if i == j:
                 continue
-            if _inside(pts[0], p2):
+            votes = sum(1 for q in probes if _inside(q, p2))
+            if votes * 2 > len(probes):
                 depth += 1
         want_negative = (depth % 2 == 0)
         area = reps[i][1]

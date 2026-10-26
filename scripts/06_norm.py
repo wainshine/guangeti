@@ -13,27 +13,36 @@ from glyphvec import (base_bounds, clean_ink, contour_bounds, trace,  # noqa: E4
                       normalize_to_base, to_em)
 
 ROOT = Path(__file__).resolve().parents[1]
-CELLS = ROOT / "work" / "cells"
+WORK = ROOT / "work"
+CELLS = WORK / "cells"
 BLEND = 0.8
 
 
 def main():
-    meta = {json.loads(l)["file"]: json.loads(l) for l in open(ROOT / "work" / "cells.jsonl")}
-    chosen = [json.loads(l) for l in open(ROOT / "work" / "chosen.jsonl")]
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--work", default=str(ROOT / "work"),
+                    help="working directory (the B line uses work-b)")
+    ap.add_argument("--pitch-floor", type=float, default=200.0,
+                    help="guard against absurd pitches; 四書 at 300 dpi is 310, 史記 is 175")
+    args = ap.parse_args()
+    wd = Path(args.work)
+    meta = {json.loads(l)["file"]: json.loads(l) for l in open(wd / "cells.jsonl")}
+    chosen = [json.loads(l) for l in open(wd / "chosen.jsonl")]
     out = {}
     for row in chosen:
         ch = row["label"]
         m = meta.get(row["file"])
         if not m or not ch:
             continue
-        mpath = ROOT / "work" / "masks" / row["file"]
+        mpath = wd / "masks" / row["file"]
         if not mpath.exists():
             continue
         ink = clean_ink(np.array(Image.open(mpath).convert("L")) > 127)
         cs = trace(ink)
         if not cs:
             continue
-        scale = 880.0 / max(200.0, m["pitch"])
+        scale = 880.0 / max(args.pitch_floor, m["pitch"])
         pad = 6
         em = to_em(cs, scale, m["x0"] - pad, m["y0"] - pad,
                    (m["x0"] + m["x1"]) / 2, (m["slot"][0] + m["slot"][1]) / 2,
@@ -57,7 +66,7 @@ def main():
                        origin=(m["x0"] - pad, m["y0"] - pad),
                        slot_cx=float((m["x0"] + m["x1"]) / 2),
                        slot_cy=float((m["slot"][0] + m["slot"][1]) / 2))
-    with open(ROOT / "work" / "norm.json", "w") as f:
+    with open(wd / "norm.json", "w") as f:
         json.dump(out, f)
     print("norm computed for", len(out))
 

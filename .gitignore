@@ -1,50 +1,32 @@
-# large / derived artifacts
+# ---- 输入与大型派生物 ----
 *.pdf
+*.part
+/*.zip
 .venv/
-work/
-data/base/*.ttf
-data/base/*.otf
-build/
-release/*.ttf
 __pycache__/
 .DS_Store
-/data/zi2zi_ds/test/001_guangekai
-/data/zi2zi_ds/train/001_guangekai
-/data/zi2zi_ds2/test/001_GuangeKai-Real
-/data/zi2zi_ds2/train/001_GuangeKai-Real
-/data/zi2zi_glyphs
-/data/zi2zi_out
-/data/zi2zi_out2
-/data/zi2zi_out3
-*.part
-/data/zi2zi_lora_out
-/data/lora_test
-/data/zi2zi_lora_out26
-/data/lora_run
-data/models/zi2zi/zi2zi-JiT-B-16.pth
-data/base/cg/cg.zip
-data/base/cg/ComputerGrassRegular.ttf
-data/base/NotoSerifSC-Light.otf
-/data/vendor/zi2zi-JiT
-/*.zip
+
+# ---- 工作区（所有可重建的中间产物；A 线=四书，B 线=史记）----
+/work/
+/work-b/
+
+# ---- 构建与发布产物 ----
+/build/
+/release/*.ttf
+/release-b/*.ttf
+
+# ---- 第三方字体二进制（只保留许可文本）----
+data/base/**/*.ttf
+data/base/**/*.otf
+data/base/cg/*.zip
+
+# ---- 数据集、模型权重、评测中间产物 ----
+# 用通配覆盖全部历史与将来的同类目录，避免一条条追加
+data/vendor/
 data/models/
+data/zi2zi_*/
+data/jit_*/
+data/lora_*/
+data/scratch_test/
 data/fonts_target/
-/data/zi2zi_ds2/*.npz
 data/ids/Unihan_IRGSources.txt
-/data/zi2zi_ds/
-/data/zi2zi_eval_base
-/data/zi2zi_eval_cfg1.5
-/data/zi2zi_eval_cfg4.0
-/data/zi2zi_eval_lora
-/data/lora_long
-/data/zi2zi_eval_lora40
-/data/scratch_test
-/data/zi2zi_eval_lora40b
-/data/zi2zi_eval_lora600b
-/data/zi2zi_eval_zerob
-/data/jit_l40A
-/data/jit_l40C
-/data/jit_l600A
-/data/jit_l600C
-/data/jit_zeroA
-/data/jit_zeroC

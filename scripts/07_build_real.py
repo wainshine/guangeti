@@ -13,6 +13,33 @@ from fontbuild import VERSION, build_font  # noqa: E402
 from glyphvec import binarize, clean_ink, trace, to_em, normalize_to_base, transform  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def carve_holes(ink, gray):
+    """Reopen counters that the binarisation sealed shut (audit P0 layer 1).
+
+    The printed counters are often bridged by weak ink, so the mask has no hole
+    while the grayscale still shows a lighter enclosed area. Build a strict "solid
+    ink" mask, fill it, and carve regions that are enclosed and markedly lighter.
+    """
+    import cv2 as _cv
+    from scipy import ndimage as _ndi
+    paper = float(np.percentile(gray, 90))
+    ink_lvl = float(np.percentile(gray[ink], 25)) if ink.any() else 0.0
+    strict = gray < max(40.0, 0.55 * paper)
+    filled = _ndi.binary_fill_holes(strict)
+    cand = filled & ~strict & ink
+    if not cand.any():
+        return ink
+    lab, n = _ndi.label(cand)
+    carve = np.zeros_like(ink)
+    for i in range(1, n + 1):
+        reg = lab == i
+        if reg.sum() < 25:
+            continue
+        if float(gray[reg].mean()) > ink_lvl + 35:
+            carve |= reg
+    return ink & ~carve
 CELLS = ROOT / "work" / "cells"
 
 
@@ -37,6 +64,8 @@ def main():
     ap = __import__("argparse").ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-Real.ttf"))
+    ap.add_argument("--carve-holes", action="store_true",
+                    help="experimental hole recovery (E38, no measurable gain — off by default)")
     ap.add_argument("--reuse-contours", action="store_true",
                     help="rebuild from work/real_contours.jsonl when work/masks has been cleared")
     args = ap.parse_args()
@@ -65,6 +94,10 @@ def main():
         if not mpath.exists():
             continue
         ink = np.array(Image.open(mpath).convert("L")) > 127
+        if args.carve_holes:
+            gpath = ROOT / "work" / "cells" / f
+            if gpath.exists():
+                ink = carve_holes(ink, np.array(Image.open(gpath).convert("L")))
         ink = clean_ink(ink)
         if ink.sum() < 60:
             continue

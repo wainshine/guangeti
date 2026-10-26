@@ -91,22 +91,34 @@ def line_mask(bw: np.ndarray) -> np.ndarray:
     return cv2.dilate(cv2.bitwise_or(hl, vl), np.ones((9, 9), np.uint8))
 
 
-def clean_text_mask(bw: np.ndarray, min_area: int = 90, max_side_ratio: float = 1.9) -> np.ndarray:
+def clean_text_mask(bw: np.ndarray, min_area: int = 90, max_side_ratio: float = 1.9,
+                    s: float = 1.0) -> np.ndarray:
+    """Drop rules, specks and hair-thin fragments.
+
+    `s` scales the four absolute pixel thresholds, which were calibrated on the
+    四書 print at 300 dpi (character pitch 310 px).  Pass s = pitch/310 for other
+    data; s = 1.0 reproduces the original behaviour exactly.  Without this the
+    "thin horizontal rule" filter deletes a 一 stroke whenever the glyphs are
+    smaller than the 四書 ones.
+    """
     lm = line_mask(bw)
     txt = cv2.bitwise_and(bw, cv2.bitwise_not(lm))
     n, lab, stats, _ = cv2.connectedComponentsWithStats((txt > 0).astype(np.uint8), 8)
     keep = np.zeros(n, np.uint8)
     h, w = bw.shape
+    amin = max(6, int(round(min_area * s * s)))
+    thin = max(3, 14 * s)
+    long_side = 90 * s
     for i in range(1, n):
         x, y, ww, hh, aa = stats[i]
-        if aa < min_area:
+        if aa < amin:
             continue
         # drop leftover rule fragments
         if ww > w * 0.5 or hh > h * 0.5:
             continue
         if ww > hh * 12 or hh > ww * 12:
             continue
-        if (hh < 14 and ww > 90) or (ww < 14 and hh > 90):
+        if (hh < thin and ww > long_side) or (ww < thin and hh > long_side):
             continue
         keep[i] = 1
     return keep[lab] * 255
@@ -194,8 +206,13 @@ def _low_runs(profile: np.ndarray, width: int, min_len: int = 12):
     return runs
 
 
-def estimate_pitch(mask: np.ndarray, cols: list[tuple[int, int]]) -> float:
-    """Character advance estimated from the summed normalised column profiles."""
+def estimate_pitch(mask: np.ndarray, cols: list[tuple[int, int]],
+                   lo: int = 200, hi: int = 460) -> float:
+    """Character advance estimated from the summed normalised column profiles.
+
+    lo/hi are the autocorrelation search band, in pixels.  The defaults are the
+    四書 print at 300 dpi (pitch 310 px); pass your own band for other scans.
+    """
     if not cols:
         return 320.0
     P = np.zeros(mask.shape[0], dtype=np.float64)
@@ -209,7 +226,7 @@ def estimate_pitch(mask: np.ndarray, cols: list[tuple[int, int]]) -> float:
     q = q - q.mean()
     ac = np.correlate(q, q, "full")[len(q) - 1:]
     ac /= (ac[0] + 1e-9)
-    lo, hi = 200, min(460, len(ac) - 2)
+    hi = min(hi, len(ac) - 2)
     if hi <= lo:
         return 320.0
     k = lo + int(np.argmax(ac[lo:hi]))
@@ -298,18 +315,29 @@ def text_block(mask: np.ndarray, frac: float = 0.22) -> tuple[int, int, int, int
     return x0, y0, x1, y1
 
 
-def analyze_page(rgb: np.ndarray, min_comp_area: int = 60) -> dict:
+def analyze_page(rgb: np.ndarray, min_comp_area: int = 60, s: float = 1.0,
+                 pitch_range: tuple[int, int] = (200, 460), deskew: bool = True,
+                 block_frac: float = 0.22, mask: np.ndarray | None = None) -> dict:
     """Full page analysis: deskew, mask, columns, character cells.
 
     Cell assignment is component-based: every connected ink component is
     assigned to the grid slot containing its centroid, so neighbouring
     characters never bleed into a glyph.
+
+    s and pitch_range are the data-side calibration (see clean_text_mask /
+    estimate_pitch); deskew=False skips the global Hough rotation, which is
+    meaningless on pages that have no frame rules.
     """
-    ang = estimate_skew(rgb)
+    ang = estimate_skew(rgb) if deskew else 0.0
     rgb_r = rotate(rgb, ang)
-    bw, _ = ink_mask(rgb_r)
-    mask = clean_text_mask(bw)
-    bx0, by0, bx1, by1 = text_block(mask)
+    if mask is None:
+        bw, _ = ink_mask(rgb_r)
+        mask = clean_text_mask(bw, s=s)
+    else:
+        # caller-supplied ink (e.g. a paper-relative threshold that rejects the
+        # grey digital watermark, which global Otsu happily classifies as ink)
+        mask = clean_text_mask((mask > 0).astype(np.uint8) * 255, s=s)
+    bx0, by0, bx1, by1 = text_block(mask, frac=block_frac)
     mask[:, :bx0] = 0
     mask[:, bx1 + 1:] = 0
     mask[:by0] = 0
@@ -319,7 +347,7 @@ def analyze_page(rgb: np.ndarray, min_comp_area: int = 60) -> dict:
     if not cols:
         return dict(angle=ang, columns=[], cells=[], mask=mask, lab=np.zeros_like(mask),
                     block=(bx0, by0, bx1, by1), pitch=320.0)
-    pitch = estimate_pitch(mask, cols)
+    pitch = estimate_pitch(mask, cols, lo=pitch_range[0], hi=pitch_range[1])
 
     n, lab, stats, cent = cv2.connectedComponentsWithStats((mask > 0).astype(np.uint8), 8)
 
@@ -349,10 +377,10 @@ def analyze_page(rgb: np.ndarray, min_comp_area: int = 60) -> dict:
     comps = []
     for i in range(1, n):
         a = stats[i, cv2.CC_STAT_AREA]
-        if a < 55:
+        if a < max(8, 55 * s * s):
             continue
         # drop hair-thin fragments: printed 圈点 arcs and paper creases
-        if a < 3000 and float(dt[lab == i].max()) < 2.3:
+        if a < 3000 * s * s and float(dt[lab == i].max()) < max(1.2, 2.3 * s):
             continue
         w, h = stats[i, cv2.CC_STAT_WIDTH], stats[i, cv2.CC_STAT_HEIGHT]
         if w > mask.shape[1] * 0.5 or h > mask.shape[0] * 0.5:

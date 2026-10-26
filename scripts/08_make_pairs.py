@@ -10,8 +10,9 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-CELLS = ROOT / "work" / "cells"
-OUT = ROOT / "work" / "pairs"
+WORK = ROOT / "work"
+CELLS = WORK / "cells"
+OUT = WORK / "pairs"
 S = 256
 EM_TOP, EM_BOT = 880.0, -120.0
 PAD = 6
@@ -84,10 +85,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sigma", type=float, default=1.0, help="target blur; 0.5 keeps corners sharper")
     ap.add_argument("--out", default=str(ROOT / "work" / "pairs" / "pairs.npz"))
+    ap.add_argument("--work", default=str(ROOT / "work"),
+                    help="working directory (the B line uses work-b)")
+    ap.add_argument("--chosen", default="",
+                    help="alternative chosen list (e.g. second.jsonl, to build the "
+                         "same-character pairs needed for the chamfer floor)")
     _a = ap.parse_args()
-    meta = {json.loads(l)["file"]: json.loads(l) for l in open(ROOT / "work" / "cells.jsonl")}
-    chosen = [json.loads(l) for l in open(ROOT / "work" / "chosen.jsonl")]
-    norm = json.load(open(ROOT / "work" / "norm.json"))
+    global CELLS
+    wd = Path(_a.work)
+    CELLS = wd / "cells"
+    meta = {json.loads(l)["file"]: json.loads(l) for l in open(wd / "cells.jsonl")}
+    chosen = [json.loads(l) for l in open(Path(_a.chosen) if _a.chosen
+                                          else wd / "chosen.jsonl")]
+    norm = json.load(open(wd / "norm.json"))
     OUT.mkdir(parents=True, exist_ok=True)
     chars, targets = [], []
     for r in chosen:
@@ -97,7 +107,7 @@ def main():
         nrm = norm.get(r["label"])
         if not nrm:
             continue
-        mpath = ROOT / "work" / "masks" / r["file"]
+        mpath = wd / "masks" / r["file"]
         if not mpath.exists():
             continue
         ink = np.array(Image.open(mpath).convert("L"))
@@ -117,7 +127,8 @@ def main():
     for i in range(n):
         sheet.paste(Image.fromarray(X[i]), (i * S, 0))
         sheet.paste(Image.fromarray(Y[i]), (i * S, S))
-    sheet.resize((S * n // 2, S)).save(ROOT / "work" / "preview" / "pairs.png")
+    Path(_a.out).parent.mkdir(parents=True, exist_ok=True)
+    sheet.resize((S * n // 2, S)).save(Path(_a.out).parent / "pairs.png")
     print("wrote pairs")
 
 

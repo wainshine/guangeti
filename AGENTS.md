@@ -35,7 +35,7 @@
   - 任何删除先看 `work/ckpt/MANIFEST.json`，并在 `docs/DATA.md` §6.5.1 登记；
     **删完必须立刻重跑 `scripts/31_ckpt_manifest.py`**——这一步单独做已经漏过三次。
 
-## 当前状态（v1.5.2）
+## 当前状态（v1.6.0）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成
   （**90.5% 由 GAN 生成，9.5% 守着卫回退 ribbon**，见 E33）

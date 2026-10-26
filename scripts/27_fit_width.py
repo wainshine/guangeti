@@ -39,22 +39,24 @@ def collect(chars, Y, idx):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--out", default=str(ROOT / "work/stroke_rel_width.npy"))
+    ap.add_argument("--out", default="")
+    ap.add_argument("--work", default=str(ROOT / "work"),
+                    help="working directory (the B line uses work-b)")
     args = ap.parse_args()
-
-    d = np.load(ROOT / "work/pairs/pairs.npz", allow_pickle=True)
+    wd = Path(args.work)
+    d = np.load(wd / "pairs/pairs.npz", allow_pickle=True)
     Y = d["Y"]
     idx = list(range(len(Y)))
     if args.limit:
         idx = idx[: args.limit]
     v = collect(None, Y, idx)
 
-    s = np.load(ROOT / "work/pairs_single.npz", allow_pickle=True)
+    s = np.load(wd / "pairs_single.npz", allow_pickle=True)
     v2 = collect(None, s["Y"], range(len(s["Y"])))
     v = np.concatenate([v, v2])
 
     v = np.clip(v, 0.45, 2.2)
-    np.save(args.out, v)
+    np.save(args.out or (wd / "stroke_rel_width.npy"), v)
     print(f"strokes: {len(v)}  median {np.median(v):.3f}  IQR "
           f"{np.percentile(v, 25):.3f}-{np.percentile(v, 75):.3f}")
 

@@ -7,7 +7,7 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.5.2（2026-10-25）** —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（其中 90.5% 由 GAN 生成，9.5% 回退為帶狀掃掠）。
+> **狀態：v1.6.0（2026-10-26）** —— 本版起專案含兩套字體：四書本（本頁）與史記本（見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（其中 90.5% 由 GAN 生成，9.5% 回退為帶狀掃掠）。
 > 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的刻刀筆鋒**；
 > 與刻本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
@@ -80,7 +80,8 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 37 組實驗（E1–E37）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.5.2.md](docs/RELEASE-v1.5.2.md) | 想了解本版改了什麼的人 | v1.5.2：加訓無增益、字重偏差歸因、工具鏈更新 |
+| [docs/RELEASE-v1.6.0.md](docs/RELEASE-v1.6.0.md) | 想了解本版改了什麼的人 | v1.6.0：兩線合一的聯合發布（A v1.6.0 / B v1.0.0） |
+| [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.0.0 |
 | [docs/RELEASE-v1.5.1.md](docs/RELEASE-v1.5.1.md) | 考古的人 | v1.5.1：更正小字號披露、provenance 三態 |
 | [docs/RELEASE-v1.5.0.md](docs/RELEASE-v1.5.0.md) | 考古的人 | v1.5.0：合成字換成 GAN |
 | [docs/PLAN-v1.5.md](docs/PLAN-v1.5.md) | 想知道下一步的人 | 把 GAN 推到可驗收的四個里程碑（M0–M4）與決策點 |
