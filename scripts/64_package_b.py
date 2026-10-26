@@ -76,14 +76,14 @@ def main():
 
     real_chars = {json.loads(l)["label"] for l in open(wd / "chosen.jsonl")}
     gen_kind = {}
-    KNOWN_SRC = {"gen", "base"}          # gan / ribbon fallback; anything else is a bug
+    KNOWN_SRC = {"gen", "gen_ht", "base"}   # primary gan / hard-tail gan / ribbon fallback
     bad_src = set()
     for l in open(wd / "generated.jsonl"):
         r = json.loads(l)
         src = r.get("src")
         if src not in KNOWN_SRC:
             bad_src.add(src)
-        gen_kind[r["char"]] = "gan" if src == "gen" else "ribbon_fb"
+        gen_kind[r["char"]] = {"gen": "gan", "gen_ht": "gan_ht"}.get(src, "ribbon_fb")
     if bad_src:
         raise SystemExit(f"ABORT: unknown provenance tags {sorted(bad_src)} "
                          f"(whitelist {sorted(KNOWN_SRC)})")
@@ -110,6 +110,7 @@ def main():
         real_ext_a=len(ext),
         generated=sum(1 for v in provenance.values() if v in ("gan", "ribbon_fb")),
         gan=sum(1 for v in provenance.values() if v == "gan"),
+        gan_ht=sum(1 for v in provenance.values() if v == "gan_ht"),
         ribbon_fallback=sum(1 for v in provenance.values() if v == "ribbon_fb"),
         missing=sum(1 for v in provenance.values() if v == "missing"),
         upm=f["head"].unitsPerEm,

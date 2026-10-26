@@ -1,0 +1,18 @@
+{
+ "line": "B",
+ "family": "GuanGe Kai B",
+ "version": "1.1.0",
+ "main_version": "1.6.3",
+ "checkpoint": "work-b/ckpt/b_ep080.pt",
+ "threshold": -0.1,
+ "close": 7,
+ "hole_repair": true,
+ "prefer_clean": "dewarp_fail",
+ "workers": 6,
+ "res": 512,
+ "simplify": 2.0,
+ "epochs": 80,
+ "release_date": "2026-10-26",
+ "note": "单一口径来源：67 与 73 用它对账；60_generate_b 启动时会核对 threshold/close 是否一致，不一致只告警。checkpoint_hardtail 非空时，主模型过不了守卫的字会再试它一次（PLAN-hybrid；B/E12 证明对 B 线应当「先主后副」，与 A 线的「先加权后补位」相反）。改发布工作点必须同时改这里与 docs/DATA-B.md §7。",
+ "checkpoint_hardtail": ""
+}

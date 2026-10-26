@@ -140,11 +140,19 @@ def _augment(a, b, rng):
 
 
 class Pairs(Dataset):
-    def __init__(self, idx, path=None, aug=False):
+    def __init__(self, idx, path=None, aug=False, alpha=0.0):
         d = np.load(path or (ROOT / "work/pairs/pairs.npz"), allow_pickle=True)
         self.X = d["X"][idx].astype(np.float32) / 127.5 - 1.0
         self.Y = d["Y"][idx].astype(np.float32) / 127.5 - 1.0
         self.aug = aug
+        self.alpha = alpha
+        # per-sample weight by target ink density (B/E10: fallbacks are the complex glyphs)
+        if alpha > 0:
+            ink = (self.Y > 0).reshape(len(self.Y), -1).mean(axis=1)
+            med = float(np.median(ink)) or 1.0
+            self.w = np.clip((ink / med) ** alpha, 0.5, 3.0).astype(np.float32)
+        else:
+            self.w = np.ones(len(self.X), np.float32)
 
     def __len__(self):
         return len(self.X)
@@ -155,7 +163,8 @@ class Pairs(Dataset):
             a0, b0 = _augment(a0, b0, np.random)
         a = np.repeat(a0[None], 3, 0)
         b = np.repeat(b0[None], 3, 0)
-        return torch.from_numpy(a.copy()), torch.from_numpy(b.copy())
+        return (torch.from_numpy(a.copy()), torch.from_numpy(b.copy()),
+                torch.tensor(float(self.w[i])))
 
 
 def main():
@@ -172,6 +181,8 @@ def main():
     ap.add_argument("--data", default=str(ROOT / "work" / "pairs" / "pairs.npz"),
                     help="npz with X/Y/chars; work/pairs_multi.npz for multi-instance")
     ap.add_argument("--hinge", action="store_true", help="hinge loss instead of BCE")
+    ap.add_argument("--weight-complexity", type=float, default=0.0,
+                    help="alpha for per-sample L1 weight by ink density (0 = off; B/E10)")
     ap.add_argument("--aug", action="store_true", help="rotate/shift/scale jitter on X and Y")
     ap.add_argument("--patchgan", action="store_true",
                     help="70x70 PatchGAN (conditioned on the input) instead of the global FC head")
@@ -197,7 +208,8 @@ def main():
     tr = np.array([i for i, c in enumerate(all_chars) if c not in val_chars], dtype=int)
     if args.limit:
         tr = tr[:args.limit]
-    dl = DataLoader(Pairs(tr, args.data, aug=args.aug), batch_size=args.batch, shuffle=True, drop_last=True, num_workers=0)
+    _train_ds = Pairs(tr, args.data, aug=args.aug, alpha=args.weight_complexity)
+    dl = DataLoader(_train_ds, batch_size=args.batch, shuffle=True, drop_last=True, num_workers=0)
     print(f"train {len(tr)} val {len(val)} device {dev}", flush=True)
     # Record the split so evaluation can tell whether a benchmark class was seen.
     split_path = Path(args.out).with_suffix("")
@@ -229,8 +241,8 @@ def main():
         t0 = time.time()
         gl = dls = 0.0
         nb = 0
-        for a, b in dl:
-            a, b = a.to(dev), b.to(dev)
+        for a, b, wt in dl:
+            a, b, wt = a.to(dev), b.to(dev), wt.to(dev)
             # ---- D
             with torch.no_grad():
                 fake = G(a)
@@ -250,7 +262,11 @@ def main():
             fake = G(a)
             fake_logit = D(a, fake) if args.patchgan else D(fake)
             adv = -fake_logit.mean() if args.hinge else bce(fake_logit, torch.ones_like(fake_logit))
-            l1 = F.l1_loss(fake, b) * 100.0
+            if args.weight_complexity > 0:
+                per = torch.abs(fake - b).mean(dim=(1, 2, 3))
+                l1 = (per * wt).mean() * 100.0
+            else:
+                l1 = F.l1_loss(fake, b) * 100.0
             enc_real, _ = G.encode(b)
             enc_fake, _ = G.encode(fake)
             const = F.mse_loss(enc_fake, enc_real.detach()) * 15.0

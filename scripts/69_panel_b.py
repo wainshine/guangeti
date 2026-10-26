@@ -49,10 +49,9 @@ def main():
     ap.add_argument("--close", type=int, default=4,
                     help="closing kernel in this 256-px space (~= 7 px at 512 in production)")
     ap.add_argument("--no-hole-repair", dest="hole_repair", action="store_false")
-    ap.add_argument("--thr", type=float, default=-0.30,
-                    help="GAN output threshold. Must match the released operating point "
-                         "(audit 2-7: it used to be hardcoded 0, so the panel showed a "
-                         "heavier font than the one shipped)")
+    ap.add_argument("--thr", type=float, default=-0.10,
+                    help="GAN output threshold; must match data/release-b.json (audit 2-7: "
+                         "it used to be hardcoded 0, so the panel showed a heavier font)")
     ap.add_argument("--out", default=str(ROOT / "docs" / "images" / "eval-panel-b.png"))
     args = ap.parse_args()
     wd = Path(args.work)

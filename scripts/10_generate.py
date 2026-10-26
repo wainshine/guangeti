@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -70,7 +71,8 @@ def gan_chunk(args):
         spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
         m = iu.module_from_spec(spec); spec.loader.exec_module(m)
         g = m.Generator()
-        g.load_state_dict(torch.load(ROOT / "work" / "ckpt" / "m2_ep080.pt", map_location="cpu")["G"])
+        ck = os.environ.get("GAN_CKPT", str(ROOT / "work" / "ckpt" / "m2_ep080.pt"))
+        g.load_state_dict(torch.load(ck, map_location="cpu")["G"])
         g.eval()
         _GAN_CACHE = g
     gan = _GAN_CACHE

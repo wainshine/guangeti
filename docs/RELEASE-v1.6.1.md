@@ -3,7 +3,7 @@
 > 本项目同时维护两套馆阁体：**A 四书白文**（本页，`GuanGe Kai`）与
 > **B 史记抄本**（`GuanGe Kai B`）。两者独立训练、独立评估、互不复用字形。
 > 本文件是**项目级**发布说明；B 线的细节见 [`README-B.md`](../README-B.md) 与
-> [`docs/RELEASE-v1.0.1-B.md`](RELEASE-v1.0.1-B.md)。
+> [`docs/RELEASE-v1.1.0-B.md`](RELEASE-v1.1.0-B.md)。
 
 ## 本版做了什么（A 线）
 

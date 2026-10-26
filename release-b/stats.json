@@ -5,6 +5,7 @@
  "real_ext_a": 5,
  "generated": 16919,
  "gan": 15784,
+ "gan_ht": 0,
  "ribbon_fallback": 1135,
  "missing": 0,
  "upm": 1000,

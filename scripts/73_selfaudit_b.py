@@ -211,6 +211,27 @@ def main() -> int:
     lab = [json.loads(l) for _, l in zip(range(3), open(wd / "labeled.jsonl"))]
     check("labeled.jsonl carries dewarp_fail", "dewarp_fail" in lab[0])
 
+    print("== 7b. 发布口径 ↔ 文档 ↔ 制品 ==")
+    relj = json.loads((ROOT / "data" / "release-b.json").read_text())
+    check("release.json version == font version",
+          fr["name"].getDebugName(5) == f"Version {relj['version']}", relj["version"])
+    check("release.json checkpoint exists", (ROOT / relj["checkpoint"]).exists())
+    # 复现命令必须真的写出了发布参数，否则按文档重跑得不到发布的字
+    repro = Path("docs/DATA-B.md").read_text()
+    for key, needle in (("threshold", f"--threshold {relj['threshold']:.2f}"),
+                        ("close", f"--close {relj['close']}"),
+                        ("hole_repair", "--hole-repair"),
+                        ("prefer_clean", f"--prefer-clean {relj['prefer_clean']}"),
+                        ("checkpoint", Path(relj["checkpoint"]).name),
+                        ("singletons", "58_add_singletons_b.py")):
+        check(f"repro steps mention {key}", needle in repro, needle)
+    # 脚本默认值必须与发布口径一致（角度的"默认值 ≠ 发布值"踩过两次）
+    gen = (ROOT / "scripts" / "60_generate_b.py").read_text()
+    check("60 default threshold == release",
+          f'"--threshold", type=float, default={relj["threshold"]}' in gen)
+    check("60 default close == release",
+          f'"--close", type=int, default={relj["close"]}' in gen)
+
     print("== 8. hygiene ==")
     pyc = list((ROOT / "scripts").glob("__pycache__"))
     check("no __pycache__ committed risk", True, f"{len(pyc)} dir(s), gitignored")

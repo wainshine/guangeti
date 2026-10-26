@@ -30,6 +30,7 @@ BLOCK = (0x4E00, 0x9FFF)
 BASE_FONT = ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"
 
 _GAN_CACHE = None
+_GAN_HT = None
 CFG = {}
 
 
@@ -60,10 +61,14 @@ def gan_chunk(args):
         _c2.setNumThreads(1)
     except Exception:
         pass
-    global _GAN_CACHE
+    global _GAN_CACHE, _GAN_HT
     if _GAN_CACHE is None:
         _GAN_CACHE = _load_gan(CFG["ckpt"], CFG["gan_res"])
     gan = _GAN_CACHE
+    ht_path = CFG.get("ckpt_hardtail") or ""
+    if ht_path and _GAN_HT is None:
+        _GAN_HT = _load_gan(ht_path, CFG["gan_res"])
+    ht = _GAN_HT if ht_path else None
     bl = importlib.import_module("brush_lib")
     rel = np.load(CFG["rel_width"])
     lo, hi, chars, font_path, S = args
@@ -92,6 +97,22 @@ def gan_chunk(args):
         ok = (g.sum() > 200 * (S / 256.0) ** 2
               and CFG["ink_lo"] <= ink <= CFG["ink_hi"]
               and abs(comps - comps_w) <= 3)
+        tag = "gen" if ok else "base"
+        if not ok and ht is not None:
+            # hard-tail checkpoint: same guard, same thresholds, only a second opinion
+            with torch.no_grad():
+                g2 = ht(torch.from_numpy(a).float()).numpy()[0, 0] > thr
+            if S != GAN_RES:
+                g2 = cv2.resize(g2.astype(np.uint8) * 255, (S, S),
+                                interpolation=cv2.INTER_LINEAR) > 127
+            n2, _l3, st2, _ = cv2.connectedComponentsWithStats(g2.astype(np.uint8), 8)
+            comps2 = sum(1 for i in range(1, n2) if st2[i, 4] >= amin)
+            ink2 = float(g2.sum()) / max(1.0, float(wm.sum()))
+            ok2 = (g2.sum() > 200 * (S / 256.0) ** 2
+                   and CFG["ink_lo"] <= ink2 <= CFG["ink_hi"]
+                   and abs(comps2 - comps_w) <= 3)
+            if ok2:
+                g, ok, tag = g2, True, "gen_ht"
         if not ok:
             fr = bl.glyph_frames(wm, S)
             rng = np.random.RandomState(ord(ch) % (2 ** 31))
@@ -102,7 +123,7 @@ def gan_chunk(args):
             comp256 = float(wm.sum()) * (256.0 / S) ** 2
             g = bl.render_ribbon(fr, scale=ribbon_scale_b(comp256), dips=w,
                                  end_skew=0.9, taper=0.2, size=S, ss=2)
-        out.append((ch, g, "gen" if ok else "base", ok))
+        out.append((ch, g, tag, ok))
     return lo, out
 
 
@@ -171,13 +192,19 @@ def main():
     ap.add_argument("--out", default=str(WB / "generated_gan.jsonl"))
     ap.add_argument("--res", type=int, default=512)
     ap.add_argument("--gan-res", type=int, default=256, help="must equal the training resolution")
-    ap.add_argument("--threshold", type=float, default=-0.30,
+    ap.add_argument("--threshold", type=float, default=-0.10,
                     help="GAN output threshold. Default is the released operating point "
-                         "(calibrated so the clean-set ink ratio is 1.00, see E4); the old "
-                         "default -0.05 produced a different, heavier font")
+                         "(data/release-b.json; calibrated so the clean-set ink ratio is "
+                         "1.00 after the counter repair, see E8). v1.0.x shipped -0.30 "
+                         "because the repair was not yet in the pipeline")
     ap.add_argument("--ink-lo", type=float, default=0.6)
     ap.add_argument("--ink-hi", type=float, default=1.5)
     ap.add_argument("--simplify", type=float, default=2.0)
+    ap.add_argument("--ckpt-hardtail", default="",
+                    help="secondary checkpoint tried only for characters the primary one "
+                         "fails the guard on. Deterministic: the primary always gets first "
+                         "refusal, so a char never switches model between runs "
+                         "(PLAN-hybrid / B/E12)")
     ap.add_argument("--hole-repair", action="store_true", default=True,
                     help="escalate the closing kernel for glyphs whose counter did not "
                          "survive the model's output (audit rev3 2-3). On by default; "
@@ -198,11 +225,26 @@ def main():
 
     wd = Path(args.work)
     CFG.update(ckpt=args.ckpt, rel_width=args.rel_width, gan_res=args.gan_res,
-               threshold=args.threshold, ink_lo=args.ink_lo, ink_hi=args.ink_hi)
+               threshold=args.threshold, ink_lo=args.ink_lo, ink_hi=args.ink_hi,
+               ckpt_hardtail=args.ckpt_hardtail)
     real = {json.loads(l)["label"] for l in open(wd / "chosen.jsonl")}
     chars = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1) if chr(c) not in real]
     if args.limit:
         chars = chars[: args.limit]
+    # cross-check against the released operating point (data/release-b.json); this only
+    # warns — it must never change what the command line asked for.
+    try:
+        rel = json.load(open(ROOT / "data" / "release-b.json"))
+        if args.method == "gan":
+            if abs(args.threshold - rel["threshold"]) > 1e-9:
+                print(f"WARNING: --threshold {args.threshold} != released {rel['threshold']}",
+                      flush=True)
+            if args.close != rel["close"]:
+                print(f"WARNING: --close {args.close} != released {rel['close']}", flush=True)
+            if bool(args.hole_repair) != bool(rel["hole_repair"]):
+                print("WARNING: --hole-repair differs from the released setting", flush=True)
+    except (OSError, KeyError, json.JSONDecodeError):
+        pass
     print("to generate", len(chars), "method", args.method, "threshold", args.threshold,
           "-> skip", len(real), "real chars", flush=True)
 

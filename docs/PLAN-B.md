@@ -12,7 +12,7 @@
 | 源数据 | `史记.二十四册.传姜立纲抄本.新加坡国立大学藏.水印.pdf`（1672 页，页 1080×1008 pt，**原生 150 dpi**，JPEG 2250×2100） |
 | 产物 | `build/GuanGeKai-B-Regular.ttf`（全字集）、`build/GuanGeKai-B-Real.ttf`（仅真迹） |
 | 家族名 | `GuanGe Kai B` / PS 名 `GuanGeKai-B-Regular`、`GuanGeKai-B-Real` |
-| 版本 | v1.1.0（随主版本 v1.6.2） |
+| 版本 | **v1.1.0**（随主版本 v1.6.2） |
 | 发布包 | `release-b/` + `GuanGeKai-B-v1.1.0.zip` |
 | 工作目录 | `work-b/` |
 
@@ -35,8 +35,8 @@
 | 配对 / 宽度分布 | `08_make_pairs.py` / `27_fit_width.py` | **完成** | 4,070 对（训练集；本版真迹增至 4,078 但未重训）；95,568 条笔画 |
 | GAN 训练 | `21_train_gan.py --patchgan --hinge --aug` | **完成** | **练到 80 轮**（50 轮后续训），每轮约 380 s |
 | 干净集评估 | `65_eval_b.py` | **完成** | Dice **0.531** / chamfer **5.66** / 墨量 1.018 / 崩坏率 3.0% |
-| 全量生成 | `60_generate_b.py`（ep80, thr −0.30, `--close 7`） | **完成** | 16,927 字：GAN 15,831 + 回退 1,088（6.4%） |
-| 合字 / 质检 / 验收 | `62/63/68` | **完成** | 20,992/20,992；字重比 1.125 |
+| 全量生成 | `60_generate_b.py`（ep80, thr −0.10, `--close 7 --hole-repair`） | **完成** | 16,919 字：GAN 15,831 + 回退 1,135（6.7%） |
+| 合字 / 质检 / 验收 | `62/63/68` | **完成** | 20,992/20,992；字重比 **1.071**；三道硬闸 |
 | 打包 | `64_package_b.py` | **完成** | `GuanGeKai-B-v1.1.0.zip`（14 MB） |
 
 **最终交付**：`build/GuanGeKai-B-Regular.ttf`（15.6 MB，20,992 字）、

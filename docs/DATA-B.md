@@ -128,6 +128,20 @@ B 线的处理（`shiji_page.ink_mask`）：
 
 结果：20 页抽样里水印假字格 **22 → 0**，页底 7% 区域不再产生任何字格。
 
+## 5.8 扫描件分辨率：已到顶（2026-10-26 所有者确认）
+
+本 PDF 的嵌入图是 **150 dpi 原生**（2250×2100 px / 1080×1008 pt）。所有者确认
+**没有更高清的扫描件可获取，这就是当前最好的**。
+
+因此与本数据相关的两条路线正式关闭：
+
+- **高 dpi 重渲染**：A 线 E38 用 200 字批量探针证明 600 dpi 只恢复 22% 的缺孔，B 线 E9 独立
+  复现同一现象（残差孔内是纸面灰度、接缝是墨）；投入 1 天全链路重做换来的是边际改善。
+- **换数据源**：本线无替代扫描件可用，chamfer 5.60（地板 3.57）与「孔数偏少 19.6%」是这份
+  数据的**结构性天花板**，不是工程遗漏。
+
+后续若要再提质量，可动的只剩：回退字的形态（B/E10 已证明不能靠放宽守卫）、模型结构/容量。
+
 ## 5.9 `head.fontRevision`
 
 TrueType 的 `fontRevision` 是 **16.16 定点数**。本版（v1.1.0）由共用库按
@@ -142,7 +156,7 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 ```
 886ecf25f449c6f160fe6856aad55cf9a6db70a5d329b8cd7d96fdefd988febf  build/GuanGeKai-B-Regular.ttf
 3009c3a0b5d7937b3aa89034ac7e14a04a73f9aa308b0f16fff639aaa84f6e07  build/GuanGeKai-B-Real.ttf
-bd78f57adee6c91cce0b305c84c8c1b959c278d354da8aff4ec23d3424043e62  GuanGeKai-B-v1.1.0.zip
+c1b33d11dd7c82b925dc357cb2e611e18133ba20fe5ad502c781b329d8d22f82  GuanGeKai-B-v1.1.0.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死
@@ -169,26 +183,68 @@ bd78f57adee6c91cce0b305c84c8c1b959c278d354da8aff4ec23d3424043e62  GuanGeKai-B-v1
 `b_ep080` 必须保留（发版检查点），`b_ep050`/`b_ep060` 是决策证据；`ep010–040` 是平台证据。
 磁盘充足，**均暂未清理**。若将来续训到 100+ 轮，按同一规则保留 100/150/… 即可。
 
-## 7. 复现步骤
+## 7. 复现步骤（与 v1.1.0 发布链逐条对应）
+
+发布口径的唯一来源是 **`data/release-b.json`**（ckpt / 阈值 / 闭运算 / 修复开关 / 版本）。
+下面每条命令的参数都取自它；改工作点必须同时改那个文件和本节。
 
 ```bash
-# 0. 下载霞鹜文楷到 data/base/LXGWWenKai-Regular.ttf；把史记 PDF 放在仓库根目录
-python3 scripts/53_build_reference_b.py          # 参考文本
-python3 scripts/51_segment_b.py --workers 8      # 纠偏 + 切字（1672 页，约 20 分钟）
-python3 scripts/52_ocr_b.py --workers 8          # OCR（纠偏后的图，约 15 分钟）
-python3 scripts/54_label_b.py                    # 标注 + 对齐率
-python3 scripts/05_select.py --work work-b       # 每字选优
-python3 scripts/06_norm.py   --work work-b --pitch-floor 100
-python3 scripts/57_build_real_b.py               # build/GuanGeKai-B-Real.ttf
-python3 scripts/24_build_singles.py --work work-b --pitch-floor 100   # 干净集
-python3 scripts/08_make_pairs.py --work work-b   # 训练配对
-python3 scripts/27_fit_width.py --work work-b    # 逐笔宽度分布（B 线自拟合）
+# 0. 依赖：霞鹜文楷放 data/base/LXGWWenKai-Regular.ttf；史记 PDF 放仓库根目录
+python3 scripts/53_build_reference_b.py            # 公版参考文本
+python3 scripts/51_segment_b.py --workers 8        # 纠偏 + 切字（1672 页，约 19 分钟）
+                                                   # 顺带写入 dewarp_fail/dewarp_res100
+python3 scripts/52_ocr_b.py --workers 8            # OCR（纠偏后的图，约 10 分钟）
+python3 scripts/54_label_b.py                      # 标注 + 对齐；无 OCR 行的格保留为 nolines
+
+# 选优：优先避开纠偏超标页的样本（--prefer-clean），再做单次字准入
+python3 scripts/05_select.py --work work-b --prefer-clean dewarp_fail
+cp work-b/chosen.jsonl work-b/chosen_min2.jsonl     # 留存"仅 ≥2 样本"的版本
+python3 scripts/58_add_singletons_b.py --work work-b --out work-b/chosen.jsonl
+                                                   # 双见证准入：3,807 -> 4,078
+
+python3 scripts/06_norm.py --work work-b --pitch-floor 100
+python3 scripts/57_build_real_b.py --close 7 --hole-repair
+                                                   # 7px 闭运算 + 逐字升级修孔
+python3 scripts/24_build_singles.py --work work-b --pitch-floor 100
+                                                   # 干净集（单次字，与训练集互斥）
+python3 scripts/08_make_pairs.py --work work-b --out work-b/pairs/pairs.npz
+python3 scripts/27_fit_width.py --work work-b      # 逐笔宽度分布（B 线自拟合）
+
 python3 scripts/21_train_gan.py --data work-b/pairs/pairs.npz \
         --out work-b/ckpt/b.pt --ckpt-dir work-b/ckpt \
-        --patchgan --hinge --aug --epochs 80
-python3 scripts/60_generate_b.py --method gan --workers 6 --res 512 --simplify 2.0 \
-        --ckpt work-b/ckpt/b_ep080.pt --out work-b/generated_gan.jsonl
-python3 scripts/61_fill_fallback_b.py && mv work-b/generated_gan.jsonl work-b/generated.jsonl
-python3 scripts/62_build_full_b.py               # build/GuanGeKai-B-Regular.ttf
-python3 scripts/63_qa_b.py && python3 scripts/64_package_b.py
+        --patchgan --hinge --aug --epochs 80 --batch 16 --save-every 10
+                                                   # 每轮约 380 s，全程约 8.5 小时
+
+python3 scripts/60_generate_b.py --method gan --ckpt work-b/ckpt/b_ep080.pt \
+        --threshold -0.10 --close 7 --workers 6 --res 512 --simplify 2.0 \
+        --out work-b/generated.jsonl
+                                                   # 16,927 字，约 25 分钟
+python3 scripts/61_fill_fallback_b.py              # 兜底：60 漏掉的字用带状扫掠补齐
+
+python3 scripts/62_build_full_b.py                 # build/GuanGeKai-B-Regular.ttf
+python3 scripts/63_qa_b.py                         # 硬闸：覆盖率/空字形/真跡数/孔洞
+python3 scripts/68_accept_b.py                     # 硬闸：字重比/回退占比/包围盒
+
+# 图与包
+python3 scripts/66_specimen_b.py
+python3 scripts/69_panel_b.py --gan work-b/ckpt/b_ep080.pt --n 16
+python3 scripts/72_book_vs_font_b.py
+rm -rf release-b && python3 scripts/64_package_b.py
+cd release-b && zip -q -r ../GuanGeKai-B-v1.1.0.zip . && cd ..
+
+# 复核
+python3 scripts/71_holes.py --font build/GuanGeKai-B-Regular.ttf --n 300
+python3 scripts/73_selfaudit_b.py                  # 制品↔文档一致性
+python3 scripts/67_verify_a.py                     # A 线未被波及
 ```
+
+**改动过哪些默认值**（避免"按默认重跑 ≠ 发布产物"）：
+
+| 脚本 | 默认 | 为什么 |
+|---|---|---|
+| `60_generate_b --threshold` | **−0.10** | 孔洞修复后的墨量 1.00 工作点；v1.0.x 是 −0.30 |
+| `60_generate_b --close` / `--hole-repair` | **7 / 开** | 孔洞修复；v1.0.0 之前没有 |
+| `69_panel_b --thr` | **−0.10** | 面板必须展示成品形态 |
+| `05_select --prefer-clean` | 空（不启用） | B 线发布时传 `dewarp_fail`；默认关闭以保持 A 线行为 |
+| `57_build_real_b --close` / `--hole-repair` | 0 / 关 | 传 `7 --hole-repair` 才是发布形态 |
+
