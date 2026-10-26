@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WB = ROOT / "work-b"
 BLOCK = (0x4E00, 0x9FFF)
 FAMILY = "GuanGe Kai B"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript 史記 "
              "(attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "

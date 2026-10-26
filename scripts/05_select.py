@@ -58,6 +58,11 @@ def main():
                     help="drop characters whose label occurs fewer times (cannot be cross-validated)")
     ap.add_argument("--work", default=str(ROOT / "work"),
                     help="working directory (the B line uses work-b)")
+    ap.add_argument("--prefer-clean", default="",
+                    help="name of a boolean cell field (e.g. dewarp_fail); when a character "
+                         "has at least one sample without the flag, the flagged samples are "
+                         "excluded from the medoid instead of dropping the character "
+                         "(audit rev3 2-5: down-weight, do not lose coverage)")
     ap.add_argument("--drop-flag", default="",
                     help="drop rows whose named boolean field is truthy "
                          "(B line: low_align — cells on pages whose page-level "
@@ -91,10 +96,16 @@ def main():
     chosen = {}
     second = {}
     dropped = 0
+    n_pref = 0
     for lab, items in groups.items():
         if len(items) < args.min_samples:
             dropped += 1
             continue
+        if args.prefer_clean:
+            good = [r for r in items if not r.get(args.prefer_clean)]
+            if good and len(good) < len(items):
+                n_pref += len(items) - len(good)
+                items = good
         V = np.stack([vecs[r["file"]] for r in items])
         F = V.reshape(len(items), -1)
         # robust medoid: start from the mean, drop the worst 35%, recompute
@@ -129,6 +140,8 @@ def main():
         if len(order) > 1:
             second[lab] = build(int(order[1]))
     print(f"chosen {len(chosen)} (dropped {dropped} labels with <{args.min_samples} samples)")
+    if args.prefer_clean:
+        print(f"prefer-clean: excluded {n_pref} samples carrying {args.prefer_clean}=true")
     with open(wd / "chosen.jsonl", "w") as f:
         for lab, r in sorted(chosen.items()):
             f.write(json.dumps(r, ensure_ascii=False) + "\n")

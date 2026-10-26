@@ -20,6 +20,7 @@ from PIL import ImageFont
 
 sys.path.insert(0, str(Path(__file__).parent))
 from glyphvec import normalize_to_base, trace  # noqa: E402
+from shiji_page import repair_counters  # noqa: E402
 from generate_lib import raster_to_em, render_base, ribbon_scale_b  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -177,6 +178,11 @@ def main():
     ap.add_argument("--ink-lo", type=float, default=0.6)
     ap.add_argument("--ink-hi", type=float, default=1.5)
     ap.add_argument("--simplify", type=float, default=2.0)
+    ap.add_argument("--hole-repair", action="store_true", default=True,
+                    help="escalate the closing kernel for glyphs whose counter did not "
+                         "survive the model's output (audit rev3 2-3). On by default; "
+                         "pass --no-hole-repair to disable")
+    ap.add_argument("--no-hole-repair", dest="hole_repair", action="store_false")
     ap.add_argument("--close", type=int, default=7,
                     help="morphological closing (px) applied to the GAN output before "
                          "tracing.  The scan's hairline stroke gaps let counters leak out, "
@@ -214,11 +220,13 @@ def main():
             for ch, g, tag, ok in rows:
                 if not ok:
                     fb.append(ch)
-                gm = g.astype(np.uint8)
+                gm = g.astype(bool)
                 if args.close:
                     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (args.close, args.close))
-                    gm = cv2.morphologyEx(gm, cv2.MORPH_CLOSE, k)
-                cs = trace(gm.astype(bool), turdsize=4, alphamax=0.4, opttol=0.5)
+                    gm = cv2.morphologyEx(gm.astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
+                if args.hole_repair:
+                    gm, _ = repair_counters(gm, ch, base_close=args.close)
+                cs = trace(gm, turdsize=4, alphamax=0.4, opttol=0.5)
                 if not cs:
                     fb.append(ch)
                     continue

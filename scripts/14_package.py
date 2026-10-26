@@ -41,6 +41,10 @@ def main():
         img = ROOT / "docs" / "images" / name
         if img.exists():
             shutil.copy2(img, out / name)
+    # the packaged README sits next to the images, so strip the docs/images/ prefix
+    rp = out / "README.md"
+    if rp.exists():
+        rp.write_text(rp.read_text(encoding="utf-8").replace("docs/images/", ""), encoding="utf-8")
 
     real_chars = {json.loads(l)["label"] for l in open(ROOT / "work" / "chosen.jsonl")}
     # three-way provenance: GAN output vs ribbon fallback (guard triggered) vs real

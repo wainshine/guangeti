@@ -32,14 +32,21 @@ def main():
     ap.add_argument("--font", default=str(ROOT / "build" / "GuanGeKai-B-Regular.ttf"))
     ap.add_argument("--outdir", default=str(ROOT / "work-b" / "qa"))
     ap.add_argument("--real", default=str(ROOT / "build" / "GuanGeKai-B-Real.ttf"))
-    ap.add_argument("--real-expect", type=int, default=4070,
-                    help="exact expected glyph count in the real subset")
-    ap.add_argument("--min-real", type=int, default=4070,
-                    help="kept for compatibility; --real-expect is the hard gate")
+    ap.add_argument("--real-expect", type=int, default=0,
+                    help="exact expected glyph count in the real subset; 0 = read it from "
+                         "work-b/chosen.jsonl (single source of truth)")
+
     ap.add_argument("--holes", type=int, default=300,
                     help="counter audit sample size (0 = skip, --holes 0 to disable)")
-    ap.add_argument("--max-lost-frac", type=float, default=0.08,
-                    help="max share of comparable glyphs allowed to lose a counter")
+    ap.add_argument("--max-lost-frac", type=float, default=0.03,
+                    help="max share of comparable glyphs allowed to lose ALL counters "
+                         "(rev3 2-3 tightened this from 0.08)")
+    ap.add_argument("--max-fewer-frac", type=float, default=0.40,
+                    help="max share allowed to have fewer counters than WenKai")
+    ap.add_argument("--common-holes", default="四國国目自回田申昌串吕品門门開开間间問问聞闻",
+                    help="characters that must keep at least one counter (drawn closed in the "
+                         "manuscript); 年 is deliberately absent — its manuscript form has no "
+                         "closed counter (docs/images/counter-forms-b.jpg)")
     ap.add_argument("--sheets", type=int, default=0, help="0 = all")
     args = ap.parse_args()
     out = Path(args.outdir)
@@ -93,13 +100,22 @@ def main():
         sheet.save(out / f"sheet_{s//per:03d}.png")
     print("sheets:", nsheet, "->", out)
 
+    expect = args.real_expect
+    if not expect:
+        wd = Path(args.outdir).parent
+        try:
+            expect = sum(1 for _ in open(wd / "chosen.jsonl"))
+        except OSError:
+            expect = 0
+    if not expect:
+        raise SystemExit("QA FAILED: cannot determine the expected real-subset size")
     real_path = Path(args.real)
     status = "MISSING"
     if real_path.exists():
         rf = TTFont(str(real_path))
         n_real = rf["maxp"].numGlyphs - 1
         cm_real = len(rf.getBestCmap())
-        want = args.real_expect
+        want = expect
         status = "OK" if (n_real == want and cm_real == want) else "BROKEN"
         print(f"real-subset glyphs {n_real} cmap {cm_real} (expect {want}) -> {status}")
         if status != "OK":
@@ -122,6 +138,17 @@ def main():
             if frac > args.max_lost_frac:
                 fails.append(f"counters lost in {frac:.1%} of comparable glyphs "
                              f"(> {args.max_lost_frac:.0%})")
+            ffrac = holes["fewer"] / max(1, holes["comparable"])
+            if ffrac > args.max_fewer_frac:
+                fails.append(f"{ffrac:.1%} of glyphs have fewer counters than WenKai "
+                             f"(> {args.max_fewer_frac:.0%})")
+            # a curated list must keep at least one counter
+            zero = [c for c in args.common_holes if c in holes.get("lost_chars", "")]
+            if zero:
+                fails.append(f"common characters lost their counter: {''.join(zero)}")
+            print(f"  counters: lost {holes['lost']}/{holes['comparable']} "
+                  f"({frac:.1%}), fewer {holes['fewer']} ({ffrac:.1%}), "
+                  f"common-hole chars without a counter: {len(zero)}")
     stats = dict(coverage=len(have), empty=len(empty), tiny=tiny[:50], huge=huge[:50],
                  real_subset=status, n_sheets=nsheet, holes=holes)
     (out / "stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=1))

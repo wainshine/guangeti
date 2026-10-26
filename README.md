@@ -7,13 +7,30 @@
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.6.0（2026-10-26）** —— 本版起專案含兩套字體：四書本（本頁）與史記本（見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（其中 90.5% 由 GAN 生成，9.5% 回退為帶狀掃掠）。
+> **狀態：v1.6.1（2026-10-26）** —— 本專案含兩套字體：四書本（本頁，`GuanGe Kai`）與史記本（`GuanGe Kai B`，見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（其中 90.5% 由 GAN 生成，9.5% 回退為帶狀掃掠）。
 > 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的刻刀筆鋒**；
 > 與刻本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
 
+## 兩套字體
+
+本專案同時維護兩套獨立的館閣體，**各自訓練、各自評估、互不混用字形**：
+
+| | A · 四書白文 | B · 史記抄本 |
+|---|---|---|
+| 家族名 | `GuanGe Kai` | `GuanGe Kai B` |
+| 版本 | **v1.6.1** | **v1.0.1** |
+| 真跡 | 1,675 字 | **4,078 字** |
+| 覆蓋 | 20,992 / 20,992 | 20,992 / 20,992 |
+| 檔案 | `GuanGeKai-Regular.ttf` / `-Real.ttf` | `GuanGeKai-B-Regular.ttf` / `-B-Real.ttf` |
+| 詳細 | 本頁 | [README-B.md](README-B.md) |
+
+兩套可同時安裝，用家族名區分。本版的項目級發布說明見
+[docs/RELEASE-v1.6.1.md](docs/RELEASE-v1.6.1.md)（含兩線指標、已知限制、校驗和入口）。
+
 ## 這是什麼
+
 
 《四書白文》（十八卷，舊傳明·姜立綱書，原藏日本宮內廳書陵部（圖書寮數位檔案 shoryobu.kunaicho.go.jp，檔號 1000066720000））是一部典型的
 **館閣體**刻本：結體方正、筆畫豐腴、橫細豎粗、起收分明。本項目把它變成一套可安裝、可再分發的
@@ -80,7 +97,8 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 37 組實驗（E1–E37）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.6.0.md](docs/RELEASE-v1.6.0.md) | 想了解本版改了什麼的人 | v1.6.0：兩線合一的聯合發布（A v1.6.0 / B v1.0.0） |
+| [docs/RELEASE-v1.6.1.md](docs/RELEASE-v1.6.1.md) | 想了解本版改了什麼的人 | **v1.6.1（專案級）**：A v1.6.1 + B v1.0.1，含史記版概要與入口 |
+| [docs/RELEASE-v1.6.0.md](docs/RELEASE-v1.6.0.md) | 考古的人 | v1.6.0：兩線首次合一的聯合發布 |
 | [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.0.0 |
 | [docs/RELEASE-v1.5.1.md](docs/RELEASE-v1.5.1.md) | 考古的人 | v1.5.1：更正小字號披露、provenance 三態 |
 | [docs/RELEASE-v1.5.0.md](docs/RELEASE-v1.5.0.md) | 考古的人 | v1.5.0：合成字換成 GAN |

@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ["README-B.md", "docs/PLAN-B.md", "docs/EXPERIMENTS-B.md",
-        "docs/DATA-B.md", "docs/RELEASE-v1.0.0-B.md"]
+        "docs/DATA-B.md", "docs/RELEASE-v1.0.1-B.md"]
 BLOCK = (0x4E00, 0x9FFF)
 
 fails: list[str] = []
@@ -70,7 +70,7 @@ def main() -> int:
           f"{len(cm_r)}")
     check("Real glyph count", fm["maxp"].numGlyphs - 1 == stats["real"], f"{fm['maxp'].numGlyphs-1}")
     check("family name", fr["name"].getDebugName(1) == fm["name"].getDebugName(1) == "GuanGe Kai B")
-    check("package version", fr["name"].getDebugName(5) == "Version 1.0.0",
+    check("package version", fr["name"].getDebugName(5) == "Version 1.0.1",
           repr(fr["name"].getDebugName(5)))
     check("source split adds up",
           stats["real"] + stats["generated"] == stats["codepoints"] + stats["real_ext_a"],
@@ -101,8 +101,8 @@ def main() -> int:
     check("coverage.txt length", len((rel / "coverage.txt").read_text()) == stats["codepoints"])
 
     print("== 4. checksums quoted in docs ==")
-    zips = re.findall(r"([0-9a-f]{64})  GuanGeKai-B-v1\.0\.0\.zip", text)
-    zp = ROOT / "GuanGeKai-B-v1.0.0.zip"
+    zips = re.findall(r"([0-9a-f]{64})  GuanGeKai-B-v1\.0\.1\.zip", text)
+    zp = ROOT / "GuanGeKai-B-v1.0.1.zip"
     if zp.exists():
         want = sha256(zp)
         check("doc zip hash == disk", bool(zips) and set(zips) == {want}, want[:16])
@@ -115,15 +115,17 @@ def main() -> int:
     # 面向使用者/摘要的三份文档不得出现已被取代的口径；EXPERIMENTS-B 是实验记录，
     # 历史值（ep50 当时的候选工作点）本来就该留在那里。
     user_docs = "\n".join(Path(d).read_text() for d in
-                          ("README-B.md", "docs/PLAN-B.md", "docs/RELEASE-v1.0.0-B.md"))
+                          ("README-B.md", "docs/PLAN-B.md", "docs/RELEASE-v1.0.1-B.md"))
     stale = ["17.7 MB", "3.97 MB", "18.4 MB", "19.4 MB", "1,567 個", "15,360",
              "thr −0.10", "ep50 是发版"]
     for s in stale:
         check(f"no stale {s!r} in user docs", s not in user_docs)
-    check("bbox ratio quoted == accept (1.026)",
-          "1.026" in text and abs(accept["bbox_w_ratio"] - 1.026) < 1e-9)
+    check("bbox ratio quoted == accept",
+          f"{accept['bbox_w_ratio']}" in text,
+          f"{accept['bbox_w_ratio']}")
     check("weight bias quoted == accept", f"{accept['weight_bias']}" in text)
-    for n in ("15,838", "1,089", "4,070", "20,992", "0.532", "5.57", "0.016", "6.4%"):
+    for n in ("15,831", "1,088", "4,078", "20,992", "0.528", "5.63", "0.016", "6.4%",
+              "1.9%"):
         check(f"doc quotes {n}", n in text)
     # 语言约定：仅 README 可繁体
     trad = "發佈檢驗實數據線體與這個說時會後點樣現標準兩覆變載"
@@ -158,7 +160,34 @@ def main() -> int:
         s = (ROOT / "scripts" / f).read_text()
         check(f"{f} keeps A defaults", 'work"' not in s or '--work' in s or 'work-b' in s)
 
-    print("== 7. hygiene ==")
+    print("== 7. rebuild chain of this round ==")
+    # chosen / norm / real_contours / pairs must all describe the same glyph set
+    chosen = {json.loads(l)["label"] for l in open(wd / "chosen.jsonl")}
+    norm = json.loads((wd / "norm.json").read_text())
+    check("chosen == stats.real", len(chosen) == stats["real"], f"{len(chosen)}")
+    check("norm covers every chosen glyph", set(norm) == chosen, f"{len(norm)}")
+    rc = wd / "real_contours.jsonl"
+    if rc.exists():
+        n_rc = sum(1 for _ in open(rc))
+        check("real_contours has every chosen glyph", n_rc == len(chosen), f"{n_rc}")
+    import numpy as np
+    clean = {str(c) for c in np.load(wd / "pairs_single.npz", allow_pickle=True)["chars"]}
+    check("clean set disjoint from training (no leak)", not (clean & chosen), f"{len(clean)}")
+    check("clean set size", len(clean) == 629, f"{len(clean)}")
+    # audit 2-4: the QA log must be newer than the font it certifies
+    qa_log = wd / "log_qa.txt"
+    check("QA log exists", qa_log.exists())
+    if qa_log.exists():
+        check("QA log newer than the font", qa_log.stat().st_mtime >= reg.stat().st_mtime - 1,
+              f"{int(reg.stat().st_mtime - qa_log.stat().st_mtime)}s")
+        check("QA log ends with OK", "QA OK" in qa_log.read_text())
+    # dewarp gate must be present on the release data
+    cells = [json.loads(l) for _, l in zip(range(3), open(wd / "cells.jsonl"))]
+    check("cells.jsonl carries dewarp_fail", "dewarp_fail" in cells[0])
+    lab = [json.loads(l) for _, l in zip(range(3), open(wd / "labeled.jsonl"))]
+    check("labeled.jsonl carries dewarp_fail", "dewarp_fail" in lab[0])
+
+    print("== 8. hygiene ==")
     pyc = list((ROOT / "scripts").glob("__pycache__"))
     check("no __pycache__ committed risk", True, f"{len(pyc)} dir(s), gitignored")
     check("work-b/ckpt MANIFEST fresh", (wd / "ckpt" / "MANIFEST.json").exists())

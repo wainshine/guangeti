@@ -20,6 +20,8 @@ columns are straight and vertical.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import cv2
 import numpy as np
 
@@ -375,3 +377,66 @@ def dewarp_page(rgb: np.ndarray, win: int = 0, sigma_x: int = 9, verbose: bool =
             after.append(dict(leaf=[int(x0), int(x1)], **st))
     info["after"] = after
     return dict(image=warped, info=info, pm=pm)
+
+
+# ---------------------------------------------------------------- counter repair
+def _hole_count(m: np.ndarray) -> int:
+    out = cv2.findContours(m.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    hier = out[-1]
+    if hier is None:
+        return 0
+    return int(sum(1 for h in hier[0] if h[3] != -1))
+
+
+_WK_FONT: dict = {}
+
+
+def wk_holes(ch: str, size: int = 256) -> int:
+    """How many counters WenKai draws for this character (the reference count)."""
+    from PIL import Image, ImageDraw, ImageFont
+    if size not in _WK_FONT:
+        f = ImageFont.truetype(str(Path(__file__).resolve().parents[1]
+                                   / "data/base/LXGWWenKai-Regular.ttf"), size)
+        _WK_FONT[size] = f
+    im = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(im).text((size // 2, int(0.88 * size)), ch, fill=255, font=_WK_FONT[size],
+                            anchor="ms")
+    return _hole_count(np.array(im) > 127)
+
+
+def _holes_at(m: np.ndarray, size: int = 256) -> int:
+    """Hole count in the *rendering* space the audit measures at (256 px)."""
+    if m.shape[0] != size:
+        m = cv2.resize(m.astype(np.uint8), (size, size), interpolation=cv2.INTER_NEAREST)
+    return _hole_count(m > 0)
+
+
+def repair_counters(m: np.ndarray, ch: str, base_close: int = 7,
+                    extra=(11, 15), max_ink_gain: float = 0.08):
+    """Close the ink, escalating, until the counter that WenKai draws reappears.
+
+    The scan's strokes are grey at the edges, so a 1-2 px gap lets a counter leak to
+    the outside and potrace then sees no hole at all (audit rev2 P0 / rev3 2-3).
+    A fixed kernel fixes most glyphs but not all; this retries with a bigger kernel
+    only for the ones that still have no counter, and gives up if the ink grows by
+    more than `max_ink_gain` (i.e. strokes would visibly thicken).
+    """
+    want = wk_holes(ch, 256)
+    if want == 0 or _holes_at(m) >= want:
+        return m, 0
+    base = int(m.sum())
+    best_m, best_k = m, 0
+    for k in (base_close, *extra):
+        if k <= 0:
+            continue
+        kk = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+        m2 = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, kk) > 0
+        if (m2.sum() - base) / max(1, base) > max_ink_gain:
+            break
+        got = _holes_at(m2)
+        if got >= want:
+            return np.asarray(m2, dtype=bool), int(k)
+        if got > _holes_at(best_m):
+            best_m, best_k = m2, k
+    # no kernel reached WenKai's count; keep the best one found (never worse than input)
+    return (np.asarray(best_m, dtype=bool), int(best_k)) if best_k else (m, 0)

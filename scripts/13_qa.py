@@ -63,10 +63,17 @@ def main():
         rf = TTFont(str(real_path))
         n_real = rf["maxp"].numGlyphs - 1
         cm_real = len(rf.getBestCmap())
-        status = "OK" if n_real >= 1600 and cm_real >= 1600 else "BROKEN"
+        status = "OK" if n_real == 1675 and cm_real == 1675 else "BROKEN"
         print(f"real-subset glyphs {n_real} cmap {cm_real} -> {status}")
         if status != "OK":
-            raise SystemExit("ABORT: GuanGeKai-Real.ttf looks like a stub")
+            raise SystemExit(f"ABORT: GuanGeKai-Real.ttf expected 1675/1675, got {n_real}/{cm_real}")
+    else:
+        raise SystemExit(f"ABORT: {real_path} missing — run 07_build_real.py first")
+    # hard gates (audit P1-3): these used to be printed and ignored
+    if len(have) != BLOCK[1] - BLOCK[0] + 1:
+        raise SystemExit(f"ABORT: coverage {len(have)} != {BLOCK[1]-BLOCK[0]+1}")
+    if empty or tiny or huge:
+        raise SystemExit(f"ABORT: empty={len(empty)} tiny={len(tiny)} huge={len(huge)}")
     stats = dict(coverage=len(have), empty=len(empty), tiny=tiny[:50], huge=huge[:50])
     (out / "stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=1))
 

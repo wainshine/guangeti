@@ -10,7 +10,7 @@ from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.reverseContourPen import ReverseContourPen
 
 EM = 1000
-VERSION = "1.6.0"  # single source of truth for the font version
+VERSION = "1.6.1"  # single source of truth for the font version
 OFL_TEXT = (
     "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
     "This license is available with a FAQ at: https://openfontlicense.org"

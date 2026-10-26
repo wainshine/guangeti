@@ -19,10 +19,11 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).parent))
 from fontbuild import build_font  # noqa: E402
 from glyphvec import clean_ink, to_em, trace, transform  # noqa: E402
+from shiji_page import repair_counters  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FAMILY = "GuanGe Kai B"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript "
              "史記 (attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
@@ -36,6 +37,9 @@ def main():
     ap.add_argument("--pitch-floor", type=float, default=100.0)
     ap.add_argument("--min-glyphs", type=int, default=1000)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--hole-repair", action="store_true",
+                    help="escalate the closing kernel for glyphs that still have no counter "
+                         "where WenKai draws one (audit rev3 2-3)")
     ap.add_argument("--close", type=int, default=0,
                     help="morphological closing kernel before tracing. The scan's thin "
                          "strokes leave 1-2 px gaps, so counters leak to the outside and "
@@ -53,6 +57,7 @@ def main():
         chosen = chosen[: args.limit]
 
     glyphs, used = {}, {}
+    n_repaired = 0
     for row in chosen:
         f = row["file"]
         m = meta.get(f)
@@ -68,6 +73,10 @@ def main():
         if args.close:
             k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (args.close, args.close))
             ink = cv2.morphologyEx(ink.astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
+        if args.hole_repair:
+            ink, shipped = repair_counters(ink, ch, base_close=args.close)
+            if shipped:
+                n_repaired += 1
         if ink.sum() < 60:
             continue
         contours = trace(ink)
@@ -83,7 +92,7 @@ def main():
             em = transform(em, n["sx"], n["sy"], n["dx"], n["dy"])
         glyphs[ch] = em
         used[ch] = f
-    print("glyphs", len(glyphs))
+    print("glyphs", len(glyphs), f"(counter repair with a bigger kernel: {n_repaired})")
     if len(glyphs) < args.min_glyphs:
         raise SystemExit(f"ABORT: only {len(glyphs)} real glyphs — refusing to overwrite "
                          f"{args.out} and work-b/real_contours.jsonl")

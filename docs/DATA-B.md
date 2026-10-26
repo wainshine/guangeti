@@ -128,12 +128,12 @@ B 线的处理（`shiji_page.ink_mask`）：
 
 结果：20 页抽样里水印假字格 **22 → 0**，页底 7% 区域不再产生任何字格。
 
-## 6. 校验和（v1.0.0）
+## 6. 校验和（v1.0.1）
 
 ```
-41c23d1abd3c11da106a0f58b31c669ba057c15a1cc9acb7a05d5765c8baab1b  build/GuanGeKai-B-Regular.ttf
-451d92028fe779022e6f6e12b118334b0b7fdef308d1c11b72fa119bf015b9ab  build/GuanGeKai-B-Real.ttf
-7985dbcdb60c70c51d6f6aad7241fde2bd11ea0c613badd8a4f5eb0d219df262  GuanGeKai-B-v1.0.0.zip
+b76cfc016e1094c8b3299298b52802abb9f8322495b72b6ba38272f984492cec  build/GuanGeKai-B-Regular.ttf
+79aadc231a3bef0b3ddfc14205448aeb705aae8b53ae00b296bcbb426a3d35be  build/GuanGeKai-B-Real.ttf
+f95b5e7fb736e48ed232d16e9f05baab12920a25eb996924fc6898ba0e1f02f1  GuanGeKai-B-v1.0.1.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死
