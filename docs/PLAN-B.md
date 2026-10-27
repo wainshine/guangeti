@@ -12,7 +12,7 @@
 | 源数据 | `史记.二十四册.传姜立纲抄本.新加坡国立大学藏.水印.pdf`（1672 页，页 1080×1008 pt，**原生 150 dpi**，JPEG 2250×2100） |
 | 产物 | `build/GuanGeKai-B-Regular.ttf`（全字集）、`build/GuanGeKai-B-Real.ttf`（仅真迹） |
 | 家族名 | `GuanGe Kai B` / PS 名 `GuanGeKai-B-Regular`、`GuanGeKai-B-Real` |
-| 版本 | **v1.1.0**（随主版本 v1.6.2） |
+| 版本 | **v1.2.0**（随主版本 v1.6.3；混合检查点） |
 | 发布包 | `release-b/` + `GuanGeKai-B-v1.1.0.zip` |
 | 工作目录 | `work-b/` |
 
@@ -20,7 +20,7 @@
 150 dpi（四书 300 dpi），字面 80×86 px（四书 250×250 px）。因此 A 线的数据侧标定
 一条都不能继承，见 §4。
 
-## 2. 阶段状态（v1.1.0 已完成）
+## 2. 阶段状态（v1.2.0 已完成）
 
 | 阶段 | 脚本 | 状态 | 关键数字 |
 |---|---|---|---|
@@ -39,7 +39,7 @@
 | 合字 / 质检 / 验收 | `62/63/68` | **完成** | 20,992/20,992；字重比 **1.071**；三道硬闸 |
 | 打包 | `64_package_b.py` | **完成** | `GuanGeKai-B-v1.1.0.zip`（14 MB） |
 
-**最终交付**：`build/GuanGeKai-B-Regular.ttf`（15.6 MB，20,992 字）、
+**最终交付**：`build/GuanGeKai-B-Regular.ttf`（15.5 MB，20,992 字）、
 `build/GuanGeKai-B-Real.ttf`（3.76 MB，4,078 字）、`release-b/`、`GuanGeKai-B-v1.1.0.zip`。
 真迹覆盖率 **8.0% → 19.4%**（1,675 → 4,078 字）。
 

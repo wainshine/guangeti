@@ -46,6 +46,10 @@ def brush_style(a, k1=0, k2=1):
 
 
 _GAN_CACHE = None
+_HARD_CACHE = None
+
+
+HARDTAIL = os.environ.get("GAN_HARDTAIL", "")
 
 
 def gan_chunk(args):
@@ -76,6 +80,17 @@ def gan_chunk(args):
         g.eval()
         _GAN_CACHE = g
     gan = _GAN_CACHE
+    global _HARD_CACHE
+    hard = None
+    if HARDTAIL:
+        if _HARD_CACHE is None:
+            spec = iu.spec_from_file_location("ganlib2", ROOT / "scripts" / "21_train_gan.py")
+            m2 = iu.module_from_spec(spec); spec.loader.exec_module(m2)
+            h2 = m2.Generator()
+            h2.load_state_dict(torch.load(HARDTAIL, map_location="cpu")["G"])
+            h2.eval()
+            _HARD_CACHE = h2
+        hard = _HARD_CACHE
     bl = importlib.import_module("brush_lib")
     rel = np.load(ROOT / "work" / "stroke_rel_width.npy")
     lo, hi, chars, font_path, S = args
@@ -101,6 +116,17 @@ def gan_chunk(args):
         comps_w = sum(1 for i in range(1, nw) if sw[i, 4] >= 20)
         ink = float(g.sum()) / max(1.0, float(wm.sum()))
         ok = g.sum() > 200 and 0.6 <= ink <= 1.5 and abs(comps - comps_w) <= 3
+        tag = "gen"
+        if not ok and hard is not None:
+            with torch.no_grad():
+                g2 = hard(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+            if S != GAN_RES:
+                g2 = _cv.resize(g2.astype(np.uint8) * 255, (S, S), interpolation=_cv.INTER_LINEAR) > 127
+            n2, _l3, st2, _ = _cv.connectedComponentsWithStats(g2.astype(np.uint8), 8)
+            c2 = sum(1 for i in range(1, n2) if st2[i, 4] >= 20)
+            ink2 = float(g2.sum()) / max(1.0, float(wm.sum()))
+            if g2.sum() > 200 and 0.6 <= ink2 <= 1.5 and abs(c2 - comps_w) <= 3:
+                g, ok, tag = g2, True, "gen80"
         if not ok:
             fr = bl.glyph_frames(wm, S)
             rng = np.random.RandomState(ord(ch) % (2 ** 31))
@@ -110,7 +136,7 @@ def gan_chunk(args):
             comp256 = float(wm.sum()) * (256.0 / S) ** 2
             g = bl.render_ribbon(fr, scale=ribbon_scale(comp256), dips=w,
                                  end_skew=0.9, taper=0.2, size=S, ss=2)
-        out.append((ch, g, "gen" if ok else "base", ok))
+        out.append((ch, g, tag if ok else "base", ok))
     return lo, out
 
 
@@ -131,6 +157,17 @@ def gated_chunk(args):
         g.eval()
         _GAN_CACHE = g
     gan = _GAN_CACHE
+    global _HARD_CACHE
+    hard = None
+    if HARDTAIL:
+        if _HARD_CACHE is None:
+            spec = iu.spec_from_file_location("ganlib2", ROOT / "scripts" / "21_train_gan.py")
+            m2 = iu.module_from_spec(spec); spec.loader.exec_module(m2)
+            h2 = m2.Generator()
+            h2.load_state_dict(torch.load(HARDTAIL, map_location="cpu")["G"])
+            h2.eval()
+            _HARD_CACHE = h2
+        hard = _HARD_CACHE
     bl = importlib.import_module("brush_lib")
     rel = np.load(ROOT / "work" / "stroke_rel_width.npy")
     font = ImageFont.truetype(font_path, S)
@@ -369,6 +406,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "work" / "style_unet.pt"))
     ap.add_argument("--out", default=str(ROOT / "work" / "generated.jsonl"))
+    ap.add_argument("--ckpt-hardtail", default="",
+                    help="secondary checkpoint tried when the primary fails the guard (hybrid)")
     ap.add_argument("--method", choices=["model", "brush", "field", "ribbon", "gan_gated", "gan"],
                     default="gan",
                     help="default = the shipped method (v1.5.0: GAN with a cheap guard); "
@@ -394,7 +433,11 @@ def main():
     chars = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1) if chr(c) not in real]
     if args.limit:
         chars = chars[: args.limit]
-    print("to generate", len(chars), "method", args.method, flush=True)
+    global HARDTAIL
+    if getattr(args, "ckpt_hardtail", ""):
+        HARDTAIL = args.ckpt_hardtail
+    print("to generate", len(chars), "method", args.method,
+          ("hardtail " + HARDTAIL) if HARDTAIL else "", flush=True)
     font = ImageFont.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
 
     gan = None

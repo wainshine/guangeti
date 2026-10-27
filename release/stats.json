@@ -2,11 +2,13 @@
  "codepoints": 20992,
  "real": 1675,
  "generated": 19317,
- "gan": 17790,
- "ribbon_fallback": 1527,
+ "gan_ep90": 17790,
+ "gan_ep80": 728,
+ "gan": 0,
+ "ribbon_fallback": 799,
  "missing": 0,
  "upm": 1000,
  "glyphs": 20993,
- "file_bytes": 15383864,
+ "file_bytes": 15692576,
  "real_file_bytes": 3322124
 }

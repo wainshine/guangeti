@@ -168,13 +168,16 @@ def main():
             print(f"   {px:3d}px  syn {v['syn']:.3f}  real {v['real']:.3f}  bias {v['bias']:.3f}")
 
     # 3. fallback share and coverage
-    fb = sum(1 for c, s in gen.items() if s != "gen")
+    # four provenance states: "gen" (primary model) and "gen_ht" (hard-tail model) are
+    # both GAN output; only "base" is the ribbon fallback (PLAN-hybrid)
+    fb = sum(1 for c, s in gen.items() if s not in ("gen", "gen_ht"))
+    ht = sum(1 for c, s in gen.items() if s == "gen_ht")
     cov = sum(1 for c in range(*[BLOCK[0], BLOCK[1] + 1]) if c in cm)
     res = dict(
         font=str(Path(args.font)),
         codepoints_in_block=cov,
         coverage=round(cov / (BLOCK[1] - BLOCK[0] + 1), 4),
-        chosen=len(chosen), generated=len(gen), ribbon_fallback=fb,
+        chosen=len(chosen), generated=len(gen), ribbon_fallback=fb, gan_hardtail=ht,
         fallback_share=round(fb / max(1, len(gen)), 4),
         syn_ink_over_wenkai=None if not rs_syn else round(float(np.median(rs_syn)), 3),
         real_ink_over_wenkai=None if not rs_real else round(float(np.median(rs_real)), 3),

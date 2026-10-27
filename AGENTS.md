@@ -5,7 +5,7 @@
 **先读这三个文件，再动手：**
 
 1. [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) —— 现状、决策、已知缺陷、未决问题、审计方法
-2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 39 组实验（E1–E39）的配置/指标/复现命令（含"第几轮训练"）
+2. [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) —— 40 组实验（E1–E40）的配置/指标/复现命令（含"第几轮训练"）
 3. [`docs/DATA.md`](docs/DATA.md) —— 数据来源、许可、校验和、重建步骤
 
 ## 硬性约束
@@ -35,7 +35,7 @@
   - 任何删除先看 `work/ckpt/MANIFEST.json`，并在 `docs/DATA.md` §6.5.1 登记；
     **删完必须立刻重跑 `scripts/31_ckpt_manifest.py`**——这一步单独做已经漏过三次。
 
-## 当前状态（v1.6.3）
+## 当前状态（v1.6.4）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成
   （**90.5% 由 GAN 生成，9.5% 守着卫回退 ribbon**，见 E33）

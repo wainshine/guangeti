@@ -108,7 +108,8 @@ def main():
         real_basic=sum(1 for k, v in provenance.items() if v == "real"
                         and BLOCK[0] <= ord(k) <= BLOCK[1]),
         real_ext_a=len(ext),
-        generated=sum(1 for v in provenance.values() if v in ("gan", "ribbon_fb")),
+        generated=sum(1 for v in provenance.values()
+                      if v in ("gan", "gan_ht", "ribbon_fb")),
         gan=sum(1 for v in provenance.values() if v == "gan"),
         gan_ht=sum(1 for v in provenance.values() if v == "gan_ht"),
         ribbon_fallback=sum(1 for v in provenance.values() if v == "ribbon_fb"),

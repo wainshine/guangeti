@@ -60,7 +60,9 @@ def main():
     gen_kind = {}
     for l in open(ROOT / "work" / "generated.jsonl"):
         r = json.loads(l)
-        gen_kind[r["char"]] = "gan" if r.get("src") == "gen" else "ribbon_fb"
+        _src = r.get("src")
+        gen_kind[r["char"]] = {"gen": "gan_ep90", "gen80": "gan_ep80",
+                               "base": "ribbon_fb"}.get(_src, "ribbon_fb")
     provenance = {}
     for c in range(BLOCK[0], BLOCK[1] + 1):
         ch = chr(c)
@@ -78,7 +80,10 @@ def main():
     stats = dict(
         codepoints=len(covered),
         real=sum(1 for v in provenance.values() if v == "real"),
-        generated=sum(1 for v in provenance.values() if v in ("gan", "ribbon_fb")),
+        generated=sum(1 for v in provenance.values()
+                      if v in ("gan", "gan_ep90", "gan_ep80", "ribbon_fb")),
+        gan_ep90=sum(1 for v in provenance.values() if v == "gan_ep90"),
+        gan_ep80=sum(1 for v in provenance.values() if v == "gan_ep80"),
         gan=sum(1 for v in provenance.values() if v == "gan"),
         ribbon_fallback=sum(1 for v in provenance.values() if v == "ribbon_fb"),
         missing=sum(1 for v in provenance.values() if v == "missing"),

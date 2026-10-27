@@ -151,12 +151,19 @@ TrueType 的 `fontRevision` 是 **16.16 定点数**。本版（v1.1.0）由共�
 注意：v1.0.1 时它是截断的 `1.0`（共用库旧行为，审计 3-3）；v1.1.0 起与 name 表一致。
 A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
-## 6. 校验和（v1.1.0）
+## 5.95 发布包保留规则（所有者 2026-10-27）
+
+**不要删除任何 `GuanGeKai-B-v*.zip`**——历史版本的 zip 由所有者手动清理。
+发新版时只新增 zip，旧版原地保留；`release-b/` 可以重建，zip 不行。
+
+（本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
+
+## 6. 校验和（v1.2.0）
 
 ```
-886ecf25f449c6f160fe6856aad55cf9a6db70a5d329b8cd7d96fdefd988febf  build/GuanGeKai-B-Regular.ttf
-3009c3a0b5d7937b3aa89034ac7e14a04a73f9aa308b0f16fff639aaa84f6e07  build/GuanGeKai-B-Real.ttf
-c1b33d11dd7c82b925dc357cb2e611e18133ba20fe5ad502c781b329d8d22f82  GuanGeKai-B-v1.1.0.zip
+285fd47e5b7ce634f460ca7f62da828b4e826c50187fc944d828e20027383e29  build/GuanGeKai-B-Regular.ttf
+803b48952c1aa23e9470220febbbdc6341ae073960207f3b629255db87995b59  build/GuanGeKai-B-Real.ttf
+50ac55504e16e188d768364cde6efd67b7e00872c2a05bd7a11e934a33fe2691  GuanGeKai-B-v1.2.0.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死
@@ -216,6 +223,7 @@ python3 scripts/21_train_gan.py --data work-b/pairs/pairs.npz \
                                                    # 每轮约 380 s，全程约 8.5 小时
 
 python3 scripts/60_generate_b.py --method gan --ckpt work-b/ckpt/b_ep080.pt \
+        --ckpt-hardtail work-b/ckpt/b_wt_ep090.pt \
         --threshold -0.10 --close 7 --workers 6 --res 512 --simplify 2.0 \
         --out work-b/generated.jsonl
                                                    # 16,927 字，约 25 分钟
