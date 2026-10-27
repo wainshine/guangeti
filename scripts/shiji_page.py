@@ -412,7 +412,7 @@ def _holes_at(m: np.ndarray, size: int = 256) -> int:
 
 
 def repair_counters(m: np.ndarray, ch: str, base_close: int = 7,
-                    extra=(11, 15), max_ink_gain: float = 0.08):
+                    extra=(11, 15, 19, 24, 32), max_ink_gain: float = 0.08):
     """Close the ink, escalating, until the counter that WenKai draws reappears.
 
     The scan's strokes are grey at the edges, so a 1-2 px gap lets a counter leak to
@@ -420,6 +420,11 @@ def repair_counters(m: np.ndarray, ch: str, base_close: int = 7,
     A fixed kernel fixes most glyphs but not all; this retries with a bigger kernel
     only for the ones that still have no counter, and gives up if the ink grows by
     more than `max_ink_gain` (i.e. strokes would visibly thicken).
+
+    The escalation range matters: at 512 px, `四` needs 15, `年` needs 11, `国` needs 24
+    and `园` needs 32 (audit 2026-10-27 found `国` still solid in the shipped font because
+    the old list stopped at 15).  The ink budget is what keeps that safe: 24 costs +3.7%
+    on `国`, 32 costs +6.2% on `园`.
     """
     want = wk_holes(ch, 256)
     if want == 0 or _holes_at(m) >= want:

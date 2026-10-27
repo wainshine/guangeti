@@ -63,10 +63,14 @@ def main():
         rf = TTFont(str(real_path))
         n_real = rf["maxp"].numGlyphs - 1
         cm_real = len(rf.getBestCmap())
-        status = "OK" if n_real == 1675 and cm_real == 1675 else "BROKEN"
+        try:
+            _exp = sum(1 for _ in open(ROOT / "work" / "chosen.jsonl"))
+        except Exception:
+            _exp = 1675
+        status = "OK" if n_real == _exp and cm_real == _exp else "BROKEN"
         print(f"real-subset glyphs {n_real} cmap {cm_real} -> {status}")
         if status != "OK":
-            raise SystemExit(f"ABORT: GuanGeKai-Real.ttf expected 1675/1675, got {n_real}/{cm_real}")
+            raise SystemExit(f"ABORT: GuanGeKai-Real.ttf expected {_exp}/{_exp}, got {n_real}/{cm_real}")
     else:
         raise SystemExit(f"ABORT: {real_path} missing — run 07_build_real.py first")
     # hard gates (audit P1-3): these used to be printed and ignored

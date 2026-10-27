@@ -14,7 +14,7 @@
 
 ## 1. 這是什麼
 
-**版本**：本包为 **GuanGe Kai B v1.2.0**，随主版本 **GuanGeKai v1.6.4** 一起发布
+**版本**：本包为 **GuanGe Kai B v1.2.1**，随主版本 **GuanGeKai v1.6.5** 一起发布
 （同一项目、两个字形来源：A = 四书刻本 `GuanGe Kai`，B = 史记抄本 `GuanGe Kai B`，
 两套家族名并存，互不覆盖）。
 

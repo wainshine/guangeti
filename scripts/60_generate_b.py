@@ -268,7 +268,9 @@ def main():
                     gm = cv2.morphologyEx(gm.astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
                 if args.hole_repair:
                     gm, _ = repair_counters(gm, ch, base_close=args.close)
-                cs = trace(gm, turdsize=4, alphamax=0.4, opttol=0.5)
+                # turdsize 2, not 4: a counter recovered by the closing step can be only a
+                # few px at 512 and 4 dropped it (audit 2026-10-27: 年 still solid)
+                cs = trace(gm, turdsize=2, alphamax=0.4, opttol=0.5)
                 if not cs:
                     fb.append(ch)
                     continue

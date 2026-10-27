@@ -50,6 +50,8 @@ _HARD_CACHE = None
 
 
 HARDTAIL = os.environ.get("GAN_HARDTAIL", "")
+GEN_THR = float(os.environ.get("GAN_THR", "-0.05"))        # primary model threshold
+HARD_THR = float(os.environ.get("GAN_HARD_THR", "-0.45"))  # fill-in model threshold
 
 
 def gan_chunk(args):
@@ -106,7 +108,7 @@ def gan_chunk(args):
         gin = render_base(font_gan, ch, GAN_RES)
         a = (gin.astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
         with torch.no_grad():
-            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > GEN_THR
         if S != GAN_RES:
             g = _cv.resize(g.astype(np.uint8) * 255, (S, S), interpolation=_cv.INTER_LINEAR) > 127
         # ---- cheap guard
@@ -119,7 +121,7 @@ def gan_chunk(args):
         tag = "gen"
         if not ok and hard is not None:
             with torch.no_grad():
-                g2 = hard(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+                g2 = hard(torch.from_numpy(a).float()).numpy()[0, 0] > HARD_THR
             if S != GAN_RES:
                 g2 = _cv.resize(g2.astype(np.uint8) * 255, (S, S), interpolation=_cv.INTER_LINEAR) > 127
             n2, _l3, st2, _ = _cv.connectedComponentsWithStats(g2.astype(np.uint8), 8)
@@ -202,7 +204,7 @@ def gated_chunk(args):
         with torch.no_grad():
             # threshold -0.05: M2 sweep shows it puts median ink at 0.999
             # (threshold is a weak lever here: Dice varies only 0.547–0.554 across the range)
-            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+            g = gan(torch.from_numpy(a).float()).numpy()[0, 0] > GEN_THR
         g = _gate(g, ref)
         if len(_holes(g)) != len(_holes(ref)):
             fr = bl.glyph_frames(ref)
@@ -421,7 +423,10 @@ def main():
     ap.add_argument("--caps", action="store_true", help="apply vector cap replacement")
     ap.add_argument("--cap-k", type=float, default=1.2)
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--threshold", type=float, default=0.5)
+    ap.add_argument("--threshold", type=float, default=-0.05,
+                    help="primary model binarisation threshold (release: -0.05)")
+    ap.add_argument("--hardtail-threshold", type=float, default=-0.45,
+                    help="fill-in model threshold, calibrated to match ink (E40)")
     ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args()
     global CAPS, CAP_K, SIMPLIFY
@@ -433,11 +438,14 @@ def main():
     chars = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1) if chr(c) not in real]
     if args.limit:
         chars = chars[: args.limit]
-    global HARDTAIL
+    global HARDTAIL, GEN_THR, HARD_THR
     if getattr(args, "ckpt_hardtail", ""):
         HARDTAIL = args.ckpt_hardtail
+    GEN_THR = float(args.threshold)
+    HARD_THR = float(args.hardtail_threshold)
     print("to generate", len(chars), "method", args.method,
-          ("hardtail " + HARDTAIL) if HARDTAIL else "", flush=True)
+          f"thr {GEN_THR:+.2f}" + (f" | hardtail {HARDTAIL} thr {HARD_THR:+.2f}" if HARDTAIL else ""),
+          flush=True)
     font = ImageFont.truetype(str(ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"), S)
 
     gan = None

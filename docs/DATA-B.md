@@ -158,12 +158,12 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
 （本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
 
-## 6. 校验和（v1.2.0）
+## 6. 校验和（v1.2.1）
 
 ```
-285fd47e5b7ce634f460ca7f62da828b4e826c50187fc944d828e20027383e29  build/GuanGeKai-B-Regular.ttf
-803b48952c1aa23e9470220febbbdc6341ae073960207f3b629255db87995b59  build/GuanGeKai-B-Real.ttf
-50ac55504e16e188d768364cde6efd67b7e00872c2a05bd7a11e934a33fe2691  GuanGeKai-B-v1.2.0.zip
+a0cf0912e1a8eb77168a9e665d3cdea6f871c6b0e3f37eb3eee783f544bdbd11  build/GuanGeKai-B-Regular.ttf
+7e9d70862f9341e3194e61fcedd02505158da0205b1e40b8bf92ed9b9d7e1403  build/GuanGeKai-B-Real.ttf
+c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死

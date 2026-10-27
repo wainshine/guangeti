@@ -1,0 +1,21 @@
+{
+ "version": "1.6.4",
+ "generator": {
+  "script": "scripts/10_generate.py",
+  "method": "gan",
+  "primary_ckpt": "work/ckpt/m2wt_ep090.pt",
+  "primary_threshold": -0.05,
+  "hardtail_ckpt": "work/ckpt/m2_ep080.pt",
+  "hardtail_threshold": -0.45,
+  "res": 512,
+  "simplify": 2.0
+ },
+ "counts": {
+  "real": 1675,
+  "gan_ep90": 17790,
+  "gan_ep80": 728,
+  "ribbon_fb": 799
+ },
+ "reproduce": "python3 scripts/10_generate.py --method gan --res 512 --simplify 2.0 --workers 6 --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45",
+ "note": "E40: the fill-in model needs its own threshold; -0.45 was calibrated so its ink matches the primary model (3.8% gap)."
+}

@@ -20,7 +20,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，15.6 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.1 MB）
 - 发布包：`release/`、`GuanGeKai-v1.5.0.zip`
-- **合成字三层**：1,675 真迹 + 17,484 GAN + 1,833 ribbon 回退（守卫触发）；
+- **合成字三层**：1,675 真迹 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ ribbon 回退 799；
   `release/provenance.json` 为三态 `real` / `gan` / `ribbon_fb`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
@@ -45,9 +45,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.6.4） | 15.7 MB | `5df2b37ca2b0d888` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `54d22b65bf8a4bfa` |
-| `GuanGeKai-v1.6.4.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `9555cd9f85a3c899` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.6.5） | 15.7 MB | `d10ecf00bdb01b53` |
+| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `b0a706b90701ff8b` |
+| `GuanGeKai-v1.6.5.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `226ef25d43fde048` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
@@ -290,7 +290,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 > → §16 v1.3.x → §17 v1.2.1 → §18 v1.2.0。
 
 **两线合一**：本版起项目同时发布两套字体——A 四书（`GuanGe Kai` **v1.6.0**）与
-B 史记（`GuanGe Kai B` **v1.0.0**，见 `README-B.md` 与 `docs/RELEASE-v1.6.0.md`）。
+B 史记（`GuanGe Kai B` **v1.2.1**，见 `README-B.md` 与 `docs/RELEASE-v1.6.0.md`）。
 
 A 线字形**重新由源码构建**（v1.5.2 之后轮廓缓存被实验污染），并修了四处共用代码：
 `fontbuild._orient` 改曲线采样判定嵌套、`glyphvec.trace` 的 `turdsize` 8→2、

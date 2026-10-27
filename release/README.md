@@ -7,7 +7,7 @@
   <img src="specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.6.4（2026-10-27）** —— 本專案含兩套字體：四書本（本頁，`GuanGe Kai`）與史記本（`GuanGe Kai B`，見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（其中 90.5% 由 GAN 生成，9.5% 回退為帶狀掃掠）。
+> **狀態：v1.6.5（2026-10-27）** —— 本專案含兩套字體：四書本（本頁，`GuanGe Kai`）與史記本（`GuanGe Kai B`，見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（GAN 18,518 字＝95.9%；帶狀掃掠回退 799 字＝4.1%）。
 > 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的刻刀筆鋒**；
 > 與刻本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
@@ -20,14 +20,14 @@
 | | A · 四書白文 | B · 史記抄本 |
 |---|---|---|
 | 家族名 | `GuanGe Kai` | `GuanGe Kai B` |
-| 版本 | **v1.6.1** | **v1.0.1** |
+| 版本 | **v1.6.5** | **v1.2.1** |
 | 真跡 | 1,675 字 | **4,078 字** |
 | 覆蓋 | 20,992 / 20,992 | 20,992 / 20,992 |
 | 檔案 | `GuanGeKai-Regular.ttf` / `-Real.ttf` | `GuanGeKai-B-Regular.ttf` / `-B-Real.ttf` |
-| 詳細 | 本頁 | [README-B.md](README-B.md) |
+| 詳細 | 本頁 | [README-B.md](README-B.md)（v1.2.1） |
 
 兩套可同時安裝，用家族名區分。本版的項目級發布說明見
-[docs/RELEASE-v1.6.4.md](docs/RELEASE-v1.6.4.md)（A 線）與 [docs/RELEASE-v1.2.0-B.md](docs/RELEASE-v1.2.0-B.md)（B 線）。
+[docs/RELEASE-v1.6.5.md](docs/RELEASE-v1.6.5.md)（A 線 v1.6.5）與 [docs/RELEASE-v1.2.1-B.md](docs/RELEASE-v1.2.1-B.md)（B 線 v1.2.1）。
 
 ## 這是什麼
 
@@ -78,11 +78,12 @@ GuanGeKai (20,992 字)
 20,992 字
 ├─ 1,675  真跡   直接取自刻本，不經過任何模型
 └─ 19,317 合成
-   ├─ 17,484  GAN（m2-ep80）        90.5%  ← 書中沒有的字，由模型生成
-   └─  1,833  帶狀掃掠回退            9.5%  ← 守衛判定 GAN 輸出不可靠時
+   ├─ 17,790  GAN（m2wt-ep90）      92.1%  ← 主模型（複雜度加權）
+   ├─    728  GAN（m2-ep80 補位）    3.8%  ← 主模型過不了守衛時
+   └─    799  帶狀掃掠回退            4.1%  ← 兩個模型都過不了守衛時
 ```
 
-守衛三條（任一不滿足即整字回退帶狀掃掠）：**空輸出 / 墨量比不在 [0.6, 1.5] / 連通域數與基線字體相差 >3**。
+守衛三條（任一不滿足即換模型再試，都失敗才整字回退帶狀掃掠）：**空輸出 / 墨量比不在 [0.6, 1.5] / 連通域數與基線字體相差 >3**。
 回退偏向筆畫多的字（回退字平均墨量 13,695，GAN 字 12,479）。
 
 > 有真跡的字**一定**用真跡；GAN 只負責書中沒有的字，且出問題時退回帶狀掃掠。
@@ -97,7 +98,8 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 37 組實驗（E1–E37）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.6.4.md](docs/RELEASE-v1.6.4.md) | 想了解本版改了什麼的人 | **v1.6.4（A 線）**：混合檢查點，回退率 7.9%→**4.1%** |
+| [docs/RELEASE-v1.6.5.md](docs/RELEASE-v1.6.5.md) | 想了解本版改了什麼的人 | **v1.6.5（A 線）**：修復輪——發布口徑可複現、發布流程加閘 |
+| [docs/RELEASE-v1.6.4.md](docs/RELEASE-v1.6.4.md) | 考古的人 | v1.6.4：混合檢查點，回退率 7.9%→4.1% |
 | [docs/RELEASE-v1.6.3.md](docs/RELEASE-v1.6.3.md) | 考古的人 | v1.6.3：複雜度加權，回退率 9.5%→7.9% |
 | [docs/RELEASE-v1.6.2.md](docs/RELEASE-v1.6.2.md) | 考古的人 | v1.6.2：fontRevision 修正、品質閘門 |
 | [docs/RELEASE-v1.6.1.md](docs/RELEASE-v1.6.1.md) | 考古的人 | v1.6.1（專案級）：A v1.6.1 + B v1.0.1 |

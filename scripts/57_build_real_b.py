@@ -23,7 +23,7 @@ from shiji_page import repair_counters  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FAMILY = "GuanGe Kai B"
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript "
              "史記 (attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "

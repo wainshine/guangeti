@@ -35,10 +35,11 @@
   - 任何删除先看 `work/ckpt/MANIFEST.json`，并在 `docs/DATA.md` §6.5.1 登记；
     **删完必须立刻重跑 `scripts/31_ckpt_manifest.py`**——这一步单独做已经漏过三次。
 
-## 当前状态（v1.6.4）
+## 当前状态（v1.6.5）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成
-  （**90.5% 由 GAN 生成，9.5% 守着卫回退 ribbon**，见 E33）
+  （**GAN 18,518 字 = 95.9%（ep90 17,790 + ep80 补位 728），ribbon 回退 799 字 = 4.1%**，
+  见 E39/E40；发布口径见 `data/release-a.json`）
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真迹
 - 真字覆盖率 8% 是全局瓶颈。v1.3.x 的合成字骨架取自文楷（结构=文楷结构）；
   **v1.5.0 起合成字由 GAN 生成**，笔画级结构更接近刻本：干净集 Dice 0.414→0.549、
@@ -59,7 +60,7 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 ## 技术路线（v1.5.0 现状）
 
-**发布版 = 真迹 1,675 + GAN 17,484 + 带状扫掠回退 1,833。**
+**发布版 = 真迹 1,675 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ 带状扫掠回退 799。**
 历史三条线：**A 带状扫掠**（v1.3.x 发布方案，已退役）/ **B zi2zi-GAN**（v1.5.0 起采用）/
 **C zi2zi-JiT**（未启动）。`docs/PLAN-v1.4.md` 的"三线并行"已作废，当前计划见 `docs/PLAN-v1.5.md`。
 
@@ -107,7 +108,8 @@ M0 墨量校准（0.5h）→ M1 目标图去模糊（1h）→ M2 5 层 hinge 判
 python3 scripts/07_build_real.py --reuse-contours   # 1. 真字子集（无 work/masks 时用缓存）
 python3 scripts/11_build_full.py            # 2. 完整字体
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应打印 real-subset ... OK）
-python3 scripts/23_compare_all.py --n 120 --set work/eval_clean3.json  # 3.5 重出对比面板（docs/images/eval-panel*.png）
+python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json work/holes_a.json  # 3.4 孔洞审计（记录，不阻断）
+python3 scripts/23_compare_all.py --n 40                              # 3.5 重出对比面板（默认用 617 干净字）
 rm -rf release && python3 scripts/14_package.py               # 4. 重新打包（会复制根 README）
 cd release && zip -q -r ../GuanGeKai-vX.Y.Z.zip . && cd ..    # 5. 出 zip
 shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验和到 DATA.md / PROJECT_STATE.md
@@ -120,6 +122,7 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 | `13_qa` 覆盖率 | `20992/20992` |
 | `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
 | `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
+| `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%**，见 `work/holes_a.json`） |
 
 **踩过的坑**：
 1. 先打包、后改 README，导致包内说明落后于仓库（改过 README 必须重跑第 4–6 步）。

@@ -61,8 +61,10 @@ def main():
     for l in open(ROOT / "work" / "generated.jsonl"):
         r = json.loads(l)
         _src = r.get("src")
-        gen_kind[r["char"]] = {"gen": "gan_ep90", "gen80": "gan_ep80",
-                               "base": "ribbon_fb"}.get(_src, "ribbon_fb")
+        _map = {"gen": "gan_ep90", "gen80": "gan_ep80", "base": "ribbon_fb"}
+        if _src not in _map:
+            raise SystemExit(f"ABORT: unknown generated src {_src!r} for {r['char']!r}")
+        gen_kind[r["char"]] = _map[_src]
     provenance = {}
     for c in range(BLOCK[0], BLOCK[1] + 1):
         ch = chr(c)

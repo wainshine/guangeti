@@ -19,6 +19,8 @@ import argparse
 import json
 from pathlib import Path
 
+import numpy as np
+
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
@@ -43,7 +45,8 @@ def main():
                          "(rev3 2-3 tightened this from 0.08)")
     ap.add_argument("--max-fewer-frac", type=float, default=0.40,
                     help="max share allowed to have fewer counters than WenKai")
-    ap.add_argument("--common-holes", default="四國国目自回田申昌串吕品門门開开間间問问聞闻",
+    ap.add_argument("--common-holes",
+                    default="四國国目自回田申昌串吕品門门開开間间問问聞闻园園團团圖图因困固圈",
                     help="characters that must keep at least one counter (drawn closed in the "
                          "manuscript); 年 is deliberately absent — its manuscript form has no "
                          "closed counter (docs/images/counter-forms-b.jpg)")
@@ -142,10 +145,41 @@ def main():
             if ffrac > args.max_fewer_frac:
                 fails.append(f"{ffrac:.1%} of glyphs have fewer counters than WenKai "
                              f"(> {args.max_fewer_frac:.0%})")
-            # a curated list must keep at least one counter
-            zero = [c for c in args.common_holes if c in holes.get("lost_chars", "")]
+            # A curated list must keep at least one counter — checked EXHAUSTIVELY,
+            # not by looking for the char in the random sample's lost list.  The sample
+            # version let a fully solid 国 through (audit 2026-10-27 P1).
+            from PIL import Image as _Im, ImageDraw as _ImD
+            S = 256
+            fnt = ImageFont.truetype(args.font, S)
+            zero = []
+            not_applicable = []
+            for c in args.common_holes:
+                # only require a counter when the reference font draws one; `门` has no
+                # enclosed counter in WenKai either, so demanding one was a bug
+                from shiji_page import wk_holes as _wkh
+                if _wkh(c, S) < 1:
+                    not_applicable.append(c)
+                    continue
+                want_c = 1
+                im = _Im.new("L", (S, S), 0)
+                _ImD.Draw(im).text((S // 2, int(0.88 * S)), c, fill=255, font=fnt,
+                                   anchor="ms")
+                m = np.array(im) > 127
+                if m.sum() < 50:
+                    continue
+                import cv2 as _cv
+                _cc = _cv.findContours(m.astype(np.uint8), _cv.RETR_CCOMP,
+                                       _cv.CHAIN_APPROX_SIMPLE)
+                hier = _cc[-1]
+                got = 0 if hier is None else sum(1 for h in hier[0] if h[3] != -1)
+                if got < want_c:
+                    zero.append(c)
+            if not_applicable:
+                print(f"  (whitelist chars with no counter in WenKai, skipped: "
+                      f"{''.join(not_applicable)})")
             if zero:
-                fails.append(f"common characters lost their counter: {''.join(zero)}")
+                fails.append(f"common characters lost their counter (exhaustive): "
+                             f"{''.join(zero)}")
             print(f"  counters: lost {holes['lost']}/{holes['comparable']} "
                   f"({frac:.1%}), fewer {holes['fewer']} ({ffrac:.1%}), "
                   f"common-hole chars without a counter: {len(zero)}")
