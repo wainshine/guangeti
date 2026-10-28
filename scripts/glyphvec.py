@@ -28,6 +28,123 @@ def clean_ink(mask: np.ndarray, min_area: int = 55, min_thick: float = 2.2) -> n
     return keep[lab]
 
 
+def denoise_mask(ink: np.ndarray, rel: float = 0.0025, min_px: int = 40,
+                 hole_rel: float = 0.002, hole_px: int = 50) -> np.ndarray:
+    """Drop paper speckles and fill pinholes before tracing.
+
+    A 300 dpi scan of a Ming manuscript carries dust, paper fibre and ink spatter;
+    `clean_ink` only removes components that are both small and thin.  Those specks
+    become separate contours (or ragged edges) in the font, which is exactly what
+    makes the shipped glyphs look scratched at display sizes.  Thresholds are
+    relative to the glyph's own ink area so they scale from 150 to 512 px.
+    """
+    m = ink.astype(np.uint8)
+    area = int(m.sum())
+    if area < 200:
+        return ink
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    amin = max(min_px, int(rel * area))
+    keep = np.zeros(n, bool)
+    for i in range(1, n):
+        if st[i, cv2.CC_STAT_AREA] >= amin:
+            keep[i] = True
+    m = keep[lab].astype(np.uint8)
+    # fill pinholes that do not touch the crop border
+    inv = (1 - m).astype(np.uint8)
+    n2, lab2, st2, _ = cv2.connectedComponentsWithStats(inv, 8)
+    hmax = max(hole_px, int(hole_rel * area))
+    out = m.copy()
+    H, W = m.shape
+    for i in range(1, n2):
+        x, y, w, h, a = st2[i]
+        if a <= hmax and x > 0 and y > 0 and x + w < W and y + h < H:
+            out[lab2 == i] = 1
+    # one median pass removes the 1-px ragged edge left by thresholding
+    out = (cv2.medianBlur(out * 255, 3) > 127).astype(np.uint8)
+    return out.astype(bool)
+
+
+def _hole_count(m: np.ndarray) -> int:
+    cc = cv2.findContours(m.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    h = cc[-1]
+    return 0 if h is None else sum(1 for x in h[0] if x[3] != -1)
+
+
+def clamp_em_bbox(contours, maxw: float = 1000.0, maxh: float = 1000.0):
+    """Scale a glyph down if its outline leaves the 1000-unit em box.
+
+    A few real samples lean so far that the normalised outline is 1-2% taller than the
+    em; most rasterisers clip that.  Scaling about the bbox centre keeps the glyph's
+    visual position while bringing it back inside the box.
+    """
+    xs, ys = [], []
+    for c in contours:
+        xs.append(c["start"][0]); ys.append(c["start"][1])
+        for sg in c["segs"]:
+            xs += [sg[1], sg[-2]]; ys += [sg[2], sg[-1]]
+    if not xs:
+        return contours
+    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    w, h = x1 - x0, y1 - y0
+    if w <= maxw and h <= maxh:
+        return contours
+    k = min(maxw / max(1e-6, w), maxh / max(1e-6, h))
+    cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+    out = []
+    for c in contours:
+        c2 = {"start": [cx + (c["start"][0] - cx) * k, cy + (c["start"][1] - cy) * k],
+              "segs": []}
+        for sg in c["segs"]:
+            if sg[0] == "L":
+                c2["segs"].append(["L", cx + (sg[1] - cx) * k, cy + (sg[2] - cy) * k])
+            else:
+                c2["segs"].append([sg[0],
+                                   cx + (sg[1] - cx) * k, cy + (sg[2] - cy) * k,
+                                   cx + (sg[3] - cx) * k, cy + (sg[4] - cy) * k,
+                                   cx + (sg[5] - cx) * k, cy + (sg[6] - cy) * k])
+        out.append(c2)
+    return out
+
+
+def adjust_mask_area(ink: np.ndarray, target_area: float, max_iter: int = 6) -> np.ndarray:
+    """Nudge a glyph's stroke width so its ink area hits `target_area` (in px).
+
+    The 大典 was copied by many hands; stroke weight varies by page by up to 2x.  A font
+    assembled from one sample per character inherits that patchwork, which is the most
+    visible defect at display sizes.  The adjustment is a sub-pixel dilation/erosion via
+    the distance transform, so the glyph's shape and bbox barely move.  Iterated because
+    the boundary-pixel count overestimates the perimeter of a stroke band.
+    """
+    m = ink.astype(np.uint8)
+    if int(m.sum()) < 200 or target_area <= 0:
+        return ink
+    h0 = _hole_count(m)
+    prev = m.copy()
+    for _ in range(max_iter):
+        area = int(m.sum())
+        if abs(area - target_area) / max(1.0, target_area) < 0.04:
+            break
+        er = cv2.erode(m, np.ones((3, 3), np.uint8))
+        perim = max(1, int((m & (1 - er)).sum()))
+        delta = (float(target_area) - area) / perim
+        delta = max(-5.0, min(5.0, delta))
+        if abs(delta) < 0.05:
+            break
+        if delta > 0:
+            dto = cv2.distanceTransform((1 - m).astype(np.uint8), cv2.DIST_L2, 5)
+            m = ((m > 0) | (dto <= delta)).astype(np.uint8)
+        else:
+            dt = cv2.distanceTransform(m, cv2.DIST_L2, 5)
+            m = ((m > 0) & (dt > 1.0 - delta)).astype(np.uint8)
+        # never trade a counter for weight: 四/園/因/圈 are common and a solid 四 is a
+        # visible defect.  If this step closed a hole, stop and keep the previous mask.
+        if _hole_count(m) < h0:
+            m = prev
+            break
+        prev = m.copy()
+    return m.astype(bool)
+
+
 def binarize(img: np.ndarray) -> np.ndarray:
     """Return a boolean ink mask from a grayscale glyph crop."""
     img = cv2.medianBlur(img, 3)
@@ -61,8 +178,15 @@ def trace(ink: np.ndarray, turdsize: int = 2, alphamax: float = 1.0, opttol: flo
     turdsize=2 (was 8): small counters (e.g. 年's 4px hole) were being dropped by
     potrace's speck filter — see audit P0 layer 3.
     """
-    p = potrace.Bitmap(~ink).trace(turdsize=turdsize, alphamax=alphamax,
-                                   opticurve=True, opttolerance=opttol)
+    try:
+        p = potrace.Bitmap(~ink).trace(turdsize=turdsize, alphamax=alphamax,
+                                       opticurve=True, opttolerance=opttol)
+    except ValueError:
+        # potrace's curve optimiser raises on a degenerate sliver (seen on a few 大典
+        # glyphs after the weight adjustment); fall back to polygons rather than
+        # dropping the whole generation run
+        p = potrace.Bitmap(~ink).trace(turdsize=turdsize, alphamax=alphamax,
+                                       opticurve=False, opttolerance=opttol)
     H = ink.shape[0]
     contours = []
     for curve in p:
@@ -111,6 +235,32 @@ def vectorize(img: np.ndarray, scale: float, page_x0: float, page_y0: float,
     ink = binarize(img)
     cs = trace(ink)
     return to_em(cs, scale, page_x0, page_y0, slot_cx, slot_cy)
+
+
+_WK_INK = {}
+
+
+def wenkai_ink_256(ch: str) -> int:
+    """Ink area of the same character in WenKai, rendered at 256 px (cached)."""
+    if ch in _WK_INK:
+        return _WK_INK[ch]
+    from PIL import Image, ImageDraw, ImageFont
+    from pathlib import Path
+    f = ImageFont.truetype(str(Path(__file__).resolve().parents[1]
+                               / "data/base/LXGWWenKai-Regular.ttf"), 256)
+    im = Image.new("L", (256, 256), 0)
+    ImageDraw.Draw(im).text((0, 880 * 256 / 1000.0), ch, fill=255, font=f, anchor="ls")
+    n = int((np.array(im) > 127).sum())
+    _WK_INK[ch] = n
+    return n
+
+
+def target_ink_256(ch: str, a: float = 38.7258, exp: float = 0.5701) -> float:
+    """C-corpus ink target at 256 px: ink = a * wenkai_ink^exp (see EXPERIMENTS-C E13)."""
+    w = wenkai_ink_256(ch)
+    if w < 80:
+        return 0.0
+    return float(a * (w ** exp))
 
 
 _BASE = None

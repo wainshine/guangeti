@@ -1,0 +1,181 @@
+"""Three-line comparison sheet: GuanGe Kai (A 四书) / B (史记) / C (永乐大典).
+
+One image, same text, three typefaces stacked, so a regression in any line is visible
+at a glance instead of needing three separate specimen files.
+
+Why this exists
+---------------
+Each line ships its own ``specimen*.png`` and ``book-vs-font*``. Those are per-release
+and per-line: you cannot tell from them whether the three lines still look like
+siblings, and a weight drift or a fallback spike in one line shows up nowhere else.
+This sheet is release-time proof of all three at once.
+
+Layout
+------
+For every sample group the three lines are stacked (A / B / C), each row tagged.
+The same text is used in every row, so the differences are style, not content.
+
+Samples are grouped by what tends to break:
+  常用字    structural sanity
+  孔洞字    counter characters -- the project's P0 defect class
+  複雜字    dense characters, where the GAN is weakest and fallback is most likely
+  簡體碼位  simplified codepoints that must still carry traditional forms
+  非漢字    space / digits / punctuation: the fonts are CJK-only, this row shows it
+
+Sizes 48 / 24 / 14 px expose weight bias and small-size brittleness.
+
+Notes
+-----
+* Renders only ``build/GuanGeKai*-*.ttf``; missing lines are skipped.
+* The faces have **no space, no ASCII, no CJK punctuation** (verified: cmap lacks
+  0x20/0x30/0x41/0x300C). Spaces in the samples are drawn as gaps by this script,
+  not as glyphs -- otherwise every space would render as a .notdef box.
+* Output is one indexed PNG, target < 1.5 MB.
+
+Usage
+-----
+    python3 scripts/95_compare_lines.py            # -> docs/images/lines-compare.png
+    python3 scripts/95_compare_lines.py --show     # print sample text
+"""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+from fontTools.ttLib import TTFont
+from PIL import Image, ImageDraw, ImageFont
+
+ROOT = Path(__file__).resolve().parents[1]
+
+LINES = [
+    ("A", "GuanGe Kai", ROOT / "build" / "GuanGeKai-Regular.ttf", "release"),
+    ("B", "GuanGe Kai B", ROOT / "build" / "GuanGeKai-B-Regular.ttf", "release-b"),
+    ("C", "GuanGe Kai C", ROOT / "build" / "GuanGeKai-C-Regular.ttf", "release-c"),
+]
+BASE = ROOT / "data" / "base" / "LXGWWenKai-Regular.ttf"
+OUT = ROOT / "docs" / "images" / "lines-compare.png"
+
+SAMPLES = [
+    ("常用字", "天地玄黃 宇宙洪荒 日月盈昃 辰宿列張"),
+    ("孔洞字", "國目自回田 四申昌串吕 門開間問聞"),
+    ("複雜字", "萬曆年製 乾隆御覽 館閣體楷 繪繡纏繞"),
+    ("簡體碼位", "书习长价礼类 庄个亘坛"),
+    ("非漢字", " 0123 ABC ，。「」"),
+]
+SIZES = [48, 24, 14]
+
+BG, FG, LABEL, RULE, DIM = 252, 20, 110, 208, 150
+
+
+def _version(path: Path) -> str:
+    try:
+        f = TTFont(str(path), lazy=True)
+        names = [str(n) for n in f["name"].names if n.nameID == 5 and n.platformID == 3]
+        return names[0].replace("Version ", "v") if names else "?"
+    except Exception:
+        return "?"
+
+
+def _metrics(rel: str) -> str:
+    p = ROOT / rel / "stats.json"
+    if not p.exists():
+        return ""
+    try:
+        d = json.loads(p.read_text())
+    except Exception:
+        return ""
+    real = d.get("real", 0)
+    # A ships four-state provenance (gan_ep90 + gan_ep80 fill-in); B/C ship "gan"
+    gen = sum(d.get(k, 0) for k in ("gan", "gan_ht", "gan_ep90", "gan_ep80"))
+    ribbon = d.get("ribbon_fallback", 0)
+    total = gen + ribbon
+    fb = (100.0 * ribbon / total) if total else 0.0
+    return f"真跡 {real:,}  GAN {gen:,}  回退 {ribbon:,} ({fb:.1f}%)"
+
+
+def draw_spaced(d: ImageDraw.ImageDraw, y: int, x: int, text: str,
+                font: ImageFont.FreeTypeFont, fill: int) -> None:
+    """Draw text treating spaces as real gaps (the faces have no space glyph)."""
+    for piece in text.split(" "):
+        if piece:
+            d.text((x, y), piece, font=font, fill=fill)
+            x += font.getlength(piece)
+        x += font.size * 0.42
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--width", type=int, default=1500)
+    ap.add_argument("--show", action="store_true")
+    args = ap.parse_args()
+
+    if args.show:
+        for k, v in SAMPLES:
+            print(f"{k}: {v}")
+
+    fonts = [(t, n, Path(p), rel) for t, n, p, rel in LINES if Path(p).exists()]
+    if not fonts:
+        raise SystemExit("ABORT: no GuanGeKai*.ttf under build/")
+    if not Path(BASE).exists():
+        raise SystemExit(f"ABORT: base face missing: {BASE}")
+
+    label_font = ImageFont.truetype(str(BASE), 17)
+    tag_font = ImageFont.truetype(str(BASE), 15)
+    pad, tag_w = 26, 26
+
+    need = 0
+    for size in SIZES:
+        f = ImageFont.truetype(str(BASE), size)
+        for _, text in SAMPLES:
+            need = max(need, int(f.getlength(text) + len(text.split(" ")) * size * 0.42))
+    img_w = max(args.width, need + tag_w + pad * 2)
+
+    header_h = 78
+    row_h = {s: int(s * 1.55) for s in SIZES}
+    total_h = header_h + sum((row_h[s] + 2) * len(fonts) * len(SAMPLES) + 20 * len(SAMPLES) + 26 for s in SIZES) + 34
+
+    img = Image.new("L", (img_w, total_h), BG)
+    d = ImageDraw.Draw(img)
+
+    d.text((pad, 12), "館閣楷三線對照  GuanGe Kai  A（四書） / B（史記） / C（永樂大典）",
+           font=label_font, fill=FG)
+    y = 36
+    for i, (tag, name, path, rel) in enumerate(fonts):
+        d.text((pad, y), f"{tag}  {name}  {_version(path)}   {_metrics(rel)}",
+               font=tag_font, fill=90 if i == 0 else LABEL)
+        y += 15
+
+    y = header_h
+    for size in SIZES:
+        d.text((pad, y), f"{size} px", font=label_font, fill=LABEL)
+        y += 20
+        for title, text in SAMPLES:
+            d.text((pad, y + 2), title, font=tag_font, fill=LABEL)
+            y += 20
+            for tag, _name, path, _rel in fonts:
+                f = ImageFont.truetype(str(path), size)
+                base_top = y + int(row_h[size] * 0.14)
+                d.text((pad, base_top + 2), tag, font=tag_font, fill=DIM)
+                draw_spaced(d, base_top, pad + tag_w, text, f, FG)
+                y += row_h[size]
+            d.line((pad, y + 1, img_w - pad, y + 1), fill=RULE, width=1)
+            y += 2
+        y += 20
+
+    d.text((pad, total_h - 24),
+           "同一段文字、同一字號、逐行對齊；□ 表示該字體沒有此碼位——三套字均為純 CJK，無 ASCII、無空格。"
+           "回退率越高，正文裡「細弱字」越多。",
+           font=tag_font, fill=DIM)
+
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    img.convert("P", palette=Image.ADAPTIVE, colors=16).save(out, optimize=True)
+    print(f"-> {out}  ({out.stat().st_size / 1e6:.2f} MB, {img.width}x{img.height})")
+    for tag, name, path, rel in fonts:
+        print(f"   {tag} {name:14s} {_version(path):10s} {_metrics(rel)}")
+
+
+if __name__ == "__main__":
+    main()

@@ -380,7 +380,17 @@ def dewarp_page(rgb: np.ndarray, win: int = 0, sigma_x: int = 9, verbose: bool =
 
 
 # ---------------------------------------------------------------- counter repair
-def _hole_count(m: np.ndarray) -> int:
+def _hole_count(m: np.ndarray, min_area: float = 0) -> int:
+    if min_area and min_area > 0:
+        # area-filtered count: a 1-2 px pinhole is not a counter, and pretending it is
+        # stops repair_counters from sealing a real gap (C-line 四/因/圈)
+        inv = (~(m > 0)).astype(np.uint8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(inv, 8)
+        H, W = m.shape
+        return int(sum(1 for i in range(1, n)
+                       if st[i, 0] > 0 and st[i, 1] > 0
+                       and st[i, 0] + st[i, 2] < W and st[i, 1] + st[i, 3] < H
+                       and st[i, 4] >= min_area))
     out = cv2.findContours(m.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     hier = out[-1]
     if hier is None:
@@ -404,15 +414,16 @@ def wk_holes(ch: str, size: int = 256) -> int:
     return _hole_count(np.array(im) > 127)
 
 
-def _holes_at(m: np.ndarray, size: int = 256) -> int:
+def _holes_at(m: np.ndarray, size: int = 256, min_area: float = 0) -> int:
     """Hole count in the *rendering* space the audit measures at (256 px)."""
     if m.shape[0] != size:
         m = cv2.resize(m.astype(np.uint8), (size, size), interpolation=cv2.INTER_NEAREST)
-    return _hole_count(m > 0)
+    return _hole_count(m > 0, min_area)
 
 
 def repair_counters(m: np.ndarray, ch: str, base_close: int = 7,
-                    extra=(11, 15, 19, 24, 32), max_ink_gain: float = 0.08):
+                    extra=(11, 15, 19, 24, 32), max_ink_gain: float = 0.08,
+                    min_hole_area: float = 0):
     """Close the ink, escalating, until the counter that WenKai draws reappears.
 
     The scan's strokes are grey at the edges, so a 1-2 px gap lets a counter leak to
@@ -427,7 +438,7 @@ def repair_counters(m: np.ndarray, ch: str, base_close: int = 7,
     on `国`, 32 costs +6.2% on `园`.
     """
     want = wk_holes(ch, 256)
-    if want == 0 or _holes_at(m) >= want:
+    if want == 0 or _holes_at(m, min_area=min_hole_area) >= want:
         return m, 0
     base = int(m.sum())
     best_m, best_k = m, 0
@@ -438,10 +449,10 @@ def repair_counters(m: np.ndarray, ch: str, base_close: int = 7,
         m2 = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, kk) > 0
         if (m2.sum() - base) / max(1, base) > max_ink_gain:
             break
-        got = _holes_at(m2)
+        got = _holes_at(m2, min_area=min_hole_area)
         if got >= want:
             return np.asarray(m2, dtype=bool), int(k)
-        if got > _holes_at(best_m):
+        if got > _holes_at(best_m, min_area=min_hole_area):
             best_m, best_k = m2, k
     # no kernel reached WenKai's count; keep the best one found (never worse than input)
     return (np.asarray(best_m, dtype=bool), int(best_k)) if best_k else (m, 0)

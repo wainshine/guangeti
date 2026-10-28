@@ -36,7 +36,8 @@ def book_raster(m, path, nrm):
     img = np.array(Image.open(path).convert("L"))
     scale = nrm["scale"]
     slot_cx, slot_cy = nrm["slot_cx"], nrm["slot_cy"]
-    px0, py0 = m["x0"] - PAD, m["y0"] - PAD
+    # C line stores the exact crop origin; A/B fall back to their fixed pad
+    px0, py0 = nrm.get("origin", (m["x0"] - PAD, m["y0"] - PAD))
     # page -> em units
     a = scale * S / 1000.0
     # em -> canvas px, including the per-glyph normalisation
@@ -54,7 +55,7 @@ def book_raster(m, path, nrm):
 def book_raster_ink(m, ink, nrm):
     scale = nrm["scale"]
     slot_cx, slot_cy = nrm["slot_cx"], nrm["slot_cy"]
-    px0, py0 = m["x0"] - PAD, m["y0"] - PAD
+    px0, py0 = nrm.get("origin", (m["x0"] - PAD, m["y0"] - PAD))
     a = scale * S / 1000.0 * nrm["sx"]
     bscale = scale * S / 1000.0 * nrm["sy"]
     tx = (((px0 - slot_cx) * scale + 500) * nrm["sx"] + nrm["dx"]) * S / 1000.0
@@ -116,6 +117,7 @@ def main():
         chars.append(r["label"])
         targets.append(cv2.GaussianBlur(g.astype(np.float32), (0, 0), _a.sigma).astype(np.uint8))
     bases = render_base(chars, None)
+    Path(_a.out).parent.mkdir(parents=True, exist_ok=True)
     # stack into a npz
     X = np.stack([bases[c] for c in chars]).astype(np.uint8)
     Y = np.stack(targets).astype(np.uint8)

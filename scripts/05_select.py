@@ -51,6 +51,11 @@ def sharpness(path: Path) -> float:
     return float(cv2.Laplacian(img, cv2.CV_32F).var())
 
 
+def _vec_task(arg):
+    path, f = arg
+    return f, norm_glyph(Path(path))
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser()
@@ -68,34 +73,68 @@ def main():
                          "(B line: low_align — cells on pages whose page-level "
                          "reference alignment failed, e.g. the 表 tables and the "
                          "library bookplate)")
+    ap.add_argument("--drop-if-all-flagged", action="store_true",
+                    help="if every sample of a character carries the prefer-clean "
+                         "flag, drop the character instead of keeping a known-bad "
+                         "sample (C line: fragments must not reach the real font)")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="parallel workers for the glyph-vector pass (the C line has "
+                         "1.4M cells; 1 reproduces the A/B behaviour exactly)")
+    ap.add_argument("--holdout-pages", default="",
+                    help="JSON list of page keys that must never enter training "
+                         "(the C line holds out whole pages; its clean set comes "
+                         "from there)")
     args = ap.parse_args()
     global CELLS
     wd = Path(args.work)
     CELLS = wd / "cells"
     rows = [json.loads(l) for l in open(wd / "labeled.jsonl")]
     rows = [r for r in rows if r["label"]]
+    if args.holdout_pages:
+        hold = set(json.load(open(args.holdout_pages)))
+        n0 = len(rows)
+        rows = [r for r in rows if r.get("key") not in hold]
+        print(f"holdout: dropped {n0-len(rows)} rows on {len(hold)} reserved pages")
     if args.drop_flag:
         n0 = len(rows)
         rows = [r for r in rows if not r.get(args.drop_flag)]
         print(f"dropped {n0-len(rows)} rows with {args.drop_flag}=true")
     groups = defaultdict(list)
     vecs = {}
-    for _i, r in enumerate(rows):
-        if _i and _i % 100000 == 0:
-            print(f"  loaded {_i}/{len(rows)} cells", flush=True)
-        p = CELLS / r["file"]
-        v, meta, sharp = norm_glyph(p)
-        if v is None:
-            continue
-        vecs[r["file"]] = v
-        r["meta"] = meta
-        r["sharp"] = sharp
-        groups[r["label"]].append(r)
+    by_file = {}
+    if args.workers > 1:
+        import multiprocessing as mp
+        tasks = [(str(CELLS / r["file"]), r["file"]) for r in rows]
+        ctx = mp.get_context("fork")
+        with ctx.Pool(args.workers) as pool:
+            for i, (f, res) in enumerate(pool.imap(_vec_task, tasks, chunksize=200)):
+                if i and i % 100000 == 0:
+                    print(f"  loaded {i}/{len(rows)} cells", flush=True)
+                if res is None:
+                    continue
+                v, meta, sharp = res
+                vecs[f] = v
+                by_file[f] = (meta, sharp)
+    else:
+        for _i, r in enumerate(rows):
+            if _i and _i % 100000 == 0:
+                print(f"  loaded {_i}/{len(rows)} cells", flush=True)
+            p = CELLS / r["file"]
+            v, meta, sharp = norm_glyph(p)
+            if v is None:
+                continue
+            vecs[r["file"]] = v
+            by_file[r["file"]] = (meta, sharp)
+    for r in rows:
+        if r["file"] in vecs:
+            r["meta"], r["sharp"] = by_file[r["file"]]
+            groups[r["label"]].append(r)
     print("labels", len(groups), "glyphs", len(vecs), flush=True)
 
     chosen = {}
     second = {}
     dropped = 0
+    dropped_bad = 0
     n_pref = 0
     for lab, items in groups.items():
         if len(items) < args.min_samples:
@@ -106,6 +145,9 @@ def main():
             if good and len(good) < len(items):
                 n_pref += len(items) - len(good)
                 items = good
+            elif not good and args.drop_if_all_flagged:
+                dropped_bad += 1
+                continue
         V = np.stack([vecs[r["file"]] for r in items])
         F = V.reshape(len(items), -1)
         # robust medoid: start from the mean, drop the worst 35%, recompute
@@ -123,7 +165,10 @@ def main():
         q = np.clip(q / (np.percentile(q, 90) + 1e-9), 0, 1.5)
         m = np.array([min(r["meta"]["w"], r["meta"]["h"]) / max(r["meta"]["w"], r["meta"]["h"]) for r in items])
         # size prior: ink area relative to the character cell, penalise outliers
-        size = np.array([(r["meta"]["w"] * r["meta"]["h"]) / max(1.0, r["pitch"]) ** 2 for r in items])
+        # C line: small (双行) cells advance by half a column, so the size prior
+        # must use the cell pitch when it is recorded
+        size = np.array([(r["meta"]["w"] * r["meta"]["h"])
+                         / max(1.0, r.get("cpitch", r["pitch"])) ** 2 for r in items])
         med = float(np.median(size))
         sz = np.abs(size - med) / (med + 1e-6)
         red = np.array([r.get("redness", 0.0) for r in items])
@@ -139,7 +184,8 @@ def main():
         chosen[lab] = build(int(order[0]))
         if len(order) > 1:
             second[lab] = build(int(order[1]))
-    print(f"chosen {len(chosen)} (dropped {dropped} labels with <{args.min_samples} samples)")
+    print(f"chosen {len(chosen)} (dropped {dropped} labels with <{args.min_samples} samples; "
+          f"dropped {dropped_bad} whose every sample was flagged)")
     if args.prefer_clean:
         print(f"prefer-clean: excluded {n_pref} samples carrying {args.prefer_clean}=true")
     with open(wd / "chosen.jsonl", "w") as f:

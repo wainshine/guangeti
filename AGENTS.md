@@ -50,6 +50,33 @@
   **不要再做"轮廓层面积补偿"**：E37 已证明 potrace 不膨胀（轮廓/掩膜 = 0.9997），
   没有可补的对象；要修只能从模型侧（尺寸一致性）或归一化策略入手。
 
+### C 线（《永乐大典》，v1.0.1）
+
+- `build/GuanGeKai-C-Regular.ttf`：20,992 字 = **5,303 真迹 + 14,461 GAN + 1,228 带状回退（7.8%）**；
+  `build/GuanGeKai-C-Real.ttf`：仅 5,303 真迹（基本区 **25.26%**，三条线里最高）。
+- **v1.0.1 质量修复**（2026-10-28，回应「字重忽粗忽细/边缘毛糙/简体字怪」）：
+  逐字墨量标定（真迹逐字墨量/文楷比从 0.42–0.98 收窄到 0.85–1.14，字体级 16/24/48px
+  偏差 0.974/0.969/1.025/0.995）、追踪前去噪（`turdsize 3`）、
+  `repair_counters` 移到字重标定之前（全字体孔洞丢失 5.6%→**0.9%**）、
+  清理 10 个「简体码位 + 繁体字形」标签（书/习/长/价/礼/类/庄/个/亘/坛），真迹 5,310→5,303。
+  简体码位加**结构守卫**（`--struct-guard`：GAN 输出组件数与文楷差 >2 时回落 ribbon），
+  ribbon 占比 1.9%→7.8%。清理后从零重训（计划 80 轮，训到 **ep52** 停止；ep20–50 结构指标单调变差）。
+- 发布包 `release-c/`、`GuanGeKai-C-v1.0.1.zip`（14 MB）；口径 `data/release-c.json`
+  与 `work-c/accept_c.json`；文档 `README-C.md`、`docs/{PLAN,DATA,EXPERIMENTS,RELEASE-v1.0.1}-C.md`。
+- **与 A/B 的根本差别：没有对照文本。** 标签靠 **PP-OCRv6 + PP-OCRv5 双见证**
+  （全量 1,297,735 字，逐字一致率 **91.1%**），冲突（约 9%）丢弃；干净集按**页**留出
+  （207 页 / 6%），不用“只出现一次的字”。**标签未经逐字人工校对**，发布说明已披露。
+- 版面：朱丝栏 + 小字双行/大字字头混排，切字用 OCR 行框定行 + DP 切格（1,214,431 格，组件归属）；
+  篆/隶页按 OCR 含「篆」或「隸+書」整页排除（222 页）。
+- **发布检查点是 ep30**（不是最后一轮）：207 页留出集 n=800 上 ep20/30/40/50 的
+  Dice 0.464/0.444/0.444/0.436、崩坏率 11.5/15.4/15.4/17.4%。ep20 结构最好，
+  但字体级字重 1.19 过不了 0.90–1.15 的闸；ep30 字重 0.974/0.969/1.025/0.995，全项过闸。
+  生成工作点 **thr +0.30 / close 1 / blend 0.8 / --struct-guard**。
+- 共用脚本（`05_select`/`06_norm`/`08_make_pairs`）的 C 兼容改动已用 A 数据复跑验证：
+  chosen 1,675 逐项一致、norm 与 HEAD 版一致、pairs 逐元素一致。
+  **发版前必须跑 `python3 scripts/83_verify_ab_c.py`，必须打印 `A/B INTACT`。**
+- 已知缺陷：`园`、`四` 的「囗」按写本风格开口，拓扑上无闭合孔（已从 C 线白名单移除并登记）。
+
 ## 最短验证命令
 
 ```bash
@@ -59,6 +86,9 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 ```
 
 ## 技术路线（v1.5.0 现状）
+
+> **命名注意**：本节 A/B/C 是**技术路线**编号（A 带状扫掠 / B GAN / C zi2zi-JiT），
+> 与三条**字形线** A（四书）/ B（史记）/ C（永乐大典）不是一回事。字形线的状态见上节。
 
 **发布版 = 真迹 1,675 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ 带状扫掠回退 799。**
 历史三条线：**A 带状扫掠**（v1.3.x 发布方案，已退役）/ **B zi2zi-GAN**（v1.5.0 起采用）/
@@ -111,6 +141,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应�
 python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json work/holes_a.json  # 3.4 孔洞审计（记录，不阻断）
 python3 scripts/23_compare_all.py --n 40                              # 3.5 重出对比面板（默认用 617 干净字）
 rm -rf release && python3 scripts/14_package.py               # 4. 重新打包（会复制根 README）
+python3 scripts/95_compare_lines.py                    # 4.5 三线对照图（A/B/C 同一文字并排，出 docs/images/lines-compare.png）
 cd release && zip -q -r ../GuanGeKai-vX.Y.Z.zip . && cd ..    # 5. 出 zip
 shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验和到 DATA.md / PROJECT_STATE.md
 ```
@@ -123,6 +154,7 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 | `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
 | `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
 | `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%**，见 `work/holes_a.json`） |
+| `95_compare_lines` 出的三线对照图 | 三条线并排看不出「某条线整体偏细/偏粗/缺笔画」；发现即为回归 |
 
 **踩过的坑**：
 1. 先打包、后改 README，导致包内说明落后于仓库（改过 README 必须重跑第 4–6 步）。
@@ -146,7 +178,11 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 ## 常见坑
 
 - OCR 必须 150 dpi + PP-OCRv6；72 dpi 只有 ~70% 准确率。
-- 原书句读圈点是**红色**的；但我们拿到的 PDF **已被去色**（实测 `r−g` 最大仅 9–14，无红色像素），
-  颜色分离在这份文件上无效，实际靠「厚度 + 连通域」判据剔除。若换未去色的扫描，`red_mask()` 可直接生效。
+- 原书句读圈点是**红色**的，**源 PDF 也是彩色的**（`get_pixmap` 出来 `r−g` 最大约 103）。
+  `ink_mask()` 的 `red_mask()` **一直在生效**（实测每页红像素 0.08–0.16%，约 5–9 千像素），
+  只是四书这份的红色标记本来就少，所以收益接近 0。
+  **注意**：仓库里 `work/cells`、`work/masks` 是单通道灰度，**不要拿它们测颜色**——
+  早期"PDF 已被去色（`r−g` 最大 9–14）"的结论就是这么误测出来的，源文件其实是彩色的。
+  《永乐大典》（C 线）红像素占 4.4%（朱丝栏 + 句读），颜色分离在那里才有大用。
 - 撇/捺常是独立连通域，必须两遍归属，否则笔画被截断。
 - 字体家族名不能包含 LXGW 的 Reserved Font Name。

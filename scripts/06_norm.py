@@ -42,16 +42,21 @@ def main():
         cs = trace(ink)
         if not cs:
             continue
-        scale = 880.0 / max(args.pitch_floor, m["pitch"])
-        pad = 6
-        em = to_em(cs, scale, m["x0"] - pad, m["y0"] - pad,
-                   (m["x0"] + m["x1"]) / 2, (m["slot"][0] + m["slot"][1]) / 2,
+        # C line stores the per-cell advance (cpitch) and the exact crop origin;
+        # A/B have neither, so the fallbacks reproduce their old behaviour exactly.
+        pitch = float(m.get("cpitch", m["pitch"]))
+        scale = 880.0 / max(args.pitch_floor, min(760.0, pitch))
+        ox = m.get("cx0", m["x0"] - 6)
+        oy = m.get("cy0", m["y0"] - 6)
+        sx0, sx1 = m.get("slot_x", (m["x0"], m["x1"]))
+        em = to_em(cs, scale, ox, oy,
+                   (sx0 + sx1) / 2, (m["slot"][0] + m["slot"][1]) / 2,
                    em_cx=500.0, em_cy=440.0)
         bb = base_bounds(ch)
         if bb is None:
             out[ch] = dict(sx=1.0, sy=1.0, dx=0.0, dy=0.0, scale=scale,
-                           origin=(m["x0"] - pad, m["y0"] - pad),
-                           slot_cx=(m["x0"] + m["x1"]) / 2,
+                           origin=(ox, oy),
+                           slot_cx=(sx0 + sx1) / 2,
                            slot_cy=(m["slot"][0] + m["slot"][1]) / 2)
             continue
         x0, y0, x1, y1 = contour_bounds(em)
@@ -63,8 +68,8 @@ def main():
         dx = (bb[0] + bb[2]) / 2 - cx * sx
         dy = (bb[1] + bb[3]) / 2 - cy * sy
         out[ch] = dict(sx=float(sx), sy=float(sy), dx=float(dx), dy=float(dy), scale=float(scale),
-                       origin=(m["x0"] - pad, m["y0"] - pad),
-                       slot_cx=float((m["x0"] + m["x1"]) / 2),
+                       origin=(ox, oy),
+                       slot_cx=float((sx0 + sx1) / 2),
                        slot_cy=float((m["slot"][0] + m["slot"][1]) / 2))
     with open(wd / "norm.json", "w") as f:
         json.dump(out, f)

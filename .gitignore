@@ -1,19 +1,22 @@
 # ---- 输入与大型派生物 ----
 *.pdf
+/永乐大典美国藏本/
 *.part
 /*.zip
 .venv/
 __pycache__/
 .DS_Store
 
-# ---- 工作区（所有可重建的中间产物；A 线=四书，B 线=史记）----
+# ---- 工作区（所有可重建的中间产物；A=四书，B=史记，C=永乐大典）----
+# /work/ 是 A 线；/work-*/ 覆盖 B、C 及将来所有线（一条通配，不用每次追加）
 /work/
-/work-b/
+/work-*/
 
 # ---- 构建与发布产物 ----
 /build/
 /release/*.ttf
 /release-b/*.ttf
+/release-c/*.ttf
 
 # ---- 第三方字体二进制（只保留许可文本）----
 data/base/**/*.ttf

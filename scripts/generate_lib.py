@@ -112,3 +112,23 @@ def ribbon_scale(comp: float, base: float = 1.06, lo: float = 0.62, hi: float = 
     """
     tgt = 20.619 * max(float(comp), 1.0) ** -0.330
     return float(min(hi, max(lo, tgt / base)))
+
+
+_C_FIT = None
+
+
+def ribbon_scale_c(comp256: float, lo: float = 0.45, hi: float = 1.20) -> float:
+    """Per-character ribbon scale for the 永乐大典 domain.
+
+    The constants are fitted on the C training pairs by `scripts/73_fit_width_c.py`
+    and read from work-c/ribbon_fit.json, so recalibrating the fallback never means
+    editing code.  `comp256` is the WenKai ink area at 256x256.
+    """
+    global _C_FIT
+    if _C_FIT is None:
+        import json
+        from pathlib import Path
+        p = Path(__file__).resolve().parents[1] / "work-c" / "ribbon_fit.json"
+        _C_FIT = json.load(open(p)) if p.exists() else dict(a=20.619, exp=0.330, base=1.06)
+    tgt = _C_FIT["a"] * max(float(comp256), 1.0) ** (-_C_FIT["exp"])
+    return float(min(hi, max(lo, tgt / _C_FIT["base"])))
