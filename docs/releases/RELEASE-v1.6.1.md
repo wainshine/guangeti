@@ -2,7 +2,7 @@
 
 > 本项目同时维护两套馆阁体：**A 四书白文**（本页，`GuanGe Kai`）与
 > **B 史记抄本**（`GuanGe Kai B`）。两者独立训练、独立评估、互不复用字形。
-> 本文件是**项目级**发布说明；B 线的细节见 [`README-B.md`](../README-B.md) 与
+> 本文件是**项目级**发布说明；B 线的细节见 [`README-B.md`](../../README-B.md) 与
 > [`docs/RELEASE-v1.1.0-B.md`](RELEASE-v1.1.0-B.md)。
 
 ## 本版做了什么（A 线）
@@ -35,7 +35,7 @@
 | 质检 | 三道硬闸（QA / 打包新鲜度 / 验收），不过即中止 |
 
 **入口**：安装 `GuanGeKai-B-Regular.ttf`，家族名 `GuanGe Kai B`，可与 `GuanGe Kai` 并存；
-数据与许可见 [`docs/DATA-B.md`](DATA-B.md)，实验记录见 [`docs/EXPERIMENTS-B.md`](EXPERIMENTS-B.md)。
+数据与许可见 [`docs/DATA-B.md`](../DATA-B.md)，实验记录见 [`docs/EXPERIMENTS-B.md`](../EXPERIMENTS-B.md)。
 
 ## 已知限制
 
@@ -53,4 +53,4 @@
 **B**：`GuanGeKai-B-Regular.ttf`（15.45 MB）、`GuanGeKai-B-Real.ttf`（3.76 MB）、
 `GuanGeKai-B-v1.0.1.zip`（14.33 MB，`SHA256SUMS` 10/10 通过）
 
-校验和统一记在 [`docs/DATA.md`](DATA.md)。
+校验和统一记在 [`docs/DATA.md`](../DATA.md)。

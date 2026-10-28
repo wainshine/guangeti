@@ -52,7 +52,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 |---|---|---|---|
 | `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.7.0） | 15.7 MB | `6dfd79d6a1f16cc8` |
 | `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `453d14661745ef2e` |
-| `GuanGeKai-v1.7.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `f7b3d25f21200030` |
+| `GuanGeKai-v1.7.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `57686b31c32c2276` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
@@ -297,7 +297,7 @@ v1.6.4 混合检查点（7.9%→4.1%，补位模型阈值 −0.45）；v1.6.5 �
 > → §16 v1.5.0 → §17 v1.3.x → §18 v1.2.1 → §19 v1.2.0。
 
 **项目级发布**：A 四书 `GuanGe Kai` **v1.6.1** + B 史记 `GuanGe Kai B` **v1.0.1**，
-联合说明见 `docs/RELEASE-v1.6.1.md`。
+联合说明见 `docs/releases/RELEASE-v1.6.1.md`。
 
 - **回退字墨量修正真正落到制品**：1,833 个 ribbon 回退字用 256px 口径重画，
   ink/文楷 **0.714 → 0.852**（拟合目标 0.824）。v1.6.0 只改了代码没重生成数据，本版补齐。
@@ -314,7 +314,7 @@ v1.6.4 混合检查点（7.9%→4.1%，补位模型阈值 −0.45）；v1.6.5 �
 > → §16 v1.3.x → §17 v1.2.1 → §18 v1.2.0。
 
 **两线合一**：本版起项目同时发布两套字体——A 四书（`GuanGe Kai` **v1.6.0**）与
-B 史记（`GuanGe Kai B` **v1.2.1**，见 `README-B.md` 与 `docs/RELEASE-v1.6.0.md`）。
+B 史记（`GuanGe Kai B` **v1.2.1**，见 `README-B.md` 与 `docs/releases/RELEASE-v1.6.0.md`）。
 
 A 线字形**重新由源码构建**（v1.5.2 之后轮廓缓存被实验污染），并修了四处共用代码：
 `fontbuild._orient` 改曲线采样判定嵌套、`glyphvec.trace` 的 `turdsize` 8→2、

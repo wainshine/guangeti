@@ -1,7 +1,7 @@
 # 新会话提示词：用《史记》抄本做 GuanGeKai-B
 
 > **状态：已完成（2026-10-26）**。B 线已发版 `GuanGe Kai B v1.1.0`（随主版本 v1.6.0）。
-> 结果见 `README-B.md`、`docs/RELEASE-v1.1.0-B.md`、`docs/PLAN-B.md`、`docs/EXPERIMENTS-B.md`、
+> 结果见 `README-B.md`、`docs/releases/RELEASE-v1.1.0-B.md`、`docs/PLAN-B.md`、`docs/EXPERIMENTS-B.md`、
 > `docs/DATA-B.md`。**本文件转为历史留档**，不再作为执行指引；若要重跑或续训，看
 > `docs/PLAN-B.md` §5 与 `docs/DATA-B.md` §7 的复现步骤。
 

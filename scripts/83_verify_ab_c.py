@@ -30,7 +30,7 @@ A_FONTS = ["GuanGeKai-Regular.ttf", "GuanGeKai-Real.ttf"]
 B_FONTS = ["GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf"]
 # zip hashes are release-time snapshots: they change when a package is rebuilt,
 # which is expected.  Update them in the same commit as the release.
-ZIPS = {"GuanGeKai-v1.7.0.zip": "f7b3d25f2120003045e3b930c1b17df4b5331f42c07b1858c9e8f0b1b92f2b36",
+ZIPS = {"GuanGeKai-v1.7.0.zip": "57686b31c32c22761eb7a47398bf0726eb207dd384f4e8309ed14fd6a5e74cfd",
         "GuanGeKai-B-v1.2.2.zip": "d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491"}
 
 

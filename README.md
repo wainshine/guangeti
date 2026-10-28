@@ -1,33 +1,40 @@
 # 館閣楷 GuanGe Kai
 
-> 一款以明代寫本《四書白文》為字形來源的**館閣體**開源字體。
-> An open-source *guan-ge-ti* (館閣體, Ming court/office regular script) typeface built from the Ming manuscript *四書白文*.
+> 三套以明代寫本為字形來源的**館閣體**開源字體：
+> `GuanGe Kai`（四書白文）、`GuanGe Kai B`（史記）、`GuanGe Kai C`（永樂大典）。
+> Three open-source *guan-ge-ti* (館閣體, Ming court regular script) typefaces, each built from a different Ming manuscript.
 
 <p align="center">
   <img src="docs/images/specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.7.0（2026-10-28）** —— 本專案含兩套字體：四書本（本頁，`GuanGe Kai`）與史記本（`GuanGe Kai B`，見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為寫本真跡，19,317 字為合成（GAN 18,518 字＝95.9%；帶狀掃掠回退 799 字＝4.1%）。
-> 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的墨笔筆鋒**；
+> **狀態：A v1.7.0 / B v1.2.2 / C v1.0.1（2026-10-28）** —— 本專案含三套字體：
+> 四書本（本頁，`GuanGe Kai`）、史記本（`GuanGe Kai B`，見 `README-B.md`）、
+> 永樂大典本（`GuanGe Kai C`，見 `README-C.md`）。三套均為 20,992 字全覆蓋。
+> 本頁以下內容只講 A 線；B、C 的指標與限制見各自的 README。
+> 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的墨筆筆鋒**；
 > 與寫本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
 
-## 兩套字體
+## 三套字體
 
-本專案同時維護兩套獨立的館閣體，**各自訓練、各自評估、互不混用字形**：
+本專案同時維護三套獨立的館閣體，**各自訓練、各自評估、互不混用字形**：
 
-| | A · 四書白文 | B · 史記抄本 |
-|---|---|---|
-| 家族名 | `GuanGe Kai` | `GuanGe Kai B` |
-| 版本 | **v1.7.0** | **v1.2.2** |
-| 真跡 | 1,675 字 | **4,078 字** |
-| 覆蓋 | 20,992 / 20,992 | 20,992 / 20,992 |
-| 檔案 | `GuanGeKai-Regular.ttf` / `-Real.ttf` | `GuanGeKai-B-Regular.ttf` / `-B-Real.ttf` |
-| 詳細 | 本頁 | [README-B.md](README-B.md)（v1.2.1） |
+| | A · 四書白文 | B · 史記 | C · 永樂大典 |
+|---|---|---|---|
+| 書體來源 | 名家精寫本（舊傳姜立綱，存疑） | 舊抄本（舊傳姜立綱） | 嘉靖內府錄副本（多人分抄） |
+| 家族名 | `GuanGe Kai` | `GuanGe Kai B` | `GuanGe Kai C` |
+| 版本 | **v1.7.0** | **v1.2.2** | **v1.0.1** |
+| 真跡 | 1,675 字 | 4,078 字 | **5,303 字**（基本區 25.3%） |
+| 帶狀回退 | 4.1% | 3.5% | 7.8% |
+| 覆蓋 | 20,992 / 20,992 | 20,992 / 20,992 | 20,992 / 20,992 |
+| 檔案 | `GuanGeKai-*.ttf` | `GuanGeKai-B-*.ttf` | `GuanGeKai-C-*.ttf` |
+| 詳細 | 本頁 | [README-B.md](README-B.md) | [README-C.md](README-C.md) |
 
-兩套可同時安裝，用家族名區分。本版的項目級發布說明見
-[docs/RELEASE-v1.7.0.md](docs/RELEASE-v1.7.0.md)（A 線 v1.7.0）與 [docs/RELEASE-v1.2.1-B.md](docs/RELEASE-v1.2.1-B.md)（B 線 v1.2.1）。
+三套可同時安裝，用家族名區分。各自的發布說明：
+[A v1.7.0](docs/RELEASE-v1.7.0.md) · [B v1.2.2](docs/RELEASE-v1.2.2-B.md) · [C v1.0.1](docs/RELEASE-v1.0.1-C.md)。
+舊版本的發布說明見 [docs/releases/](docs/releases/README.md)。
 
 ## 這是什麼
 
@@ -96,18 +103,14 @@ GuanGeKai (20,992 字)
 |---|---|---|
 | [docs/method.md](docs/method.md) | 想懂技術路線的人 | 從掃描到字體的完整流程與參數 |
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
-| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 37 組實驗（E1–E37）的配置、指標、判定、复現命令 |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 40 組實驗（E1–E40）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.7.0.md](docs/RELEASE-v1.7.0.md) | 想了解本版改了什麼的人 | **v1.7.0（A 線）**：字體元數據與術語更正（刻本 → 寫本）、新增發版閘 | <!-- term-ok -->
-| [docs/RELEASE-v1.6.5.md](docs/RELEASE-v1.6.5.md) | 考古的人 | v1.6.5：發布口徑可複現 |
-| [docs/RELEASE-v1.6.4.md](docs/RELEASE-v1.6.4.md) | 考古的人 | v1.6.4：混合檢查點，回退率 7.9%→4.1% |
-| [docs/RELEASE-v1.6.3.md](docs/RELEASE-v1.6.3.md) | 考古的人 | v1.6.3：複雜度加權，回退率 9.5%→7.9% |
-| [docs/RELEASE-v1.6.2.md](docs/RELEASE-v1.6.2.md) | 考古的人 | v1.6.2：fontRevision 修正、品質閘門 |
-| [docs/RELEASE-v1.6.1.md](docs/RELEASE-v1.6.1.md) | 考古的人 | v1.6.1（專案級）：A v1.6.1 + B v1.0.1 |
-| [docs/RELEASE-v1.6.0.md](docs/RELEASE-v1.6.0.md) | 考古的人 | v1.6.0：兩線首次合一的聯合發布 |
-| [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.0.0 |
-| [docs/RELEASE-v1.5.1.md](docs/RELEASE-v1.5.1.md) | 考古的人 | v1.5.1：更正小字號披露、provenance 三態 |
-| [docs/RELEASE-v1.5.0.md](docs/RELEASE-v1.5.0.md) | 考古的人 | v1.5.0：合成字換成 GAN |
+| [docs/RELEASE-v1.7.0.md](docs/RELEASE-v1.7.0.md) | 想了解本版改了什麼的人 | **A v1.7.0**：字體元數據與術語更正（刻本 → 寫本）、新增發版閘 | <!-- term-ok -->
+| [docs/RELEASE-v1.2.2-B.md](docs/RELEASE-v1.2.2-B.md) | B 線本版說明 | **B v1.2.2**：術語更正與重打包 |
+| [docs/RELEASE-v1.0.1-C.md](docs/RELEASE-v1.0.1-C.md) | C 線本版說明 | **C v1.0.1**：字重標定、孔洞修復、簡繁錯配清理 |
+| [docs/releases/](docs/releases/README.md) | 考古的人 | 已被取代的 17 份發布說明（按線與版本索引） |
+| [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.2.2 |
+| [README-C.md](README-C.md) | 想用永樂大典本的人 | GuanGe Kai C v1.0.1 |
 | [docs/PLAN-v1.5.md](docs/PLAN-v1.5.md) | 想知道下一步的人 | 把 GAN 推到可驗收的四個里程碑（M0–M4）與決策點 |
 | [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 考古的人 | **已作廢**：v1.4.0 起三線並行的原始設想 |
 | [docs/REPORTS/](docs/REPORTS/) | 想看實測數據的人 | 每次橫向評測的完整報告（指標表 + 兩個面板） |

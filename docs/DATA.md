@@ -306,4 +306,4 @@ rm -rf data/zi2zi_ds2 data/fonts_target data/ids/Unihan_IRGSources.txt
 > 目前 git 跟踪的文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
 > 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
 > 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。
-f7b3d25f2120003045e3b930c1b17df4b5331f42c07b1858c9e8f0b1b92f2b36  GuanGeKai-v1.7.0.zip
+57686b31c32c22761eb7a47398bf0726eb207dd384f4e8309ed14fd6a5e74cfd  GuanGeKai-v1.7.0.zip

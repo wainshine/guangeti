@@ -48,7 +48,7 @@ FULL_WHITELIST = {
     "scripts/30_gate_rules.py",      # gate-rule ids live here by design
 }
 # History: published release notes and audit reports are not rewritten.
-PREFIX_WHITELIST = ("docs/RELEASE-", "docs/AUDIT-")
+PREFIX_WHITELIST = ("docs/RELEASE-", "docs/releases/", "docs/AUDIT-")
 # Legacy binaries / packaged snapshots: reported separately, never fatal.
 LEGACY_PREFIX = ("build/", "release/", "release-b/", "release-c/")
 
