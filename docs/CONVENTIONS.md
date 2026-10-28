@@ -204,7 +204,7 @@ ZIPS = {"GuanGeKai-v1.6.5.zip": "226ef25d43fde048e4b08f930672aa8ac3615c2f4fbe068
 
 ## 7. 验收：脚本，不是 grep
 
-`scripts/97_check_terms.py`（已建，当前 **exit=1**，91 处待改 / 22 个文件）：
+`scripts/97_check_terms.py`（已建。A/共用部分已改完，当前 **剩 17 处，全部在 B/C 线文档**）：
 
 - 扫 `*.md`、`docs/*.md`、`scripts/*.py`、三个 `release*/README.md`；
 - 词表：`刻本`、`刻刀|刀刻|雕版|版刻|摹刻|翻刻`、`woodblock|block-print`、`路线 A/B/C`、`方案 A/B/C`；
@@ -256,7 +256,7 @@ ZIPS = {"GuanGeKai-v1.6.5.zip": "226ef25d43fde048e4b08f930672aa8ac3615c2f4fbe068
 2. 代码注释与 name 表（11_build_full.py 下次发版生效）
 3. PLAN-v1.4 / PLAN-v1.2 顶部作废声明
 4. scripts/12_specimen.py 已改；仓库内 specimen.png 可重出（包内不动，见 §4）
-5. 跑 scripts/97_check_terms.py：91 处 → 0，并挂进发布流程
+5. 跑 scripts/97_check_terms.py：A/共用已清（91 → 17，余下全在 B/C 文档），等 B/C 清零后挂闸
 6. B/C 线各自执行 §5.3 / §5.4
 7. 全绿后本文加「已完成」横幅，降级为历史
 ```

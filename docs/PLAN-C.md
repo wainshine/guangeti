@@ -1,6 +1,6 @@
 # C 线计划：用《永乐大典》美国藏本做 GuanGeKai-C
 
-> 状态：**v1.0.0 已发版**（2026-10-28）。本线产物 `build/GuanGeKai-C-*`、`work-c/`、`release-c/`，
+> 状态：**v1.0.1 已发版**（2026-10-28）。本线产物 `build/GuanGeKai-C-*`、`work-c/`、`release-c/`，
 > 文档 `README-C.md`、`docs/*-C.md`。A 线（`build/GuanGeKai-*`、`work/`、`release/`）与
 > B 线（`build/GuanGeKai-B-*`、`work-b/`、`release-b/`）的路径**一律不写**。
 
@@ -11,7 +11,7 @@
 | 源数据 | `永乐大典美国藏本/` 41 册 PDF，3,538 页；明嘉靖隆庆间内府重写本；美国国会图书馆藏，书格整理发布 |
 | 产物 | `build/GuanGeKai-C-Regular.ttf`（全字集）、`build/GuanGeKai-C-Real.ttf`（仅真迹） |
 | 家族名 | `GuanGe Kai C` / PS 名 `GuanGeKai-C-Regular`、`GuanGeKai-C-Real` |
-| 发布包 | `release-c/` + `GuanGeKai-C-v1.0.0.zip` |
+| 发布包 | `release-c/` + `GuanGeKai-C-v1.0.1.zip` |
 | 工作目录 | `work-c/` |
 | 覆盖目标 | CJK 基本区 20,992 字 |
 
@@ -95,14 +95,14 @@
 
 ## 7. 发布口径（v1.0.1）
 
-- 版本 **v1.0.1**；`data/release-c.json` 记录 checkpoint（clean 标签后从零重训 80 轮）、
+- 版本 **v1.0.1**；`data/release-c.json` 记录 checkpoint（清理标签后从零重训，训到 ep52；发布取 **ep30**，理由见 EXPERIMENTS-C C/E15）、
   阈值 0.30、close 1、blend 0.8、hole_repair、`--struct-guard`、逐字墨量标定、留出页比例。
 - v1.0.1 的三处质量修复（去噪、逐字墨量标定、简体码位错配标签）见 `EXPERIMENTS-C.md` C/E15。
 - 发版前硬闸（2026-10-28 全部通过）：
   - `80_qa_c.py`：覆盖率 20,992；无空/过小/过大字形；真迹子集数量与 `chosen.jsonl` 一致；孔洞审计达标；
   - `83_verify_ab_c.py`：`A/B INTACT`；
   - `84_accept_c.py`：合成/真迹字重比 1.00±0.10。
-- A/B 同步发版：见 `docs/RELEASE-v1.0.0-C.md`。
+- A/B 同步发版：见 `docs/RELEASE-v1.0.1-C.md`。
 
 ## 8. 人工核的边界
 

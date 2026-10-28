@@ -1,5 +1,5 @@
 {
- "version": "1.6.4",
+ "version": "1.7.0",
  "generator": {
   "script": "scripts/10_generate.py",
   "method": "gan",
@@ -17,5 +17,6 @@
   "ribbon_fb": 799
  },
  "reproduce": "python3 scripts/10_generate.py --method gan --res 512 --simplify 2.0 --workers 6 --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45",
- "note": "E40: the fill-in model needs its own threshold; -0.45 was calibrated so its ink matches the primary model (3.8% gap)."
+ "note": "E40: the fill-in model needs its own threshold; -0.45 was calibrated so its ink matches the primary model (3.8% gap).",
+ "font_metadata": "Ming manuscript (fixed in 1.7.0; earlier builds said woodblock print)"
 }

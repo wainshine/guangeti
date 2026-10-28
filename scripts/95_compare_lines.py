@@ -32,16 +32,36 @@ Notes
   not as glyphs -- otherwise every space would render as a .notdef box.
 * Output is one indexed PNG, target < 1.5 MB.
 
+What this is / is not
+---------------------
+It is a **one-glance sanity sheet**: same text, three typefaces, three sizes, plus a
+numeric header (version, real/gan/ribbon counts, ink ratio on a seeded sample).
+It is **not** a test suite: a regression outside the sample text will not show up.
+It exists to catch the classes of defect you can see instantly -- a line suddenly
+thinner, a line missing strokes, a fallback ratio jumping -- before packaging.
+
+It refuses to draw a sheet that would lie:
+  * `--check` verifies each `build/GuanGeKai*.ttf` matches the hash in its
+    `release*/SHA256SUMS`; a stale font (rebuilt but not packaged) exits 2;
+  * the seeded random row (`--seed`, default 7) draws 32 codepoints from the block so
+    the sheet is not limited to hand-picked samples;
+  * a line whose font is missing is reported and excluded, never silently drawn empty.
+
 Usage
 -----
     python3 scripts/95_compare_lines.py            # -> docs/images/lines-compare.png
+    python3 scripts/95_compare_lines.py --check    # also verify packaged hashes
     python3 scripts/95_compare_lines.py --show     # print sample text
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import random
 from pathlib import Path
+
+import numpy as np
 
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
@@ -66,6 +86,27 @@ SAMPLES = [
 SIZES = [48, 24, 14]
 
 BG, FG, LABEL, RULE, DIM = 252, 20, 110, 208, 150
+BLOCK = (0x4E00, 0x9FFF)
+RANDOM_ROW = 32
+
+
+def _sha(p: Path) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _release_hash(rel: str, name: str) -> str | None:
+    sums = ROOT / rel / "SHA256SUMS"
+    if not sums.exists():
+        return None
+    for line in sums.read_text().splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[1] == name:
+            return parts[0]
+    return None
 
 
 def _version(path: Path) -> str:
@@ -94,6 +135,24 @@ def _metrics(rel: str) -> str:
     return f"真跡 {real:,}  GAN {gen:,}  回退 {ribbon:,} ({fb:.1f}%)"
 
 
+def _ink_ratio(font_path: Path, chars: str, size: int = 128) -> float:
+    """Median ink area of `chars` relative to WenKai -- a crude weight/darkness gauge."""
+    base = ImageFont.truetype(str(BASE), size)
+    target = ImageFont.truetype(str(font_path), size)
+    ratios = []
+    for ch in chars:
+        a = Image.new("L", (size * 2, size * 2), 0)
+        b = Image.new("L", (size * 2, size * 2), 0)
+        ImageDraw.Draw(a).text((0, size * 1.72), ch, font=base, fill=255, anchor="ls")
+        ImageDraw.Draw(b).text((0, size * 1.72), ch, font=target, fill=255, anchor="ls")
+        ia = (np.asarray(a) > 127).sum()
+        ib = (np.asarray(b) > 127).sum()
+        if ia:
+            ratios.append(ib / ia)
+    ratios.sort()
+    return ratios[len(ratios) // 2] if ratios else float("nan")
+
+
 def draw_spaced(d: ImageDraw.ImageDraw, y: int, x: int, text: str,
                 font: ImageFont.FreeTypeFont, fill: int) -> None:
     """Draw text treating spaces as real gaps (the faces have no space glyph)."""
@@ -108,16 +167,45 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--width", type=int, default=1500)
+    ap.add_argument("--check", action="store_true",
+                    help="verify build/*.ttf against release*/SHA256SUMS (exit 2 on mismatch)")
+    ap.add_argument("--seed", type=int, default=7, help="seed for the random row")
     ap.add_argument("--show", action="store_true")
     args = ap.parse_args()
 
+    # seeded random row: same codepoints for every line, drawn from the block, so the
+    # sheet is not limited to hand-picked characters
+    rng = random.Random(args.seed)
+    pool = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1)]
+    rnd = "".join(rng.sample(pool, RANDOM_ROW))
+    samples = list(SAMPLES) + [("隨機抽樣", rnd)]
+
     if args.show:
-        for k, v in SAMPLES:
+        for k, v in samples:
             print(f"{k}: {v}")
 
     fonts = [(t, n, Path(p), rel) for t, n, p, rel in LINES if Path(p).exists()]
     if not fonts:
         raise SystemExit("ABORT: no GuanGeKai*.ttf under build/")
+
+    # --- packaged-hash guard: never draw a sheet from a font that is not what shipped
+    stale = []
+    for tag, _name, path, rel in fonts:
+        want = _release_hash(rel, path.name)
+        if want and _sha(path) != want:
+            stale.append(f"{tag} {path.name}: build≠release/{rel}/SHA256SUMS")
+    for tag, _name, path, rel in fonts:
+        if not _release_hash(rel, path.name):
+            stale.append(f"{tag} {path.name}: {rel}/SHA256SUMS 无此条目（未打包？）")
+    if stale and args.check:
+        print("STALE — 字体与发布包不一致，先打包再出图：")
+        for item in stale:
+            print("   ", item)
+        raise SystemExit(2)
+    if stale:
+        print("! 注意：字体与发布包不一致（用 --check 可让它变成硬错）")
+        for item in stale:
+            print("   ", item)
     if not Path(BASE).exists():
         raise SystemExit(f"ABORT: base face missing: {BASE}")
 
@@ -128,13 +216,13 @@ def main() -> None:
     need = 0
     for size in SIZES:
         f = ImageFont.truetype(str(BASE), size)
-        for _, text in SAMPLES:
+        for _, text in samples:
             need = max(need, int(f.getlength(text) + len(text.split(" ")) * size * 0.42))
     img_w = max(args.width, need + tag_w + pad * 2)
 
     header_h = 78
     row_h = {s: int(s * 1.55) for s in SIZES}
-    total_h = header_h + sum((row_h[s] + 2) * len(fonts) * len(SAMPLES) + 20 * len(SAMPLES) + 26 for s in SIZES) + 34
+    total_h = header_h + sum((row_h[s] + 2) * len(fonts) * len(samples) + 20 * len(samples) + 26 for s in SIZES) + 34
 
     img = Image.new("L", (img_w, total_h), BG)
     d = ImageDraw.Draw(img)
@@ -142,8 +230,11 @@ def main() -> None:
     d.text((pad, 12), "館閣楷三線對照  GuanGe Kai  A（四書） / B（史記） / C（永樂大典）",
            font=label_font, fill=FG)
     y = 36
+    ink_ref = rnd[:24]
     for i, (tag, name, path, rel) in enumerate(fonts):
-        d.text((pad, y), f"{tag}  {name}  {_version(path)}   {_metrics(rel)}",
+        ratio = _ink_ratio(path, ink_ref)
+        d.text((pad, y),
+               f"{tag}  {name}  {_version(path)}   {_metrics(rel)}   墨量/文楷 {ratio:.2f}",
                font=tag_font, fill=90 if i == 0 else LABEL)
         y += 15
 
@@ -151,7 +242,7 @@ def main() -> None:
     for size in SIZES:
         d.text((pad, y), f"{size} px", font=label_font, fill=LABEL)
         y += 20
-        for title, text in SAMPLES:
+        for title, text in samples:
             d.text((pad, y + 2), title, font=tag_font, fill=LABEL)
             y += 20
             for tag, _name, path, _rel in fonts:

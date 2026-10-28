@@ -1,6 +1,6 @@
 """M0a: can a low-level discriminator tell real glyphs from synthesised ones at small sizes?
 
-Real glyphs are passed through a light denoise first, so that woodblock scan noise
+Real glyphs are passed through a light denoise first, so that manuscript scan noise
 does not by itself make the two classes separable.  A high AUC means the *shape*
 difference survives downscaling; AUC ~0.5 means it is invisible at that size.
 """

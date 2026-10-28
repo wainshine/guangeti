@@ -27,12 +27,12 @@
 
 **指标不受影响**：Dice、墨量、chamfer、孔洞、端帽都是对图像测的，与「刻/写」无关，**无需重算**。
 
-## E2. 已发布字体的 name 表仍写 woodblock（v1.6.5 及以前）
+## E2. 已发布字体的 name 表曾写 woodblock（**v1.7.0 已修复**）
 
 `build/GuanGeKai-Regular.ttf` 的 name ID 0 为
 `Real glyphs extracted from the Ming woodblock print 四書白文...`。
 
-- 源字符串已在 `scripts/11_build_full.py:51` 改为 manuscript，**下一版重建时生效**；
+- 源字符串已在 `scripts/11_build_full.py:51` 改为 manuscript，**v1.7.0 重建后已生效**（`6dfd79d6…`）；
 - v1.6.5 二进制**不重建**（重建会改 TTF 哈希、连带 `release/SHA256SUMS` 与 `83_verify_ab_c.py` 的基线）；
 - `97_check_terms.py` 对 `build/*.ttf` 加白名单，输出里单列「已知遗留」。
 
@@ -43,18 +43,19 @@
 ```
 release/README.md     v1.6.5
 release-b/README.md   v1.2.1
-release-c/README.md   v1.0.1
+release-c/README.md   v1.0.1（2026-10-28 联合发版时已重打包，本条不再适用）
 ```
 
-**决定**：不重新发版。仓库文档为准，包内为历史快照。`docs/DATA.md`、`DATA-B.md`、`DATA-C.md`
-各记一行 drift 说明；`83_verify_ab_c.py` 的 zip 哈希视为发布快照，不随文档变动。
+**决定**：A/B 不重新发版，包内为历史快照；**C 线例外**——v1.0.1 在 2026-10-28 三线联合发版时重打包
+（字体未变，README 已按当前 `README-C.md` 更新），C 的 drift 解除。`docs/DATA.md`、`DATA-B.md`
+记 drift；`83_verify_ab_c.py` 的 A/B zip 哈希视为发布快照，不随文档变动。
 
 ## E4. `release*/specimen.png` 与 `book-vs-font*.png` 带旧措辞
 
 这些图里印着「明代《四書白文》刻本」，且都在 `release*/SHA256SUMS` 内。
 
 - 仓库里的 `docs/images/specimen.png` 可重出（生成器 `scripts/12_specimen.py` 已改）；
-- 包内旧图**不动**，与 E3 同性质；
+- 包内旧图**不动**，与 E3 同性质（C 线的 `specimen-c.png` / `book-vs-font-c.jpg` 图注本就写「重寫本」，不在本条）；
 - 若要整包更新，需一次正式发版（改哈希、改 `83`、改 DATA），不在本轮范围。
 
 ## E5. A 线红像素比例（旧数字更正过一次，这次改成分布）

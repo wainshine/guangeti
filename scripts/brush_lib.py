@@ -207,7 +207,7 @@ def glyph_frames(mask: np.ndarray, size: int = SIZE) -> list[dict]:
 def model_radius(vert, d_free, dj, p) -> np.ndarray:
     """r = r0 * (1 + k*vert^pw) * (1 + be*exp(-(d_free/le)^2)) * (1 + bj*exp(-(dj/lj)^2))
 
-    Free ends are *thicker* than stroke bodies in this woodblock print (顿笔),
+    Free ends are *thicker* than stroke bodies in this manuscript (顿笔),
     not thinner — measured on 150 real glyphs.
     """
     r0, k, pw, be, le, bj, lj = p

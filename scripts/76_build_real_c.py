@@ -53,10 +53,11 @@ def main():
     ap.add_argument("--pitch-floor", type=float, default=180.0)
     ap.add_argument("--min-glyphs", type=int, default=1000)
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--hole-repair", action="store_true",
+    ap.add_argument("--hole-repair", action="store_true", default=True,
                     help="escalate the closing kernel for glyphs that still have no "
                          "counter where WenKai draws one")
-    ap.add_argument("--close", type=int, default=0,
+    ap.add_argument("--no-hole-repair", dest="hole_repair", action="store_false")
+    ap.add_argument("--close", type=int, default=3,
                     help="morphological closing before tracing (px at 300 dpi)")
     ap.add_argument("--no-denoise", dest="denoise", action="store_false",
                     help="keep paper specks and pinholes (only for A/B comparison)")
@@ -140,14 +141,17 @@ def main():
     print("glyphs", len(glyphs), f"(counter repair with a bigger kernel: {n_repaired})")
     if len(glyphs) < args.min_glyphs:
         raise SystemExit(f"ABORT: only {len(glyphs)} real glyphs — refusing to overwrite "
-                         f"{args.out} and work-c/real_contours.jsonl")
-    with open(wd / "real_contours.jsonl", "w") as fh:
+                         f"{args.out} and {ctr}")
+    ctr = wd / ("real_contours.jsonl" if not args.limit
+                else f"real_contours_limit{args.limit}.jsonl")
+    with open(ctr, "w") as fh:
         for ch, cs in glyphs.items():
             fh.write(json.dumps({"char": ch, "contours": cs, "src": "real"},
                                 ensure_ascii=False) + "\n")
     build_font(glyphs, Path(args.out), family=FAMILY, style="Real", version=VERSION,
                copyright_text=COPYRIGHT)
-    json.dump(used, open(wd / "real_glyph_sources.json", "w"), ensure_ascii=False)
+    if not args.limit:
+        json.dump(used, open(wd / "real_glyph_sources.json", "w"), ensure_ascii=False)
     print("wrote", args.out)
 
 

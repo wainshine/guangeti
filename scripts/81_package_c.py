@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import shutil
+import sys
 import time
 from pathlib import Path
 
@@ -43,18 +44,36 @@ def main():
     missing_src = [str(p) for p in srcs if not p.exists()]
     if missing_src:
         raise SystemExit("ABORT: packaging inputs missing: " + ", ".join(missing_src))
-    # Each font depends on a different input set: the full font needs both files, the
-    # real subset only chosen.jsonl.  Comparing both against both was a false positive.
-    deps = {full: (wd / "chosen.jsonl", wd / "generated.jsonl"),
-            real: (wd / "chosen.jsonl",)}
-    for f, ins in deps.items():
-        newest = max((p.stat().st_mtime, p.name) for p in ins)
-        if f.stat().st_mtime < newest[0] - 1:
-            raise SystemExit(
-                f"ABORT: {f.name} is older than {newest[1]} "
-                f"({time.strftime('%H:%M', time.localtime(f.stat().st_mtime))} < "
-                f"{time.strftime('%H:%M', time.localtime(newest[0]))}) — "
-                f"rebuild the font before packaging")
+    # Input pinning: `79_build_full_c.py` writes a manifest with the SHA256 of the
+    # inputs it actually built from.  Comparing hashes (not mtimes) catches the case
+    # that burned v1.0.1: a later regeneration of generated.jsonl was silently paired
+    # with an older font, so provenance/stats described a different build.
+    man_p = wd / "build_manifest.json"
+    if man_p.exists():
+        man = json.loads(man_p.read_text())
+        for key, path in (("chosen_sha256", wd / "chosen.jsonl"),
+                          ("generated_sha256", wd / "generated.jsonl")):
+            if man.get(key) and sha256(path) != man[key]:
+                raise SystemExit(f"ABORT: {path.name} changed since the font was built "
+                                 f"({man.get(key, '')[:12]} != {sha256(path)[:12]}) — "
+                                 f"rerun 79_build_full_c.py")
+        if man.get("font_sha256") and sha256(full) != man["font_sha256"]:
+            raise SystemExit("ABORT: build/GuanGeKai-C-Regular.ttf does not match the "
+                             "build manifest — rebuild before packaging")
+    else:
+        # legacy tree (pre-manifest): keep the old mtime gate, but say so loudly
+        print("WARNING: work-c/build_manifest.json missing — falling back to mtime check. "
+              "Run 79_build_full_c.py to create it.", file=sys.stderr)
+        deps = {full: (wd / "chosen.jsonl", wd / "generated.jsonl"),
+                real: (wd / "chosen.jsonl",)}
+        for f, ins in deps.items():
+            newest = max((p.stat().st_mtime, p.name) for p in ins)
+            if f.stat().st_mtime < newest[0] - 1:
+                raise SystemExit(
+                    f"ABORT: {f.name} is older than {newest[1]} "
+                    f"({time.strftime('%H:%M', time.localtime(f.stat().st_mtime))} < "
+                    f"{time.strftime('%H:%M', time.localtime(newest[0]))}) — "
+                    f"rebuild the font before packaging")
     for f in (full, real):
         shutil.copy2(f, out / f.name)
     shutil.copy2(ROOT / "OFL.txt", out / "OFL.txt")

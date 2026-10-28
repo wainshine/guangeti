@@ -1,6 +1,6 @@
 """Page processing: deskew, column detection, character cell segmentation.
 
-Designed for the 四书白文 woodblock scan (vertical columns, right-to-left,
+Designed for the 四书白文 manuscript scan (vertical columns, right-to-left,
 two facing pages per scan).
 """
 from __future__ import annotations

@@ -35,7 +35,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", default=str(WORK))
     ap.add_argument("--holdout", default=str(WORK / "holdout_pages.json"))
-    ap.add_argument("--out", default=str(WORK / "pairs_clean.npz"))
+    ap.add_argument("--out", default="",
+                    help="default: pairs_clean.npz for --rank 0, pairs_clean_second.npz for --rank 1")
     ap.add_argument("--pitch-floor", type=float, default=180.0)
     ap.add_argument("--sigma", type=float, default=0.0)
     ap.add_argument("--rank", type=int, default=0,
@@ -126,7 +127,12 @@ def main():
     if SIGMA > 0:
         Y = np.stack([cv2.GaussianBlur(y.astype(np.float32), (0, 0), SIGMA).astype(np.uint8)
                       for y in Y])
-    out = Path(args.out)
+    out = Path(args.out) if args.out else wd / (
+        "pairs_clean_second.npz" if args.rank else "pairs_clean.npz")
+    if args.rank and out.name == "pairs_clean.npz":
+        raise SystemExit("ABORT: --rank 1 must not overwrite pairs_clean.npz "
+                         "(that silently changes the clean-set baseline); "
+                         "use --out pairs_clean_second.npz")
     np.savez_compressed(out, X=X, Y=Y, chars=np.array(chars))
     print(f"clean set {len(chars)} glyphs -> {out}")
     # contact sheet for eyeballing: label on top, book glyph below

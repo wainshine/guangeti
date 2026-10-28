@@ -96,7 +96,7 @@ A 线 `docs/DATA.md` 里那条待办已于 2026-10-25 删除；B 线不复制这
 
 ### 4.1 OCR 与参考文本冲突的处理
 
-抄本是墨笔手抄，通行本是刻本系统，二者必然有差异。处理原则：
+抄本是墨笔手抄，通行本是刻本系统，二者必然有差异。处理原则：<!-- term-ok -->
 
 - 冲突字对**逐条统计**后人工归类（`work-b/ref_conflicts.json`）：
   - **异体**（爲/為、閒/間、說/説、來/来…）→ 标签取 **OCR**（保留抄本字形）；
@@ -158,16 +158,31 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
 （本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
 
-## 6. 校验和（v1.2.1）
+## 6. 校验和（v1.2.2）
 
 ```
-a0cf0912e1a8eb77168a9e665d3cdea6f871c6b0e3f37eb3eee783f544bdbd11  build/GuanGeKai-B-Regular.ttf
-7e9d70862f9341e3194e61fcedd02505158da0205b1e40b8bf92ed9b9d7e1403  build/GuanGeKai-B-Real.ttf
+1367082fd0fffba7b6e8245736cbf200699594ccca3deb86202f7689405ceece  build/GuanGeKai-B-Regular.ttf
+682a1c2295d9b108b930e2f6cbcbc47a01b981c2c6f2c9e3a2c56aa433978971  build/GuanGeKai-B-Real.ttf
+d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1.2.2.zip
+```
+
+历史版本（zip 由所有者手动清理，不主动删）：
+
+```
+58917b5d71b97480cca109243adbe687f6728e13fd9021cda6eede716cf70a72  GuanGeKai-B-v1.2.1.zip
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死
 （`SOURCE_DATE_EPOCH`），同一份输入可复现字节一致的 TTF。
+
+**包内 README 不再有 drift**：v1.2.2 重新打包后，`release-b/README.md` 与仓库
+`README-B.md` 只在图片路径前缀上不同（打包脚本按设计去掉 `docs/images/`），措辞一致。<!-- term-ok -->
+包内 `specimen-b.png` / `book-vs-font-b.jpg` 的图注不含旧术语，无需登记。<!-- term-ok -->
+
+**验收口径**：字重、字号偏移、回退率一律取 `work-b/accept_b.json`（每次发版在图之后跑）；
+干净集指标取 `work-b/eval_v120.json`（thr −0.10，与发版命令一致）。
+孔洞一律引用全字集 `--n 0` 的结果，不引用 300 字抽样。
 
 > 复验 A 线未被波及：`python3 scripts/67_verify_a.py` 必须打印 `A LINE INTACT`
 > 判据已改为**跟随 `release/SHA256SUMS`**（A 每次发版自动更新）；`v1.5.2` 的哈希只作历史兜底。
@@ -177,8 +192,8 @@ c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1
 
 | 文件 | 说明 |
 |---|---|
-| `b_ep010.pt` … `b_ep080.pt` | 每 10 轮快照，各 ≈400 MB；**ep080 是发版检查点**（干净集 Dice 0.532 / chamfer 5.57 / capKS 0.016），ep050/060 是对照 |
-| `b_best.pt` | 按训练内 valDice 选出的“最佳”。**已核对：内容与 `b_ep010.pt` 逐张量相同**（最后一次写入在 ep10，valDice 0.603）。它**不是发版检查点**——发版用 ep50，由干净集 Dice/chamfer 决定；打包脚本走路径参数，不会误读它 |
+| `b_ep010.pt` … `b_ep080.pt` | 每 10 轮快照，各 ≈400 MB；**ep080 是发版检查点**（干净集 Dice 0.523 / chamfer 5.60 / capKS 0.037，口径为发版的 thr −0.10，见 `eval_v120.json`），ep050/060 是对照 |
+| `b_best.pt` | 按训练内 valDice 选出的“最佳”。**已核对：内容与 `b_ep010.pt` 逐张量相同**（最后一次写入在 ep10，valDice 0.603）。它**不是发版检查点**——发版用 **ep080**，由干净集 Dice/chamfer 决定；打包脚本走路径参数，不会误读它 |
 | `b.pt` | 每轮覆盖写的最新权重（停在 ep51 的训练中断点） |
 | `b_split.json` | 按**字**划分的训练/验证清单 |
 
@@ -211,7 +226,9 @@ python3 scripts/58_add_singletons_b.py --work work-b --out work-b/chosen.jsonl
 
 python3 scripts/06_norm.py --work work-b --pitch-floor 100
 python3 scripts/57_build_real_b.py --close 7 --hole-repair
-                                                   # 7px 闭运算 + 逐字升级修孔
+                                                   # 7px 闭运算 + 逐字升级修孔（首次构建）
+# 之后只想改版本号/元数据时，用缓存轮廓重建，不重新描摹：
+#   python3 scripts/57_build_real_b.py --reuse-contours
 python3 scripts/24_build_singles.py --work work-b --pitch-floor 100
                                                    # 干净集（单次字，与训练集互斥）
 python3 scripts/08_make_pairs.py --work work-b --out work-b/pairs/pairs.npz
@@ -226,7 +243,7 @@ python3 scripts/60_generate_b.py --method gan --ckpt work-b/ckpt/b_ep080.pt \
         --ckpt-hardtail work-b/ckpt/b_wt_ep090.pt \
         --threshold -0.10 --close 7 --workers 6 --res 512 --simplify 2.0 \
         --out work-b/generated.jsonl
-                                                   # 16,927 字，约 25 分钟
+                                                   # 16,919 字，约 25 分钟
 python3 scripts/61_fill_fallback_b.py              # 兜底：60 漏掉的字用带状扫掠补齐
 
 python3 scripts/62_build_full_b.py                 # build/GuanGeKai-B-Regular.ttf

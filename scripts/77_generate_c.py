@@ -195,16 +195,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", default=str(WB))
     ap.add_argument("--method", choices=["gan", "ribbon"], default="gan")
-    ap.add_argument("--ckpt", default=str(WB / "ckpt" / "c_ep080.pt"))
+    ap.add_argument("--ckpt", default=str(WB / "ckpt" / "c_ep030.pt"),
+                    help="release checkpoint; see data/release-c.json")
     ap.add_argument("--rel-width", default=str(WB / "stroke_rel_width.npy"))
     ap.add_argument("--out", default=str(WB / "generated_gan.jsonl"))
     ap.add_argument("--res", type=int, default=512)
     ap.add_argument("--gan-res", type=int, default=256, help="must equal the training resolution")
-    ap.add_argument("--threshold", type=float, default=-0.05,
+    ap.add_argument("--threshold", type=float, default=0.30,
                     help="GAN output threshold. Default is the released operating point "
-                         "(data/release-c.json; calibrated so the clean-set ink ratio is "
-                         "1.00 after the counter repair, see E8). v1.0.x shipped -0.30 "
-                         "because the repair was not yet in the pipeline")
+                         "(data/release-c.json: +0.30); v1.0.0 shipped -0.30")
     ap.add_argument("--ink-lo", type=float, default=0.42,
                     help="guard band on generated/WenKai ink.  The C targets are only "
                          "~0.59 of WenKai (A 0.82, B 0.71), so A/B's 0.6 lower bound "
@@ -224,15 +223,15 @@ def main():
                          "survive the model's output (audit rev3 2-3). On by default; "
                          "pass --no-hole-repair to disable")
     ap.add_argument("--no-hole-repair", dest="hole_repair", action="store_false")
-    ap.add_argument("--close", type=int, default=3,
-                    help="morphological closing (px) applied to the GAN output before tracing. "
-                         "The 大典 leaves are 300 dpi and cleaner than the 史記 scan, so "
-                         "the released kernel is smaller than B's 7; calibrate with "
-                         "scripts/82_eval_c.py")
-    ap.add_argument("--struct-guard", action="store_true",
+    ap.add_argument("--close", type=int, default=1,
+                    help="morphological closing (px) applied to the GAN output before tracing; "
+                         "the released kernel is 1 (data/release-c.json)")
+    ap.add_argument("--struct-guard", action="store_true", default=True,
                     help="for simplified codepoints, fall back to the ribbon renderer when "
                          "the GAN output changes the character's component count by >2 "
-                         "(the model sometimes turns 鸟 into 鳥); needs opencc")
+                         "(the model sometimes turns 鸟 into 鳥); needs opencc. On by "
+                         "default in v1.0.1")
+    ap.add_argument("--no-struct-guard", dest="struct_guard", action="store_false")
     ap.add_argument("--no-ink-normalize", dest="ink_normalize", action="store_false",
                     help="keep the per-character weight variation (off-curve glyphs)")
     ap.add_argument("--ink-a", type=float, default=38.7258)
@@ -243,9 +242,9 @@ def main():
     ap.add_argument("--turdsize", type=int, default=3,
                     help="potrace speck filter for the generated mask (C scans are dusty)")
     ap.add_argument("--no-denoise", dest="denoise", action="store_false")
-    ap.add_argument("--blend", type=float, default=1.0,
-                    help="bbox blend toward WenKai after tracing; the targets were normalised with "
-                         "blend 0.8, so 1.0 re-normalises a second time")
+    ap.add_argument("--blend", type=float, default=0.8,
+                    help="bbox blend toward WenKai after tracing; the released value is 0.8, "
+                         "matching the normalisation used for the training targets")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--only", default="", help="comma separated characters (repair a few)")
     ap.add_argument("--out-append", action="store_true")
@@ -275,6 +274,10 @@ def main():
                 print(f"WARNING: --close {args.close} != released {rel['close']}", flush=True)
             if bool(args.hole_repair) != bool(rel["hole_repair"]):
                 print("WARNING: --hole-repair differs from the released setting", flush=True)
+            if abs(args.blend - rel.get("blend", 0.8)) > 1e-9:
+                print(f"WARNING: --blend {args.blend} != released {rel.get('blend')}", flush=True)
+            if bool(args.struct_guard) != bool(rel.get("struct_guard", True)):
+                print("WARNING: --struct-guard differs from the released setting", flush=True)
     except (OSError, KeyError, json.JSONDecodeError):
         pass
     print("to generate", len(chars), "method", args.method, "threshold", args.threshold,

@@ -9,7 +9,7 @@
 
 | 文件 | 体积 | 来源 | 许可 | 是否入库 |
 |---|---|---|---|---|
-| `四书白文.18卷.旧传明.姜立纲.pdf` | 1.1 GB | 原本藏日本宫内厅书陵部，数字化由其图书寮数字档案完成（档号 1000066720000）；本项目用的 PDF 由书格 shuge.org 整理发布（**扫描非书格所制**） | 原书为公有领域；**书格仅为分享渠道，非权利主体**（向其确认没有授权效力）；扫描件为公版作品的忠实再现，主流法域不认为是独创性作品 | ❌ 不入库 |
+| `四书白文.18卷.旧传明.姜立纲.pdf` | 1.1 GB | **明代精写本（手书墨迹，非刻本）**； 原本藏日本宫内厅书陵部，数字化由其图书寮数字档案完成（档号 1000066720000）；本项目用的 PDF 由书格 shuge.org 整理发布（**扫描非书格所制**） | 原书为公有领域；**书格仅为分享渠道，非权利主体**（向其确认没有授权效力）；扫描件为公版作品的忠实再现，主流法域不认为是独创性作品 | ❌ 不入库 | <!-- term-ok -->
 | `史记.二十四册.传姜立纲抄本.新加坡国立大学藏.水印.pdf` | 1.4 GB | 新加坡国立大学藏本（用户提供） | 同上，**未使用** | ❌ 不入库 |
 | `data/base/LXGWWenKai-Regular.ttf` | 25 MB | [LXGW WenKai v1.530](https://github.com/lxgw/LxgwWenKai/releases) | **OFL 1.1，含 Reserved Font Name**（霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW） | ❌ 不入库（可自行下载） |
 | `data/base/NotoSerifSC-Light.otf` | 23 MB | [noto-cjk](https://github.com/notofonts/noto-cjk) | OFL 1.1，无 RFN | ❌ 不入库 |
@@ -48,7 +48,7 @@
 - **衍生关系**：合成字由霞鹜文楷（OFL，含 RFN）派生 → 本体必须 OFL，且**不得使用 RFN**。已更名：
   - Family：`GuanGe Kai`（不含「霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW」）
   - PostScript：`GuanGeKai-Regular` / `GuanGeKai-Real`
-- **扫描本**：原书（明代刻本）为公有领域；扫描件是公版二维作品的**忠实再现**，
+- **扫描本**：原书（明代写本）为公有领域；扫描件是公版二维作品的**忠实再现**，
   按 *Bridgeman v. Corel*（1999）与国内对纯复制性扫描的独创性门槛，不构成新作品；
   **本项目**也未对扫描图像主张权利。README 已分别署名
   「宫内厅书陵部（藏本与数字化）」与「书格（整理发布）」。
@@ -93,14 +93,21 @@
 
 > 分析用的对比面板（`docs/images/eval-panel*.png`）**不进发布包**，只留在仓库里。
 
+## 4.9 已知 drift（2026-10-28）
+
+- 发布包 `release/README.md` 与 `release/specimen.png` 是 **v1.6.5 发布时的快照**，图上与文内仍写「刻本」； <!-- term-ok -->
+  仓库文档已更正为「写本」。**不重新发版**，详见 `docs/ERRATA.md` E3/E4。
+- 已发布字体 `build/GuanGeKai-Regular.ttf` 的 name 表 ID 0 仍为 `Ming woodblock print`； <!-- term-ok -->
+  源字符串已在 `scripts/11_build_full.py` 改为 `Ming manuscript`，**下一版重建时生效**（ERRATA E2）。
+
 ## 5. 校验和
 
 > 体积单位为十进制 MB（1 MB = 10⁶ 字节），与 Finder 显示一致。
 
 
 ```
-d10ecf00bdb01b53c593f518da4923da8b0615c1b34e371c1ab5f43196762b25  build/GuanGeKai-Regular.ttf
-b0a706b90701ff8b8b7b056faca93c001b16bb81d007fa84e3046f59c764be06  build/GuanGeKai-Real.ttf
+6dfd79d6a1f16cc850fe2095ce72a595939f4735433edec31a7bf27606c86a37  build/GuanGeKai-Regular.ttf
+453d14661745ef2e24c14fdd9e625b36d29cceedae78abcd346154973d7e56f2  build/GuanGeKai-Real.ttf
 c28f20404593ab302c84d93b90bdc9b6564d8bd1460ef2f0fcd5b7cb9e0b5db6  GuanGeKai-v1.5.0.zip
 5c4c59fa62e089fd7225fc2c19ee008a8bf08ab30f67034e0bfbe5492d926dfe  GuanGeKai-v1.5.1.zip
 c998d6df4bce9506a94744ce8147908c0336635083c03f50ebc99f03fcbfc3c6  GuanGeKai-v1.5.2.zip
@@ -299,4 +306,4 @@ rm -rf data/zi2zi_ds2 data/fonts_target data/ids/Unihan_IRGSources.txt
 > 目前 git 跟踪的文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
 > 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
 > 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。
-226ef25d43fde048e4b08f930672aa8ac3615c2f4fbe0680eb5520ac52380cf0  GuanGeKai-v1.6.5.zip
+f7b3d25f2120003045e3b930c1b17df4b5331f42c07b1858c9e8f0b1b92f2b36  GuanGeKai-v1.7.0.zip

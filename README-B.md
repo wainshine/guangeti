@@ -3,8 +3,8 @@
 > 從明抄本《史記》（舊傳姜立綱）整理的一套館閣體開源字型，覆蓋 CJK 基本區
 > U+4E00–U+9FFF 全部 20,992 字，SIL OFL 1.1 授權。
 >
-> **這是第二套（B 線）。** 第一套（A 線，家族名 `GuanGe Kai`）的字形來自明刻本
-> 《四書白文》，兩套字形的**來源不同**，可以同機安裝、分別選用。
+> **這是第二套（B 線）。** 第一套（A 線，家族名 `GuanGe Kai`）的字形來自明寫本
+> 《四書白文》，兩套的**書寫者與場合不同**，可以同機安裝、分別選用。
 
 <p align="center">
   <img src="docs/images/specimen-b.png" width="820" alt="GuanGe Kai B specimen">
@@ -14,8 +14,8 @@
 
 ## 1. 這是什麼
 
-**版本**：本包为 **GuanGe Kai B v1.2.1**，随主版本 **GuanGeKai v1.6.5** 一起发布
-（同一项目、两个字形来源：A = 四书刻本 `GuanGe Kai`，B = 史记抄本 `GuanGe Kai B`，
+**版本**：本包为 **GuanGe Kai B v1.2.2**，随主版本 **GuanGeKai v1.7.0** 一起发布
+（同一项目、两个字形来源：A = 四书精写本 `GuanGe Kai`，B = 史记旧抄本 `GuanGe Kai B`，
 两套家族名并存，互不覆盖）。
 
 - `GuanGeKai-B-Regular.ttf`：完整字集 **20,992 字**（CJK 基本區 100%）＝ 真跡 4,073 + 生成 16,919（含疑難字由第二模型補的 544 個）；
@@ -48,13 +48,13 @@
 
 | | A 線 `GuanGe Kai` | **B 線 `GuanGe Kai B`** |
 |---|---|---|
-| 字形來源 | 明刻本《四書白文》（舊傳姜立綱） | **明抄本《史記》（舊傳姜立綱）** |
-| 載體 | 刀刻刻本 | **墨筆抄本** |
+| 字形來源 | 明寫本《四書白文》（舊傳姜立綱） | **明舊抄本《史記》（舊傳姜立綱）** |
+| 性質 | 名家精寫本 | **舊抄本（抄手水平參差）** |
 | 掃描原生解析度 | 300 dpi | **150 dpi** |
 | 真跡字數 | 1,675（8.0%） | **4,078（19.4%）** |
 | 真跡／生成 | 1,675 / 19,317 | **4,078 / 16,919** |
 
-兩套字的筆性不同：刻本有刀口的方折與飛白，抄本有墨筆的起收與牽絲。**不要混用**，
+兩套都是寫本，筆性的差別來自寫字的人：A 線出自名家，結體最勻；B 線是舊抄，行筆較率。**不要混用**，
 排版時整段選用同一套。若系統裡同時安裝，字型選單會顯示為兩個家族。
 
 ## 3. 數據來源
@@ -77,8 +77,8 @@ PDF（1672 頁，雙頁對開）
   → 標註：OCR 為主，公有領域《史記》對齊作校驗與補漏
   → 選優：每字取穩健 medoid 樣本
   → 真跡：potrace 向量化 → 字身框歸一
-  → 生成：GAN（練到 50 輪，5 層 PatchGAN + hinge + 數據增強）補齊缺字
-     → 缺字 16,927 個：GAN 出字 15,784 + 疑難字第二模型 544 + 守衛回退帶狀掃掠 591（3.5%）
+  → 生成：GAN（練到 80 輪，5 層 PatchGAN + hinge + 數據增強）補齊缺字
+     → 缺字 16,919 個：GAN 出字 15,784 + 疑難字第二模型 544 + 守衛回退帶狀掃掠 591（3.5%）
   → 合字、質檢、打包
 ```
 
@@ -87,10 +87,10 @@ PDF（1672 頁，雙頁對開）
 
 ## 5. 已知限制
 
-1. **生成字不是真跡。** 16,927 個生成字由模型產生（其中 **591 個，即 3.5%**，
+1. **生成字不是真跡。** 16,919 個生成字由模型產生（其中 **591 個，即 3.5%**，
    因守衛不通過而走帶狀掃掠回退，集中在筆畫複雜的字），筆形接近但不等同於抄本。
    需要嚴格字形時請用 `GuanGeKai-B-Real.ttf`。
-   合成字整體比真跡**重約 12.5%**（墨量比 1.125），小字號差距更小（12px 時 ×1.04）。
+   合成字整體比真跡**重約 8.2%**（墨量比 1.082），小字號差距很小（12px 時 ×1.008）。
 2. **抄本用字只覆蓋 4,078 字（19.4%）。** 剩餘 80.6% 是合成的；這是本項目最大的
    質量瓶頸，也是 B 線比 A 線好的地方（A 線只有 8.0%）。
 3. **沒有 hinting。** 小字號依賴系統自動微調。
@@ -125,7 +125,7 @@ python3 scripts/54_label_b.py
 python3 scripts/05_select.py --work work-b --min-samples 2 --drop-flag low_align
 python3 scripts/58_add_singletons_b.py --work work-b --out work-b/chosen.jsonl
 python3 scripts/06_norm.py --work work-b --pitch-floor 100
-python3 scripts/57_build_real_b.py            # build/GuanGeKai-B-Real.ttf
+python3 scripts/57_build_real_b.py --reuse-contours   # build/GuanGeKai-B-Real.ttf（從 real_contours.jsonl 重建，與 Regular 同源）
 # … GAN 訓練與生成見 docs/DATA-B.md §7
 python3 scripts/62_build_full_b.py            # build/GuanGeKai-B-Regular.ttf
 python3 scripts/63_qa_b.py

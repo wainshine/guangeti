@@ -5,6 +5,7 @@ Forked from `62_build_full_b.py`; family name `GuanGe Kai C`, work-c paths.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -22,6 +23,14 @@ COPYRIGHT = ("GuanGe Kai C (館閣楷 C). Real glyphs traced from the Ming manus
              "the Library of Congress, distributed by 書格 shuge.org. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
              "Copyright 2026 The GuanGe Kai Project Authors. SIL OFL 1.1.")
+
+
+def sha256(p: Path) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def load(path):
@@ -58,9 +67,24 @@ def main():
     if (len(real) < args.min_real or missing > 0) and not args.allow_missing:
         raise SystemExit(f"ABORT: real={len(real)} missing={missing} — refusing to write a "
                          f"font whose real glyphs are absent or whose coverage is incomplete")
-    build_font(glyphs, Path(args.out), family=FAMILY, style="Regular", version=VERSION,
+    out = Path(args.out)
+    build_font(glyphs, out, family=FAMILY, style="Regular", version=VERSION,
                copyright_text=COPYRIGHT)
+    # Build manifest: pins the exact inputs this font was built from.  `81_package_c.py`
+    # compares these hashes instead of mtimes, so a later regeneration of generated.jsonl
+    # cannot silently be paired with an older font (the v1.0.1 packaging incident).
+    man = dict(
+        font=str(out), font_sha256=sha256(out),
+        chosen_sha256=sha256(wd / "chosen.jsonl"),
+        generated_sha256=sha256(wd / "generated.jsonl"),
+        real_sha256=(sha256(wd / "real_contours.jsonl")
+                     if (wd / "real_contours.jsonl").exists() else ""),
+        real_count=len(real), gen_count=len(gen), total=len(glyphs),
+        version=VERSION,
+    )
+    (wd / "build_manifest.json").write_text(json.dumps(man, ensure_ascii=False, indent=1))
     print("wrote", args.out)
+    print("manifest -> work-c/build_manifest.json")
 
 
 if __name__ == "__main__":

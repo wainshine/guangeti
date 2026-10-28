@@ -28,8 +28,10 @@ WORK = ROOT / "work-c"
 
 A_FONTS = ["GuanGeKai-Regular.ttf", "GuanGeKai-Real.ttf"]
 B_FONTS = ["GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf"]
-ZIPS = {"GuanGeKai-v1.6.5.zip": "226ef25d43fde048e4b08f930672aa8ac3615c2f4fbe0680eb5520ac52380cf0",
-        "GuanGeKai-B-v1.2.1.zip": None}
+# zip hashes are release-time snapshots: they change when a package is rebuilt,
+# which is expected.  Update them in the same commit as the release.
+ZIPS = {"GuanGeKai-v1.7.0.zip": "f7b3d25f2120003045e3b930c1b17df4b5331f42c07b1858c9e8f0b1b92f2b36",
+        "GuanGeKai-B-v1.2.2.zip": "d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491"}
 
 
 def sha256(p: Path) -> str:

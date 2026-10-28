@@ -1,15 +1,15 @@
 # 館閣楷 GuanGe Kai
 
-> 一款以明代刻本《四書白文》為字形來源的**館閣體**開源字體。
-> An open-source *guan-ge-ti* (館閣體, Ming court/office regular script) typeface built from the Ming woodblock print *四書白文*.
+> 一款以明代寫本《四書白文》為字形來源的**館閣體**開源字體。
+> An open-source *guan-ge-ti* (館閣體, Ming court/office regular script) typeface built from the Ming manuscript *四書白文*.
 
 <p align="center">
   <img src="specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：v1.6.5（2026-10-27）** —— 本專案含兩套字體：四書本（本頁，`GuanGe Kai`）與史記本（`GuanGe Kai B`，見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為刻本真跡，19,317 字為合成（GAN 18,518 字＝95.9%；帶狀掃掠回退 799 字＝4.1%）。
-> 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的刻刀筆鋒**；
-> 與刻本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
+> **狀態：v1.7.0（2026-10-28）** —— 本專案含兩套字體：四書本（本頁，`GuanGe Kai`）與史記本（`GuanGe Kai B`，見 `README-B.md`）。 —— 20,992 字全覆蓋；其中 1,675 字為寫本真跡，19,317 字為合成（GAN 18,518 字＝95.9%；帶狀掃掠回退 799 字＝4.1%）。
+> 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的墨笔筆鋒**；
+> 與寫本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
 
@@ -20,20 +20,20 @@
 | | A · 四書白文 | B · 史記抄本 |
 |---|---|---|
 | 家族名 | `GuanGe Kai` | `GuanGe Kai B` |
-| 版本 | **v1.6.5** | **v1.2.1** |
+| 版本 | **v1.7.0** | **v1.2.2** |
 | 真跡 | 1,675 字 | **4,078 字** |
 | 覆蓋 | 20,992 / 20,992 | 20,992 / 20,992 |
 | 檔案 | `GuanGeKai-Regular.ttf` / `-Real.ttf` | `GuanGeKai-B-Regular.ttf` / `-B-Real.ttf` |
 | 詳細 | 本頁 | [README-B.md](README-B.md)（v1.2.1） |
 
 兩套可同時安裝，用家族名區分。本版的項目級發布說明見
-[docs/RELEASE-v1.6.5.md](docs/RELEASE-v1.6.5.md)（A 線 v1.6.5）與 [docs/RELEASE-v1.2.1-B.md](docs/RELEASE-v1.2.1-B.md)（B 線 v1.2.1）。
+[docs/RELEASE-v1.7.0.md](docs/RELEASE-v1.7.0.md)（A 線 v1.7.0）與 [docs/RELEASE-v1.2.1-B.md](docs/RELEASE-v1.2.1-B.md)（B 線 v1.2.1）。
 
 ## 這是什麼
 
 
 《四書白文》（十八卷，舊傳明·姜立綱書，原藏日本宮內廳書陵部（圖書寮數位檔案 shoryobu.kunaicho.go.jp，檔號 1000066720000））是一部典型的
-**館閣體**刻本：結體方正、筆畫豐腴、橫細豎粗、起收分明。本項目把它變成一套可安裝、可再分發的
+**館閣體**寫本：結體方正、筆畫豐腴、橫細豎粗、起收分明。本項目把它變成一套可安裝、可再分發的
 CJK 字體：
 
 | 項目 | 內容 |
@@ -47,10 +47,10 @@ CJK 字體：
 
 字體分兩級發布：
 
-* **GuanGeKai-Real** —— 只含掃描本真實字形（1,675 字），可視為「原刻字形集」。
+* **GuanGeKai-Real** —— 只含掃描本真實字形（1,675 字），可視為「原字集」。
 * **GuanGeKai** —— 完整 20,992 字，其餘由 19,317 個生成字形補齊。
 
-原刻本（左）與本字體排印相同文字（右）：
+原書（左）與本字體排印相同文字（右）：
 
 <p align="center">
   <img src="book-vs-font.png" width="520" alt="book vs font">
@@ -76,7 +76,7 @@ GuanGeKai (20,992 字)
 
 ```
 20,992 字
-├─ 1,675  真跡   直接取自刻本，不經過任何模型
+├─ 1,675  真跡   直接取自寫本，不經過任何模型
 └─ 19,317 合成
    ├─ 17,790  GAN（m2wt-ep90）      92.1%  ← 主模型（複雜度加權）
    ├─    728  GAN（m2-ep80 補位）    3.8%  ← 主模型過不了守衛時
@@ -98,7 +98,8 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 37 組實驗（E1–E37）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.6.5.md](docs/RELEASE-v1.6.5.md) | 想了解本版改了什麼的人 | **v1.6.5（A 線）**：修復輪——發布口徑可複現、發布流程加閘 |
+| [docs/RELEASE-v1.7.0.md](docs/RELEASE-v1.7.0.md) | 想了解本版改了什麼的人 | **v1.7.0（A 線）**：字體元數據與術語更正（刻本 → 寫本）、新增發版閘 | <!-- term-ok -->
+| [docs/RELEASE-v1.6.5.md](docs/RELEASE-v1.6.5.md) | 考古的人 | v1.6.5：發布口徑可複現 |
 | [docs/RELEASE-v1.6.4.md](docs/RELEASE-v1.6.4.md) | 考古的人 | v1.6.4：混合檢查點，回退率 7.9%→4.1% |
 | [docs/RELEASE-v1.6.3.md](docs/RELEASE-v1.6.3.md) | 考古的人 | v1.6.3：複雜度加權，回退率 9.5%→7.9% |
 | [docs/RELEASE-v1.6.2.md](docs/RELEASE-v1.6.2.md) | 考古的人 | v1.6.2：fontRevision 修正、品質閘門 |
@@ -181,7 +182,7 @@ python3 scripts/14_package.py          # 發布包
 
 本項目最早的技術路線，是照著這三個項目定下來的（都只看流程，沒有複製代碼/數據）：
 
-* **[qiji-font 齊伋體](https://github.com/LingDong-/qiji-font)** —— 「刻本掃描 → 切字 → OCR → 字體」的完整流程樣板，
+* **[qiji-font 齊伋體](https://github.com/LingDong-/qiji-font)** —— 「寫本掃描 → 切字 → OCR → 字體」的完整流程樣板，
   我們的分頁、切格、OCR 校驗、字形歸一化都受它啟發
 * **[Image-to-font-extractor](https://github.com/wyattmattoe/Image-to-font-extractor)**（MIT）——
   「字形圖 → SVG → 可安裝 TTF」的最小可行路徑，確立了我們「先出字體、再談風格」的順序

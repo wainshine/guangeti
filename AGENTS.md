@@ -1,6 +1,6 @@
 # AGENTS.md — 给接手的 agent
 
-本项目：从明代刻本《四书白文》扫描本出发，做一套覆盖 CJK 基本区 20,992 字的 **馆阁体** 开源字体（OFL 1.1）。
+本项目：从明代写本《四书白文》扫描本出发，做一套覆盖 CJK 基本区 20,992 字的 **馆阁体** 开源字体（OFL 1.1）。
 
 **先读这三个文件，再动手：**
 
@@ -35,14 +35,14 @@
   - 任何删除先看 `work/ckpt/MANIFEST.json`，并在 `docs/DATA.md` §6.5.1 登记；
     **删完必须立刻重跑 `scripts/31_ckpt_manifest.py`**——这一步单独做已经漏过三次。
 
-## 当前状态（v1.6.5）
+## 当前状态（v1.7.0）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成
   （**GAN 18,518 字 = 95.9%（ep90 17,790 + ep80 补位 728），ribbon 回退 799 字 = 4.1%**，
   见 E39/E40；发布口径见 `data/release-a.json`）
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真迹
 - 真字覆盖率 8% 是全局瓶颈。v1.3.x 的合成字骨架取自文楷（结构=文楷结构）；
-  **v1.5.0 起合成字由 GAN 生成**，笔画级结构更接近刻本：干净集 Dice 0.414→0.549、
+  **v1.5.0 起合成字由 GAN 生成**，笔画级结构更接近写本：干净集 Dice 0.414→0.549、
   骨架 chamfer 8.76→5.92（真迹互比地板 5.16，仍差 15%）。
 - 已知偏差：合成字比真迹重约 17%（E34）。拆开是：**5–7% 字集构成**（生僻字本来墨多）+
   **约 5% 来自模型输出的字面偏小**（GAN 包围盒是真迹的 0.949，归一化放大后墨量跟着涨，E37）。
@@ -87,16 +87,17 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 ## 技术路线（v1.5.0 现状）
 
-> **命名注意**：本节 A/B/C 是**技术路线**编号（A 带状扫掠 / B GAN / C zi2zi-JiT），
-> 与三条**字形线** A（四书）/ B（史记）/ C（永乐大典）不是一回事。字形线的状态见上节。
+> **命名规范**（见 `docs/GLOSSARY.md`）：A/B/C 只指**字形线**（四书/史记/永乐大典）；
+> 技术路线一律写方法名 `ribbon` / `zi2zi-GAN` / `zi2zi-JiT`（表格内可用短码 RT1–RT3）。
+> `R0–R7` 保留给闸门判据（`30_gate_rules.py`），技术路线不得使用。**禁止再写「路线 A/B/C」。** <!-- term-ok -->
 
 **发布版 = 真迹 1,675 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ 带状扫掠回退 799。**
-历史三条线：**A 带状扫掠**（v1.3.x 发布方案，已退役）/ **B zi2zi-GAN**（v1.5.0 起采用）/
-**C zi2zi-JiT**（未启动）。`docs/PLAN-v1.4.md` 的"三线并行"已作废，当前计划见 `docs/PLAN-v1.5.md`。
+历史三条路线：**`ribbon` 带状扫掠**（v1.3.x 发布方案，现降级为回退兜底）/
+**`zi2zi-GAN`**（v1.5.0 起主线）/ **`zi2zi-JiT`**（未启动）。`docs/PLAN-v1.4.md` 的"三线并行"已作废，当前计划见 `docs/PLAN-v1.5.md`。
 
-- A（v1.3.5，**已被 v1.5.0 取代**）：512 渲染+矢量化、轮廓简化；当年 88.3% 合成字经风格化。
+- `ribbon`（v1.3.5，**已被 v1.5.0 取代**）：512 渲染+矢量化、轮廓简化；当年 88.3% 合成字经风格化。
   待做 —— **转折（横折方角，建议 miter join）**、小字号回归。
-- B（**v1.5.0 采用**）：单实例 + 5 层 PatchGAN + hinge + 数据增强，80 轮 = 干净集 Dice 0.549 /
+- `zi2zi-GAN`（**v1.5.0 采用**）：单实例 + 5 层 PatchGAN + hinge + 数据增强，80 轮 = 干净集 Dice 0.549 /
   chamfer 5.92。多实例是拖累（0.520），已被排除。
   **泛化只认 `work/pairs_single.npz`（617 个只出现一次的字，从未训练）**：
   `python3 scripts/32_eval_clean.py --gan work/ckpt/m2_ep080.pt`。
@@ -111,8 +112,8 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
   真迹互比的同口径地板是 **5.16**，GAN **5.92**——**同一量级但未打平（差 0.77px / 15%，KS p<0.001）**。
   **加训到 150 轮已实测（E36）：与 80 轮完全持平**（Dice 0.543–0.548、chamfer 5.87–5.94），
   「欠训」假设被否证，模型在 ep60–80 就到顶。**不要再靠加轮数提升**，余量只在数据/容量/分辨率。
-- C：上游权重不可用（LICENSE 只覆盖 "Software"）；计划用 MIT 代码 + 自有数据从头训练（`main_jit.py` 已验证可跑）。
-- 换数据源（楷书字典刻本）是唯一能根本改变 8% 覆盖率的路线。
+- `zi2zi-JiT`：上游权重不可用（LICENSE 只覆盖 "Software"）；计划用 MIT 代码 + 自有数据从头训练（`main_jit.py` 已验证可跑）。
+- 换数据源（楷书字典类刻本）是唯一能根本改变 8% 覆盖率的路线。 <!-- term-ok -->
   **《史记》不在本项目内**（用户已决定另立项目），要用须先取得所有者明确同意并更新本文件。
 
 > 字重与风格结论以五项指标同时报告为准：Dice、墨量比、端帽 cap_mid、端帽 KS、笔内 std。
@@ -125,7 +126,7 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 ## 当前计划
 
-**`docs/PLAN-v1.5.md`** —— 把 B 线（GAN）推到可验收，四个里程碑：
+**`docs/PLAN-v1.5.md`** —— 把 `zi2zi-GAN` 推到可验收，四个里程碑：
 M0 墨量校准（0.5h）→ M1 目标图去模糊（1h）→ M2 5 层 hinge 判别器 + 数据增强 + 80 轮（5h）
 → M3 全量生成与字体级验收（2h）→ M4 512 重训（条件触发）。
 每个里程碑只改一个变量，评估一律用 617 干净集 + 骨架分级度量，结果必须落盘。
@@ -144,6 +145,7 @@ rm -rf release && python3 scripts/14_package.py               # 4. 重新打包�
 python3 scripts/95_compare_lines.py                    # 4.5 三线对照图（A/B/C 同一文字并排，出 docs/images/lines-compare.png）
 cd release && zip -q -r ../GuanGeKai-vX.Y.Z.zip . && cd ..    # 5. 出 zip
 shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验和到 DATA.md / PROJECT_STATE.md
+python3 scripts/97_check_terms.py                            # 7. 术语检查（必须 TERMS OK；标准见 docs/GLOSSARY.md）
 ```
 
 **发布前必须核对三个数字**（任何一项不对就停下）：
@@ -155,6 +157,7 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 | `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
 | `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%**，见 `work/holes_a.json`） |
 | `95_compare_lines` 出的三线对照图 | 三条线并排看不出「某条线整体偏细/偏粗/缺笔画」；发现即为回归 |
+| `97_check_terms.py` | 打印 `TERMS OK`（白名单与「已知遗留」不算） |
 
 **踩过的坑**：
 1. 先打包、后改 README，导致包内说明落后于仓库（改过 README 必须重跑第 4–6 步）。
@@ -179,8 +182,9 @@ shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验�
 
 - OCR 必须 150 dpi + PP-OCRv6；72 dpi 只有 ~70% 准确率。
 - 原书句读圈点是**红色**的，**源 PDF 也是彩色的**（`get_pixmap` 出来 `r−g` 最大约 103）。
-  `ink_mask()` 的 `red_mask()` **一直在生效**（实测每页红像素 0.08–0.16%，约 5–9 千像素），
-  只是四书这份的红色标记本来就少，所以收益接近 0。
+  `ink_mask()` 的 `red_mask()` **一直在生效**。全库 410 页实测：正文页约 **0.1–0.4%**（中位 0.27%），
+  但跨度极大（p95 **19.97%**、最大 **97.99%**，有整页发红的例外，见 `docs/ERRATA.md` E5）。
+  四书这份红色标记本来就少，所以收益接近 0。
   **注意**：仓库里 `work/cells`、`work/masks` 是单通道灰度，**不要拿它们测颜色**——
   早期"PDF 已被去色（`r−g` 最大 9–14）"的结论就是这么误测出来的，源文件其实是彩色的。
   《永乐大典》（C 线）红像素占 4.4%（朱丝栏 + 句读），颜色分离在那里才有大用。

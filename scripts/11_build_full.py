@@ -48,7 +48,7 @@ def main():
             f"whose real glyphs are absent (run 07_build_real.py first)")
     build_font(glyphs, Path(args.out), family="GuanGe Kai", version=VERSION,
                copyright_text=(
-                   "GuanGe Kai (館閣楷). Real glyphs extracted from the Ming woodblock print "
+                   "GuanGe Kai (館閣楷). Real glyphs extracted from the Ming manuscript "
                    "四書白文 (attributed to 姜立綱), scans courtesy of 書格 shuge.org / 宮内庁書陵部. "
                    "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
                    "Copyright 2026 The GuanGe Kai Project Authors."

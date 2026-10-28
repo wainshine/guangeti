@@ -1,4 +1,4 @@
-"""Patch-based style-transfer training (WenKai -> 館閣楷 woodblock)."""
+"""Patch-based style-transfer training (WenKai -> 館閣楷 manuscript)."""
 from __future__ import annotations
 
 import argparse

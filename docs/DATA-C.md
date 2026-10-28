@@ -23,6 +23,18 @@
 15142 / 15143（兑等）、15950–15951（运）、19742–19743（录）、19785–19786 / 19792（服）、
 6831–6832（王）。
 
+## 1.1 A 线语料性质更正（避免沿用旧说法）
+
+A 线《四书白文》是**明代精写本**（手书墨迹），不是刻本。早期文档写作「明刻本」「刻刀笔锋」，<!-- term-ok -->
+2026-10-28 已更正；一手证据是 `docs/images/manuscript-evidence.jpg`（第 11 页 600 dpi：
+**版心空白**——无书名、卷次、叶码、刻工、牌记；笔锋浓淡与飞白；字径不匀、基线起伏），
+书格著录（原站文件名含「明钞本」）为旁证。判读细则见 `docs/ERRATA.md` E1。
+
+三条线**都是写本**：A 名家精写本 / B 旧抄本 / C 嘉靖内府录副本。差异在书写者与场合，不在刻还是写。
+术语以 `docs/GLOSSARY.md` 为准；历史勘误见 `docs/ERRATA.md`。本线文档提到 A 线时统一写
+「写本 / 精写本 / 墨笔笔锋」，不要写「刻本 / 刻刀 / 刀刻」。<!-- term-ok -->
+**指标不受影响**（Dice、墨量、chamfer、孔洞都是对图像测的）。
+
 ## 2. 语料实测（`work-c/page_stats.jsonl`）
 
 | 指标 | 值 |
@@ -110,13 +122,15 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 ## 5. 校验和
 
 ```
-8881a0208c75ba4e033529b9d4e5beb920bb9504fb263e2dc7207b62158c4c1f  build/GuanGeKai-C-Regular.ttf
-2d9abb207ff1b44e444a28d7a8947fd74d99216fca8d7365a4d2f4aaf8c3ace1  build/GuanGeKai-C-Real.ttf
-ccc6ab03bdf2c25bff8580bc4014c6d67b7d80100a7cd5d38ecb92578ed2866f  GuanGeKai-C-v1.0.1.zip
+77c9fa531a33853f28aa0bd1433ca732053ab154ae240071f79ebab5090def7e  build/GuanGeKai-C-Regular.ttf
+95e970ecd0c38e29ee7e05196e3e321de6a4acec4bfa9c71b1f3e4d29969757f  build/GuanGeKai-C-Real.ttf
+0409e92ce412bf74df0b797ff4c19381639b03a89c652fa0a45ba6d27c38635e  GuanGeKai-C-v1.0.1.zip
 ```
 
 `release-c/SHA256SUMS` 是发布包的逐文件校验和（10 个文件，不含自身）。
-体积：Regular **20.63 MB**（20,632,264 B）、Real **6.16 MB**（6,158,208 B）、zip **18 MB**。
+**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.0 / B v1.2.2 / C v1.0.1 同步），
+不再有术语 drift。`specimen-c.png` / `book-vs-font-c.jpg` 的图注本来就是「重寫本」，无旧词。
+体积：Regular **15.68 MB**（15,676,120 B）、Real **4.64 MB**（4,640,984 B）、zip **15.1 MB**（15,102,249 B）。
 
 ## 6. 重建步骤
 
@@ -133,10 +147,15 @@ python3 scripts/93_segment_c.py --workers 6
 
 # 4. 标签 + 留出页 + 选优 + 归一
 python3 scripts/94_label_c.py
+python3 scripts/96_fix_labels_c.py --work work-c   # 10 个简体/繁体错配标签，必须在 05 之前
 python3 scripts/74_make_holdout_c.py --frac 0.06
 python3 scripts/05_select.py --work work-c --min-samples 2 \
         --holdout-pages work-c/holdout_pages.json --prefer-clean bad
 python3 scripts/06_norm.py --work work-c --pitch-floor 180
+
+> 注：仓库现有的 `work-c/pairs_clean.npz` 建于 2026-10-28 06:45，早于 `96_fix_labels_c.py`
+> 的 55 格修复（23 重标 + 32 丢弃）。要逐位复现发布数字请保留该文件；重跑 `75` 会得到
+> 同量级但非逐位相同的结果。
 
 # 5. 真迹字体 + 配对 + 拟合
 python3 scripts/76_build_real_c.py --close 3 --hole-repair   # 内含去噪 + 逐字墨量标定
@@ -147,20 +166,24 @@ python3 scripts/73_fit_width_c.py
 python3 scripts/75_build_clean_c.py
 python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz --out work-c/ckpt/c.pt \
         --ckpt-dir work-c/ckpt --patchgan --hinge --aug --epochs 80 --batch 16 --lr 2e-4
+# 发布检查点不是最后一轮：用 82_eval_c.py 比较 ep20/30/40/50 后取 ep30（见 EXPERIMENTS-C C/E15）
 
 # 7. 评估 / 生成 / 合字 / 质检 / 打包
-python3 scripts/82_eval_c.py --gan work-c/ckpt/c_ep030.pt --n 250 --close 2 --sweep
+python3 scripts/82_eval_c.py --gan work-c/ckpt/c_ep030.pt --n 800 --close 2 --sweep
 python3 scripts/77_generate_c.py --method gan --workers 6 --res 512 --simplify 2.0 \
         --ckpt work-c/ckpt/c_ep030.pt --threshold 0.30 --close 1 --blend 0.8 --struct-guard \
         --ink-lo 0.42 --ink-hi 1.20 --comp-tol 6 --out work-c/generated_gan.jsonl
 mv work-c/generated_gan.jsonl work-c/generated.jsonl
 python3 scripts/78_fill_fallback_c.py --work work-c
-python3 scripts/79_build_full_c.py
+python3 scripts/79_build_full_c.py          # 写出 work-c/build_manifest.json（输入哈希）
+python3 scripts/71_book_vs_font_c.py        # release 图，必须在 81 之前
+python3 scripts/72_specimen_c.py
 python3 scripts/80_qa_c.py        # C 线默认 --max-lost-frac 0.18、白名单已去掉 四/园
 python3 scripts/71_holes.py --font build/GuanGeKai-C-Regular.ttf --n 300 --json work-c/holes_c.json
 python3 scripts/84_accept_c.py
-python3 scripts/81_package_c.py
+python3 scripts/81_package_c.py             # 先校验 build_manifest 的哈希，再打包
 python3 scripts/83_verify_ab_c.py
+python3 scripts/97_check_terms.py           # 术语检查
 ```
 
 ## 7. 检查点保留
@@ -168,3 +191,6 @@ python3 scripts/83_verify_ab_c.py
 沿用 AGENTS.md 的规则：每 10 轮快照；保留最终轮、验证最佳轮、核心轮次
 50/100/150/200/300…；删除前先看 `work-c/ckpt/MANIFEST.json`
 （`python3 scripts/31_ckpt_manifest.py --ckpt-dir work-c/ckpt`），删完立即重跑清单。
+
+C 线现状（2026-10-28）：`c.pt` = ep52（训练实际停止轮）、`c_best.pt` = **ep45**（valDice 最佳）、
+发布用 **ep30**；三者不同，理由见 EXPERIMENTS-C C/E15。`c_ep030_v100.pt` 是 v1.0.0 模型的归档。

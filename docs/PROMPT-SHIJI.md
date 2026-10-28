@@ -101,7 +101,7 @@ scripts/04_label.py          切片 → 字
 scripts/05_select.py         每字选优（默认剔除只出现 1 次的字）
 scripts/06_norm.py           字身框归一化
 scripts/07_build_real.py     真迹子集字体
-scripts/08_make_pairs.py     配对（X=文楷渲染，Y=刻本字形）
+scripts/08_make_pairs.py     配对（X=文楷渲染，Y=写本字形）
 scripts/21_train_gan.py      GAN 训练
 scripts/10_generate.py       --method gan 生成缺失字（含守卫，回退 --method ribbon）
 scripts/36_fill_fallback.py  补齐守卫回退的字
@@ -121,7 +121,7 @@ scripts/14_package.py        打包
 | ❌ 必须重标定 | 守卫的墨量带 `[0.6, 1.5]` | 它是**相对基线字体**的比，换数据后要重测 |
 | ❌ 必须重标定 | 推理阈值（四书是 −0.05） | 依赖模型输出分布，重训后要复扫 |
 
-**抄本与刻本的差别要预期到**：四书是**刀刻刻本**，史记是**墨笔抄本**。端帽形态、墨量分布、
+**抄本与写本的差别要预期到**：四书是**墨笔写本**，史记是**墨笔抄本**。端帽形态、墨量分布、
 笔宽方差的统计结构不同。四书那几组标定结论在抄本上**未必成立**：
 
 - E30（len_ratio 偏短、阈值修不动）

@@ -23,7 +23,7 @@ from shiji_page import repair_counters  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FAMILY = "GuanGe Kai B"
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript "
              "史記 (attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
@@ -31,12 +31,32 @@ COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manus
 
 
 def main():
+    # Fast path: the contours are already extracted; rebuild the subset without
+    # re-tracing (mirrors 07_build_real.py --reuse-contours). Used by doc/metadata-only
+    # releases, where the glyph outlines must stay byte-for-byte the same.
+    if "--reuse-contours" in sys.argv:
+        cache = ROOT / "work-b" / "real_contours.jsonl"
+        if not cache.exists():
+            raise SystemExit(f"ABORT: {cache} missing")
+        glyphs = {}
+        for line in open(cache):
+            r = json.loads(line)
+            glyphs[r["char"]] = r["contours"]
+        if len(glyphs) < 1000:
+            raise SystemExit(f"ABORT: only {len(glyphs)} cached glyphs")
+        build_font(glyphs, ROOT / "build" / "GuanGeKai-B-Real.ttf",
+                   family=FAMILY, style="Real", version=VERSION,
+                   copyright_text=COPYRIGHT)
+        print(f"wrote (from cached contours) {len(glyphs)} glyphs")
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", default=str(ROOT / "work-b"))
     ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-B-Real.ttf"))
     ap.add_argument("--pitch-floor", type=float, default=100.0)
     ap.add_argument("--min-glyphs", type=int, default=1000)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--reuse-contours", action="store_true",
+                    help="rebuild from work-b/real_contours.jsonl instead of re-tracing masks")
     ap.add_argument("--hole-repair", action="store_true",
                     help="escalate the closing kernel for glyphs that still have no counter "
                          "where WenKai draws one (audit rev3 2-3)")

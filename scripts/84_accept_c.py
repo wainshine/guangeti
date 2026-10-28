@@ -14,7 +14,9 @@ Metrics that only make sense at the *font* level (not per-glyph model output):
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -27,6 +29,14 @@ BLOCK = (0x4E00, 0x9FFF)
 
 S = 256          # canvas the book rasters live on (see 08_make_pairs.py)
 EM_TOP = 880.0
+
+
+def sha256(p: Path) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def render_em(ch, font_path, S=S):
@@ -59,7 +69,20 @@ def main():
     args = ap.parse_args()
     wd = Path(args.work)
 
-    prov_p = wd / "provenance_for_accept.json"
+    # Input pinning: if a build manifest exists, make sure this acceptance run is
+    # describing the same font/inputs (v1.0.1 hit a case where work-c had been
+    # regenerated after the font was built, and the fallback share flipped 7.8% -> 2.5%).
+    man_p = wd / "build_manifest.json"
+    if man_p.exists():
+        man = json.loads(man_p.read_text())
+        if man.get("font_sha256") and sha256(Path(args.font)) != man["font_sha256"]:
+            sys.exit("ABORT: --font does not match work-c/build_manifest.json "
+                     "(acceptance would describe different inputs)")
+        if man.get("generated_sha256") and sha256(wd / "generated.jsonl") != man["generated_sha256"]:
+            sys.exit("ABORT: work-c/generated.jsonl changed since the font was built")
+    else:
+        print("WARNING: work-c/build_manifest.json missing — cannot pin the font to "
+              "work-c/generated.jsonl", file=sys.stderr)
     gen = {}
     for line in open(wd / "generated.jsonl"):
         r = json.loads(line)
