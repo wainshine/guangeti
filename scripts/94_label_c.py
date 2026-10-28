@@ -101,11 +101,12 @@ def main():
     ap.add_argument("--v5", default=str(WORK / "ocr_v5.jsonl"))
     ap.add_argument("--out", default=str(WORK / "labeled.jsonl"))
     ap.add_argument("--min-line-iou", type=float, default=0.25)
+    ap.add_argument("--work", default=str(WORK), help="directory holding cells.jsonl")
     args = ap.parse_args()
     dedupe_boxes = load_dedupe()
     v6 = load_lines(Path(args.v6))
     v5 = load_lines(Path(args.v5))
-    cells = [json.loads(l) for l in open(WORK / "cells.jsonl")]
+    cells = [json.loads(l) for l in open(Path(args.work) / "cells.jsonl")]
     print(f"cells {len(cells)}; pages v6 {len(v6)} v5 {len(v5)}")
 
     by_page = defaultdict(list)

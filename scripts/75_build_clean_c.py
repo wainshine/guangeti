@@ -45,30 +45,39 @@ def main():
     ap.add_argument("--require-ab", action="store_true", default=True,
                     help="only cells whose two OCR witnesses agreed")
     ap.add_argument("--allow-a-only", dest="require_ab", action="store_false")
+    ap.add_argument("--chars-file", default="",
+                    help="JSON list of characters; build the set from their chosen samples "
+                         "(character-level holdout, no page restriction)")
     args = ap.parse_args()
     wd = Path(args.work)
     hold = set(json.load(open(args.holdout)))
     meta = {json.loads(l)["file"]: json.loads(l) for l in open(wd / "cells.jsonl")}
-    rows = [json.loads(l) for l in open(wd / "labeled.jsonl")]
-    rows = [r for r in rows if r.get("label") and r.get("key") in hold
-            and (r.get("agree_ab") or not args.require_ab)
-            and not r.get("bad")]
-    print(f"holdout pages {len(hold)}; candidate cells {len(rows)}")
-
-    # one sample per character: prefer the least suspicious cell, then the largest
-    by_char = defaultdict(list)
-    for r in rows:
-        by_char[r["label"]].append(r)
-    picks = []
-    for ch, cs in by_char.items():
-        cs.sort(key=lambda r: (round(r.get("edge", 0), 3), -r["h"] * r["w"]))
-        if len(cs) > args.rank:
-            picks.append(cs[args.rank])
+    chars_file = set(json.load(open(args.chars_file))) if args.chars_file else None
+    if chars_file is not None:
+        chosen = {json.loads(l)["label"]: json.loads(l) for l in open(wd / "chosen.jsonl")}
+        rows = [chosen[c] for c in sorted(chars_file) if c in chosen]
+        picks = rows
+        print(f"character holdout {len(chars_file)}; picked {len(picks)}")
+    else:
+        rows = [json.loads(l) for l in open(wd / "labeled.jsonl")]
+        rows = [r for r in rows if r.get("label") and r.get("key") in hold
+                and (r.get("agree_ab") or not args.require_ab)
+                and not r.get("bad")]
+        print(f"holdout pages {len(hold)}; candidate cells {len(rows)}")
+        # one sample per character: prefer the least suspicious cell, then the largest
+        by_char = defaultdict(list)
+        for r in rows:
+            by_char[r["label"]].append(r)
+        picks = []
+        for ch, cs in by_char.items():
+            cs.sort(key=lambda r: (round(r.get("edge", 0), 3), -r["h"] * r["w"]))
+            if len(cs) > args.rank:
+                picks.append(cs[args.rank])
     print(f"characters {len(picks)}")
 
     font_path = ROOT / "data/base/LXGWWenKai-Regular.ttf"
     font = ImageFont.truetype(str(font_path), S)
-    chars, X, Y = [], [], []
+    chars, X, Y, files, keys = [], [], [], [], []
     for row in picks:
         ch = row["label"]
         m = meta.get(row["file"])
@@ -122,18 +131,22 @@ def main():
         Y.append(book_ink((g > 127).astype(np.uint8) * 255, nrm))
         X.append(np.array(img))
         chars.append(ch)
+        files.append(row["file"])
+        keys.append(row["key"])
     X = np.stack(X).astype(np.uint8)
     Y = np.stack(Y).astype(np.uint8)
     if SIGMA > 0:
         Y = np.stack([cv2.GaussianBlur(y.astype(np.float32), (0, 0), SIGMA).astype(np.uint8)
                       for y in Y])
     out = Path(args.out) if args.out else wd / (
-        "pairs_clean_second.npz" if args.rank else "pairs_clean.npz")
+        "pairs_clean_second.npz" if args.rank else
+        "pairs_holdout.npz" if args.chars_file else "pairs_clean.npz")
     if args.rank and out.name == "pairs_clean.npz":
         raise SystemExit("ABORT: --rank 1 must not overwrite pairs_clean.npz "
                          "(that silently changes the clean-set baseline); "
                          "use --out pairs_clean_second.npz")
-    np.savez_compressed(out, X=X, Y=Y, chars=np.array(chars))
+    np.savez_compressed(out, X=X, Y=Y, chars=np.array(chars),
+                        files=np.array(files), keys=np.array(keys))
     print(f"clean set {len(chars)} glyphs -> {out}")
     # contact sheet for eyeballing: label on top, book glyph below
     n = min(40, len(chars))

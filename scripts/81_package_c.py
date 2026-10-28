@@ -31,13 +31,15 @@ def main():
     ap.add_argument("--work", default=str(ROOT / "work-c"))
     ap.add_argument("--out", default=str(ROOT / "release-c"))
     ap.add_argument("--readme", default=str(ROOT / "README-C.md"))
+    ap.add_argument("--font", default=str(ROOT / "build" / "GuanGeKai-C-Regular.ttf"))
+    ap.add_argument("--real", default=str(ROOT / "build" / "GuanGeKai-C-Real.ttf"))
     args = ap.parse_args()
     wd = Path(args.work)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    full = ROOT / "build" / "GuanGeKai-C-Regular.ttf"
-    real = ROOT / "build" / "GuanGeKai-C-Real.ttf"
+    full = Path(args.font)
+    real = Path(args.real)
     # --- freshness gate (audit P1-4): packaging a stale font against newer inputs is
     # exactly how the v1.5.1 "0 synthetic glyphs" incident slipped through.
     srcs = [wd / "chosen.jsonl", wd / "generated.jsonl", full, real]

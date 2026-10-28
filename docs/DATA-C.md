@@ -105,9 +105,9 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 | `cells.jsonl` | **614 MB** | 每格元数据（页/栏/行/坐标/字距/质量） |
 | `ocr_v6.jsonl`、`ocr_v5.jsonl` | 待补 | 两套行级 OCR 结果（58,771 / 58,732 行） |
 | `labeled.jsonl` | **697 MB** | 每格标签与见证一致性（1,003,482 格有标签，训练池；全量非空 1,065,904） |
-| `chosen.jsonl` | **5,287 行** | 每字一个 medoid 样本（v1.0.1 清理 10 个错配 + 16 个碎片/错字） |
+| `chosen.jsonl` | **5,295 行** | 每字一个 medoid 样本（v1.1.0：`--prefer-ab` + 剔除 `讞`/`串`） |
 | `norm.json` | 待补 | 字面框归一化参数 |
-| `pairs/pairs.npz` | **94 MB** | GAN 训练对（5,303 对，训练时的 chosen；碎片清理后 chosen 为 5,287） |
+| `pairs/pairs.npz` | **94 MB** | GAN 训练对（**4,995 对**；排除 300 个按字留出后） |
 | `pairs_clean.npz` | **32 MB**（3,213 字） | 留出页干净集 |
 | `pairs_clean_second.npz` | **24 MB**（2,442 字） | 同字第二样本，用于 chamfer 地板 |
 | `ckpt/` | 每 10 轮约 400 MB | 快照 + best |
@@ -117,20 +117,20 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 （重跑 `93_segment_c.py`，约 40 分钟 / 6 worker）。
 
 **语料规模**：OCR 得到 58,771 行 / **1,297,735 字**；唯一汉字 **6,864**；双见证逐字一致率
-**93.0%**（双见证格之间；含 a_only 90.3%）；最终真迹 **5,287 字**（基本区 25.19%）。
+**93.0%**（双见证格之间；含 a_only 90.3%）；最终真迹 **5,295 字**（基本区 25.22%，a_only 5.04%）。
 
 ## 5. 校验和
 
 ```
-0beb4e37c639fd69f8821217cf1dc7fbc31cf13f06e1903b8c682fbb548f3cbd  build/GuanGeKai-C-Regular.ttf
-a0a0ad3d6d5559fe8024a8b30d90bfb83b1269ddd279a2756f4ada2aaf9a3426  build/GuanGeKai-C-Real.ttf
-041bfa972051a3363d345f9137967cda47d100f2be84415afce32f6d5eb1015a  GuanGeKai-C-v1.0.1.zip
+cde44f95bd027f9d9bb77fb928c04e0513fbba3ec8caa804882576d7ccf435eb  build/GuanGeKai-C-Regular.ttf
+06c74358811bebe84ba647f5409213c32e4cc7700308aa5632bc7bc2cb45b270  build/GuanGeKai-C-Real.ttf
+d2ca9e6929f13e4b5d025ed0a476c123a996073937a8cc56f71e757267cf3087  GuanGeKai-C-v1.1.0.zip
 ```
 
 `release-c/SHA256SUMS` 是发布包的逐文件校验和（10 个文件，不含自身）。
-**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.0 / B v1.2.2 / C v1.0.1 同步），
+**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.0 / B v1.2.2 / C v1.1.0 同步），
 不再有术语 drift。`specimen-c.png` / `book-vs-font-c.jpg` 的图注本来就是「重寫本」，无旧词。
-体积：Regular **15.68 MB**（15,682,164 B）、Real **4.64 MB**（4,636,104 B）、zip **15.1 MB**（15,103,146 B）。
+体积：Regular **15.62 MB**（15,621,824 B）、Real **4.61 MB**（4,612,948 B）、zip **15.05 MB**（15,047,800 B）。
 
 ## 6. 重建步骤
 

@@ -88,6 +88,8 @@ def main():
     ap.add_argument("--out", default=str(ROOT / "work" / "pairs" / "pairs.npz"))
     ap.add_argument("--work", default=str(ROOT / "work"),
                     help="working directory (the B line uses work-b)")
+    ap.add_argument("--exclude-chars", default="",
+                    help="JSON list of characters to keep out of the training pairs")
     ap.add_argument("--chosen", default="",
                     help="alternative chosen list (e.g. second.jsonl, to build the "
                          "same-character pairs needed for the chamfer floor)")
@@ -98,6 +100,11 @@ def main():
     meta = {json.loads(l)["file"]: json.loads(l) for l in open(wd / "cells.jsonl")}
     chosen = [json.loads(l) for l in open(Path(_a.chosen) if _a.chosen
                                           else wd / "chosen.jsonl")]
+    if _a.exclude_chars:
+        ex = set(json.load(open(_a.exclude_chars)))
+        n0 = len(chosen)
+        chosen = [r for r in chosen if r["label"] not in ex]
+        print(f"excluded {n0-len(chosen)} held-out chars")
     norm = json.load(open(wd / "norm.json"))
     OUT.mkdir(parents=True, exist_ok=True)
     chars, targets = [], []

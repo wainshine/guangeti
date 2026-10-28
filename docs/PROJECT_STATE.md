@@ -3,7 +3,7 @@
 > **一句话**：以明代写本《四书白文》为字形来源，做一套覆盖 CJK 基本区 20,992 字、OFL 1.1 授权的馆阁体字体（GuanGe Kai / 馆阁楷）。
 >
 > **三线现状（2026-10-28）**：A 四书 `GuanGe Kai` v1.6.5；B 史记 `GuanGe Kai B` v1.2.1；
-> **C 永乐大典 `GuanGe Kai C` v1.0.1（5,287 真迹 / 25.19%）**。
+> **C 永乐大典 `GuanGe Kai C` v1.1.0（5,295 真迹 / 25.22%）**。
 > C 线的状态、实验与数据见 `docs/PLAN-C.md`、`docs/EXPERIMENTS-C.md`、`docs/DATA-C.md`、
 > `README-C.md`；本文以下各节仍只描述 A 线。
 >

@@ -17,7 +17,14 @@ ROOT = Path(__file__).resolve().parents[1]
 WB = ROOT / "work-c"
 BLOCK = (0x4E00, 0x9FFF)
 FAMILY = "GuanGe Kai C"
-VERSION = "1.0.1"
+def _version():
+    try:
+        return json.loads((ROOT / "data" / "release-c.json").read_text())["version"]
+    except Exception:
+        return "1.1.0"
+
+
+VERSION = _version()
 COPYRIGHT = ("GuanGe Kai C (館閣楷 C). Real glyphs traced from the Ming manuscript "
              "永樂大典 (嘉靖隆慶間内府重寫本), Library of Congress 藏本 / digitised by "
              "the Library of Congress, distributed by 書格 shuge.org. "
@@ -84,7 +91,7 @@ def main():
     )
     (wd / "build_manifest.json").write_text(json.dumps(man, ensure_ascii=False, indent=1))
     print("wrote", args.out)
-    print("manifest -> work-c/build_manifest.json")
+    print(f"manifest -> {wd / 'build_manifest.json'}")
 
 
 if __name__ == "__main__":

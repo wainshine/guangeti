@@ -38,7 +38,14 @@ from shiji_page import repair_counters  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "work-c"
 FAMILY = "GuanGe Kai C"
-VERSION = "1.0.1"
+def _version():
+    try:
+        return json.loads((ROOT / "data" / "release-c.json").read_text())["version"]
+    except Exception:
+        return "1.1.0"
+
+
+VERSION = _version()
 COPYRIGHT = ("GuanGe Kai C (館閣楷 C). Real glyphs traced from the Ming manuscript "
              "永樂大典 (嘉靖隆慶間内府重寫本), Library of Congress 藏本 / digitised by "
              "the Library of Congress, distributed by 書格 shuge.org. "
@@ -88,6 +95,8 @@ def main():
 
     glyphs, used = {}, {}
     n_repaired = 0
+    from collections import Counter
+    stop_cnt = Counter()
     for row in chosen:
         f = row["file"]
         m = meta.get(f)
@@ -121,7 +130,9 @@ def main():
             if tgt256 > 0:
                 scx = scale * nrm_ch["sx"] * 256.0 / 1000.0
                 scy = scale * nrm_ch["sy"] * 256.0 / 1000.0
-                ink = adjust_mask_area(ink, tgt256 / max(1e-6, scx * scy))
+                st = {}
+                ink = adjust_mask_area(ink, tgt256 / max(1e-6, scx * scy), stats=st)
+                stop_cnt[st.get("stop", "?")] += 1
         if ink.sum() < 60:
             continue
         contours = trace(ink, turdsize=args.turdsize, alphamax=args.alphamax,
@@ -139,11 +150,13 @@ def main():
         glyphs[ch] = em
         used[ch] = f
     print("glyphs", len(glyphs), f"(counter repair with a bigger kernel: {n_repaired})")
+    if stop_cnt:
+        print("ink-calibration stop reasons:", dict(stop_cnt.most_common()))
+    ctr = wd / ("real_contours.jsonl" if not args.limit
+                else f"real_contours_limit{args.limit}.jsonl")
     if len(glyphs) < args.min_glyphs:
         raise SystemExit(f"ABORT: only {len(glyphs)} real glyphs — refusing to overwrite "
                          f"{args.out} and {ctr}")
-    ctr = wd / ("real_contours.jsonl" if not args.limit
-                else f"real_contours_limit{args.limit}.jsonl")
     with open(ctr, "w") as fh:
         for ch, cs in glyphs.items():
             fh.write(json.dumps({"char": ch, "contours": cs, "src": "real"},

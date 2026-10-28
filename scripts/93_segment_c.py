@@ -40,6 +40,7 @@ from yongle_page import (_white_corridor, assign_components, detect_rules,  # no
 
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "work-c"
+OUT = WORK  # set by --out-dir; cell/mask/cells.jsonl go here
 CORPUS = ROOT / "永乐大典美国藏本"
 CJK = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 PAD = 8
@@ -189,13 +190,25 @@ def segment_one(task):
                 continue
             t0 = max(0, y0f) + int(r[0])
             t1 = max(0, y0f) + int(r[-1]) + 1
-            corr = _white_corridor(ink, t0, t1, ink.shape[1])
-            a = int(L + 0.26 * (R - L)); b = int(L + 0.74 * (R - L)) + 1
+            # two-column split: find the x with the least ink in the middle of the
+            # column (the gutter), but only accept it when both halves carry ink.
+            # The old code used a fixed 26–74% white corridor; on lines whose text is
+            # offset to one side that put the split in the wrong place and the crop
+            # included an empty half.
+            col = ink[t0:t1, L:R]
+            proj = col.sum(0).astype(np.float64)
+            total = float(proj.sum())
+            if total < 10:
+                splits[ci] = None
+                continue
+            a = int(0.22 * (R - L)); b = int(0.78 * (R - L)) + 1
             if b <= a:
                 splits[ci] = None
                 continue
-            k = int(np.argmax(corr[a:b]))
-            splits[ci] = (a + k, float(corr[a + k]))
+            k = int(np.argmin(proj[a:b]))
+            left = float(proj[:k].sum()); right = float(proj[k:].sum())
+            bal = min(left, right) / max(1e-6, max(left, right))
+            splits[ci] = (L + k, bal) if bal >= 0.35 else None
         # ---- gate: the red-rule grid must agree with the OCR line geometry.
         # Maps and tables (e.g. 卷10949 的 江西地圖) have a few stray rules and lots of
         # scattered text; without this check they would be cut with a column pitch
@@ -219,7 +232,7 @@ def segment_one(task):
             ci = int(np.argmin([abs(cx - (Ls[i] + Ls[i + 1]) / 2)
                                 for i in range(len(Ls) - 1)]))
             L, R = Ls[ci], Ls[ci + 1]
-            full = (bx1 - bx0) > 0.62 * (R - L)
+            full = ((bx1 - bx0) > 0.62 * (R - L)) and ((by1 - by0) > 0.55 * P)
             sp = splits.get(ci)
             if full:
                 x0, x1 = L, R
@@ -243,8 +256,25 @@ def segment_one(task):
                 a, b = cuts[k], cuts[k + 1]
                 if b - a < 6:
                     continue
+                merged = False
+                if (b - a) > 1.25 * step:
+                    sub = ink[a:b, x0:x1].any(1)
+                    rr = []
+                    st = None
+                    for ii, vv in enumerate(sub):
+                        if vv and st is None:
+                            st = ii
+                        if not vv and st is not None:
+                            rr.append((st, ii)); st = None
+                    if st is not None:
+                        rr.append((st, len(sub)))
+                    if len(rr) >= 2:
+                        hh = b - a
+                        merged = ((rr[0][1] - rr[0][0]) > 0.25 * hh
+                                  and (rr[-1][1] - rr[-1][0]) > 0.25 * hh
+                                  and (rr[-1][0] - rr[0][1]) > 0.08 * hh)
                 cells.append(dict(
-                    key=key, book_idx=idx, page=page, col=ci, li=li, sub=k,
+                    key=key, book_idx=idx, page=page, col=ci, li=li, sub=k, merged=bool(merged),
                     slot=(int(a), int(b)), slot_x=(int(x0), int(x1)),
                     x0=int(x0), y0=int(a), x1=int(x1), y1=int(b),
                     pitch=round(P, 1), cpitch=round(float(step), 1),
@@ -262,9 +292,34 @@ def segment_one(task):
                 continue
             ix0, iy0, ix1, iy1 = c["bbox"]
             w, h = ix1 - ix0, iy1 - iy0
+            cp = max(1.0, float(c["cpitch"]))
             if w < 12 or h < 12:
                 continue
+            if w < 0.30 * cp or h < 0.30 * cp:
+                continue                       # too small to vectorise; drop, don't upscale
             m = np.isin(lab[iy0:iy1, ix0:ix1], ids)
+            # drop stray components that sit entirely outside the main glyph and far
+            # from it: a neighbour line's top, a 句读 mark, a page-edge speck.  A dot
+            # or a separate 撇/捺 overlaps the main bbox, or sits within 0.12·size, so
+            # it is kept.
+            ncc, lm, stc, _cen = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+            if ncc > 2:
+                areas = stc[1:, cv2.CC_STAT_AREA]
+                main = 1 + int(np.argmax(areas))
+                mb = stc[main]
+                tot = float(m.sum())
+                H0, W0 = m.shape
+                drop = []
+                for j in range(1, ncc):
+                    if j == main or stc[j, cv2.CC_STAT_AREA] >= 0.20 * tot:
+                        continue
+                    bx, by, bw, bh = stc[j, :4]
+                    dx = max(mb[0] - (bx + bw), bx - (mb[0] + mb[2]), 0)
+                    dy = max(mb[1] - (by + bh), by - (mb[1] + mb[3]), 0)
+                    if (dx * dx + dy * dy) ** 0.5 > 0.12 * max(H0, W0):
+                        drop.append(j)
+                if drop:
+                    m = m & ~np.isin(lm, drop)
             # ink touching the cut line = the DP cut went through a character
             a, b = c["slot"]
             sl = c["slot_x"]
@@ -280,8 +335,8 @@ def segment_one(task):
             src = gray[cropy0:cropy1, cropx0:cropx1]
             cell_gray[mask_full > 0] = src[mask_full > 0]
             name = f"{key}_c{c['col']:02d}_l{c['li']:02d}_s{c['sub']:03d}.png"
-            Image.fromarray(cell_gray).save(WORK / "cells" / name, compress_level=6)
-            Image.fromarray(mask_full).save(WORK / "masks" / name, compress_level=6)
+            Image.fromarray(cell_gray).save(OUT / "cells" / name, compress_level=6)
+            Image.fromarray(mask_full).save(OUT / "masks" / name, compress_level=6)
             c.update(file=name, x0=int(ix0), y0=int(iy0), x1=int(ix1), y1=int(iy1),
                      w=w, h=h, cx0=int(cropx0), cy0=int(cropy0),
                      edge=round(edge, 4), fill=round(float(m.mean()), 4))
@@ -291,7 +346,7 @@ def segment_one(task):
             cp = max(1.0, c["cpitch"])
             c["bad"] = bool(c["edge"] > 0.10 or c["w"] > 1.25 * cp
                             or c["h"] > 1.45 * cp or c["h"] < 0.32 * cp
-                            or c["fill"] < 0.02)
+                            or c.get("merged", False) or c["fill"] < 0.02)
         rows = cells
         stat = dict(key=key, pages=1, cells=len(cells), skip="", pitch=round(P, 1),
                     wmed=round(wmed, 1), lines=len(lines))
@@ -324,9 +379,12 @@ def main():
     ap.add_argument("--dpi", type=int, default=300)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--keys", default="")
+    ap.add_argument("--out-dir", default="", help="write cells/masks/cells.jsonl here (default work-c)")
     args = ap.parse_args()
-    (WORK / "cells").mkdir(parents=True, exist_ok=True)
-    (WORK / "masks").mkdir(parents=True, exist_ok=True)
+    global OUT
+    OUT = Path(args.out_dir) if args.out_dir else WORK
+    (OUT / "cells").mkdir(parents=True, exist_ok=True)
+    (OUT / "masks").mkdir(parents=True, exist_ok=True)
     stats = [json.loads(l) for l in open(WORK / "page_stats.jsonl")]
     ocr = build_line_index(WORK / "ocr_v6.jsonl")
     todo = [s for s in stats if s["content"] == "text" and s["key"] in ocr]
@@ -355,10 +413,10 @@ def main():
                 print(f"{i}/{len(tasks)} pages, {len(all_rows)} cells, "
                       f"{time.time()-t0:.0f}s", flush=True)
     all_rows.sort(key=lambda r: (r["book_idx"], r["page"], r["col"], r["sub"]))
-    with open(WORK / "cells.jsonl", "w") as f:
+    with open(OUT / "cells.jsonl", "w") as f:
         for r in all_rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
-    with open(WORK / "seg_stats.jsonl", "w") as f:
+    with open(OUT / "seg_stats.jsonl", "w") as f:
         for st in sorted(seg_stats, key=lambda x: x["key"]):
             f.write(json.dumps(st, ensure_ascii=False) + "\n")
     from collections import Counter

@@ -63,6 +63,9 @@ def main():
                     help="drop characters whose label occurs fewer times (cannot be cross-validated)")
     ap.add_argument("--work", default=str(ROOT / "work"),
                     help="working directory (the B line uses work-b)")
+    ap.add_argument("--prefer-ab", action="store_true",
+                    help="prefer cells confirmed by both OCR witnesses; fall back to a_only "
+                         "only when a label has no ab sample")
     ap.add_argument("--prefer-clean", default="",
                     help="name of a boolean cell field (e.g. dewarp_fail); when a character "
                          "has at least one sample without the flag, the flagged samples are "
@@ -140,6 +143,10 @@ def main():
         if len(items) < args.min_samples:
             dropped += 1
             continue
+        if args.prefer_ab:
+            ab = [r for r in items if r.get("agree_ab")]
+            if ab:
+                items = ab
         if args.prefer_clean:
             good = [r for r in items if not r.get(args.prefer_clean)]
             if good and len(good) < len(items):

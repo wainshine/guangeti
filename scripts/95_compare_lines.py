@@ -171,7 +171,14 @@ def main() -> None:
                     help="verify build/*.ttf against release*/SHA256SUMS (exit 2 on mismatch)")
     ap.add_argument("--seed", type=int, default=7, help="seed for the random row")
     ap.add_argument("--show", action="store_true")
+    ap.add_argument("--c-regular", default="",
+                    help="override the C-line font (e.g. build/GuanGeKai-C-Regular-v2.ttf); "
+                         "skips the release-c hash check for C")
     args = ap.parse_args()
+    if args.c_regular:
+        for _i, (_t, _n, _p, _rel) in enumerate(LINES):
+            if _t == "C":
+                LINES[_i] = (_t, _n, Path(args.c_regular), _rel)
 
     # seeded random row: same codepoints for every line, drawn from the block, so the
     # sheet is not limited to hand-picked characters
@@ -191,10 +198,14 @@ def main() -> None:
     # --- packaged-hash guard: never draw a sheet from a font that is not what shipped
     stale = []
     for tag, _name, path, rel in fonts:
+        if tag == "C" and args.c_regular:
+            continue
         want = _release_hash(rel, path.name)
         if want and _sha(path) != want:
             stale.append(f"{tag} {path.name}: build≠release/{rel}/SHA256SUMS")
     for tag, _name, path, rel in fonts:
+        if tag == "C" and args.c_regular:
+            continue
         if not _release_hash(rel, path.name):
             stale.append(f"{tag} {path.name}: {rel}/SHA256SUMS 无此条目（未打包？）")
     if stale and args.check:

@@ -106,7 +106,8 @@ def clamp_em_bbox(contours, maxw: float = 1000.0, maxh: float = 1000.0):
     return out
 
 
-def adjust_mask_area(ink: np.ndarray, target_area: float, max_iter: int = 6) -> np.ndarray:
+def adjust_mask_area(ink: np.ndarray, target_area: float, max_iter: int = 12,
+                     stats: dict | None = None, supersample: int = 2) -> np.ndarray:
     """Nudge a glyph's stroke width so its ink area hits `target_area` (in px).
 
     The 大典 was copied by many hands; stroke weight varies by page by up to 2x.  A font
@@ -115,20 +116,38 @@ def adjust_mask_area(ink: np.ndarray, target_area: float, max_iter: int = 6) -> 
     the distance transform, so the glyph's shape and bbox barely move.  Iterated because
     the boundary-pixel count overestimates the perimeter of a stroke band.
     """
-    m = ink.astype(np.uint8)
-    if int(m.sum()) < 200 or target_area <= 0:
+    def _stop(reason, it):
+        if stats is not None:
+            stats["stop"] = reason
+            stats["iters"] = it
+
+    if int(ink.sum()) < 200 or target_area <= 0:
+        _stop("too_small", 0)
         return ink
+    ss = max(1, int(supersample))
+    if ss > 1:
+        h, w = ink.shape
+        m = (cv2.resize(ink.astype(np.uint8), (w * ss, h * ss),
+                        interpolation=cv2.INTER_NEAREST) > 0).astype(np.uint8)
+        target_area = target_area * ss * ss
+    else:
+        m = ink.astype(np.uint8)
     h0 = _hole_count(m)
     prev = m.copy()
-    for _ in range(max_iter):
+    clamped = False
+    for _it in range(max_iter):
         area = int(m.sum())
         if abs(area - target_area) / max(1.0, target_area) < 0.04:
+            _stop("tol", _it + 1)
             break
         er = cv2.erode(m, np.ones((3, 3), np.uint8))
         perim = max(1, int((m & (1 - er)).sum()))
         delta = (float(target_area) - area) / perim
+        if abs(delta) > 5.0:
+            clamped = True
         delta = max(-5.0, min(5.0, delta))
         if abs(delta) < 0.05:
+            _stop("clamped" if clamped else "small_delta", _it + 1)
             break
         if delta > 0:
             dto = cv2.distanceTransform((1 - m).astype(np.uint8), cv2.DIST_L2, 5)
@@ -140,8 +159,18 @@ def adjust_mask_area(ink: np.ndarray, target_area: float, max_iter: int = 6) -> 
         # visible defect.  If this step closed a hole, stop and keep the previous mask.
         if _hole_count(m) < h0:
             m = prev
+            _stop("hole", _it + 1)
             break
         prev = m.copy()
+    else:
+        _stop("clamped" if clamped else "max_iter", max_iter)
+    if stats is not None and "stop" not in stats:
+        stats["stop"] = "tol"
+        stats["iters"] = max_iter
+    if ss > 1:
+        h, w = ink.shape
+        small = cv2.resize(m.astype(np.uint8), (w, h), interpolation=cv2.INTER_AREA) >= 0.5
+        return small
     return m.astype(bool)
 
 
