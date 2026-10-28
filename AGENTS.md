@@ -52,19 +52,19 @@
 
 ### C 线（《永乐大典》，v1.0.1）
 
-- `build/GuanGeKai-C-Regular.ttf`：20,992 字 = **5,303 真迹 + 14,461 GAN + 1,228 带状回退（7.8%）**；
-  `build/GuanGeKai-C-Real.ttf`：仅 5,303 真迹（基本区 **25.26%**，三条线里最高）。
+- `build/GuanGeKai-C-Regular.ttf`：20,992 字 = **5,287 真迹 + 14,470 GAN + 1,235 带状回退（7.9%）**；
+  `build/GuanGeKai-C-Real.ttf`：仅 5,287 真迹（基本区 **25.19%**，三条线里最高）。
 - **v1.0.1 质量修复**（2026-10-28，回应「字重忽粗忽细/边缘毛糙/简体字怪」）：
   逐字墨量标定（真迹逐字墨量/文楷比从 0.42–0.98 收窄到 0.85–1.14，字体级 16/24/48px
   偏差 0.974/0.969/1.025/0.995）、追踪前去噪（`turdsize 3`）、
-  `repair_counters` 移到字重标定之前（全字体孔洞丢失 5.6%→**0.9%**）、
-  清理 10 个「简体码位 + 繁体字形」标签（书/习/长/价/礼/类/庄/个/亘/坛），真迹 5,310→5,303。
+  `repair_counters` 移到字重标定之前（全字体孔洞丢失 5.6%→**1.4%** 全量，300 抽样 0.9%）、
+  清理 10 个「简体码位 + 繁体字形」标签（书/习/长/价/礼/类/庄/个/亘/坛），再剔除 15 个碎片字与 1 个错标（罎），真迹 5,310→**5,287**。
   简体码位加**结构守卫**（`--struct-guard`：GAN 输出组件数与文楷差 >2 时回落 ribbon），
-  ribbon 占比 1.9%→7.8%。清理后从零重训（计划 80 轮，训到 **ep52** 停止；ep20–50 结构指标单调变差）。
+  ribbon 占比 1.9%→7.9%。清理后从零重训（计划 80 轮，训到 **ep52** 停止；ep20–50 结构指标单调变差）。
 - 发布包 `release-c/`、`GuanGeKai-C-v1.0.1.zip`（14 MB）；口径 `data/release-c.json`
   与 `work-c/accept_c.json`；文档 `README-C.md`、`docs/{PLAN,DATA,EXPERIMENTS,RELEASE-v1.0.1}-C.md`。
 - **与 A/B 的根本差别：没有对照文本。** 标签靠 **PP-OCRv6 + PP-OCRv5 双见证**
-  （全量 1,297,735 字，逐字一致率 **91.1%**），冲突（约 9%）丢弃；干净集按**页**留出
+  （全量 1,297,735 字，双见证一致率 **93.0%**；含单见证 90.3%），冲突（约 9%）丢弃；干净集按**页**留出
   （207 页 / 6%），不用“只出现一次的字”。**标签未经逐字人工校对**，发布说明已披露。
 - 版面：朱丝栏 + 小字双行/大字字头混排，切字用 OCR 行框定行 + DP 切格（1,214,431 格，组件归属）；
   篆/隶页按 OCR 含「篆」或「隸+書」整页排除（222 页）。
@@ -143,6 +143,7 @@ python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json wo
 python3 scripts/23_compare_all.py --n 40                              # 3.5 重出对比面板（默认用 617 干净字）
 rm -rf release && python3 scripts/14_package.py               # 4. 重新打包（会复制根 README）
 python3 scripts/95_compare_lines.py                    # 4.5 三线对照图（A/B/C 同一文字并排，出 docs/images/lines-compare.png）
+python3 scripts/98_style_sheet.py --line A             # 4.6 来源分层图（真迹/GAN/回退 分开看，出 docs/images/style-A.png）
 cd release && zip -q -r ../GuanGeKai-vX.Y.Z.zip . && cd ..    # 5. 出 zip
 shasum -a 256 build/*.ttf GuanGeKai-vX.Y.Z.zip                # 6. 同步校验和到 DATA.md / PROJECT_STATE.md
 python3 scripts/97_check_terms.py                            # 7. 术语检查（必须 TERMS OK；标准见 docs/GLOSSARY.md）
@@ -157,6 +158,7 @@ python3 scripts/97_check_terms.py                            # 7. 术语检查�
 | `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
 | `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%**，见 `work/holes_a.json`） |
 | `95_compare_lines` 出的三线对照图 | 三条线并排看不出「某条线整体偏细/偏粗/缺笔画」；发现即为回归 |
+| `98_style_sheet` 出的 `style-A.png` | 真迹行与 GAN 行风格连续；回退行若明显「等宽细笔」属已知，但占比不应升高 |
 | `97_check_terms.py` | 打印 `TERMS OK`（白名单与「已知遗留」不算） |
 
 **踩过的坑**：

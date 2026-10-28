@@ -497,3 +497,15 @@ OCR（PP-OCRv6）
 ```
 
 **你的首要任务不是训模型，是让标签可信。模型侧直接抄 A/B 的配方（5 层 PatchGAN + hinge + 80 轮）。**
+
+### 打包后必跑：来源分层图（共用脚本，不许 fork）
+
+```bash
+python3 scripts/98_style_sheet.py --line C      # 出 docs/images/style-C.png
+```
+
+读的是 `release-c/provenance.json`，**必须在打包之后**跑；
+`--check` 会校验 `build/` 与 `release*/SHA256SUMS` 一致。脚本归主会话维护（A 线），本线只跑不改。
+
+它把字体按来源（真迹 / GAN / 补位 / 回退）拆开画，是唯一能让眼睛判断「哪一类字有问题」的图；
+`lines-compare.png` 那种混排图看不出字来自哪个来源。
