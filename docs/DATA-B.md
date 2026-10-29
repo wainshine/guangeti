@@ -158,23 +158,32 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
 （本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
 
-## 6. 校验和（v1.2.2）
+## 6. 校验和（v1.3.0）
 
 ```
-1367082fd0fffba7b6e8245736cbf200699594ccca3deb86202f7689405ceece  build/GuanGeKai-B-Regular.ttf
-682a1c2295d9b108b930e2f6cbcbc47a01b981c2c6f2c9e3a2c56aa433978971  build/GuanGeKai-B-Real.ttf
-d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1.2.2.zip
+5e229d2f10144afda6a822df1fafcb108706d98f480f46814bf072987d5e6ec1  build/GuanGeKai-B-Regular.ttf
+1d25dfa5fe43fd45b51cc9d50208e3305df1dc8c187699524051b05d4bf12db0  build/GuanGeKai-B-Real.ttf
+ec5d492bc5ac1b378f3fa3f9024eb452504178b7056d4c149f61ba7758f1641b  GuanGeKai-B-v1.3.0.zip
 ```
 
 历史版本（zip 由所有者手动清理，不主动删）：
 
 ```
+d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1.2.2.zip
 58917b5d71b97480cca109243adbe687f6728e13fd9021cda6eede716cf70a72  GuanGeKai-B-v1.2.1.zip
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死
 （`SOURCE_DATE_EPOCH`），同一份输入可复现字节一致的 TTF。
+
+**v1.3.0 的口径变化**：
+
+- 删掉 5 个扩展 A 真迹字（`㓗㢮㯉䍧䳒`）→ `chosen` 4,078 → **4,073**，`cmap` 不再有区外码位；
+  过滤在 **builder 层**（`57/62 --drop-outside-basic`），所以 `Real ⊆ Regular` 成立；
+- 补 44 个标点/数字/空格（取自霞鹜文楷，1:1 不缩放）→ `cmap` 20,992 → **21,036**；
+- **`pairs.npz` 仍是 4,078 对的训练快照**（v1.2.2 生成），本轮不重训；下次重训时从 4,073 重建；
+- `-Real` 不含标点（只放真迹），与 A/C 同口径。
 
 **包内 README 不再有 drift**：v1.2.2 重新打包后，`release-b/README.md` 与仓库
 `README-B.md` 只在图片路径前缀上不同（打包脚本按设计去掉 `docs/images/`），措辞一致。<!-- term-ok -->
@@ -222,7 +231,7 @@ python3 scripts/54_label_b.py                      # 标注 + 对齐；无 OCR �
 python3 scripts/05_select.py --work work-b --prefer-clean dewarp_fail
 cp work-b/chosen.jsonl work-b/chosen_min2.jsonl     # 留存"仅 ≥2 样本"的版本
 python3 scripts/58_add_singletons_b.py --work work-b --out work-b/chosen.jsonl
-                                                   # 双见证准入：3,807 -> 4,078
+                                                   # 双见证准入：3,807 -> 4,078（v1.3.0 起再剔 5 个扩展 A → 4,073）
 
 python3 scripts/06_norm.py --work work-b --pitch-floor 100
 python3 scripts/57_build_real_b.py --close 7 --hole-repair
@@ -246,7 +255,8 @@ python3 scripts/60_generate_b.py --method gan --ckpt work-b/ckpt/b_ep080.pt \
                                                    # 16,919 字，约 25 分钟
 python3 scripts/61_fill_fallback_b.py              # 兜底：60 漏掉的字用带状扫掠补齐
 
-python3 scripts/62_build_full_b.py                 # build/GuanGeKai-B-Regular.ttf
+python3 scripts/62_build_full_b.py --drop-outside-basic   # 基本區 20,992（不帶 5 個扩展 A）
+python3 scripts/13_extend_punct.py --line B --inplace      # 補 44 個標點 → cmap 21,036
 python3 scripts/63_qa_b.py                         # 硬闸：覆盖率/空字形/真跡数/孔洞
 python3 scripts/68_accept_b.py                     # 硬闸：字重比/回退占比/包围盒
 

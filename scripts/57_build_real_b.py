@@ -23,7 +23,7 @@ from shiji_page import repair_counters  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FAMILY = "GuanGe Kai B"
-VERSION = "1.2.2"
+VERSION = "1.3.0"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript "
              "史記 (attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
@@ -44,6 +44,8 @@ def main():
             glyphs[r["char"]] = r["contours"]
         if len(glyphs) < 1000:
             raise SystemExit(f"ABORT: only {len(glyphs)} cached glyphs")
+        if "--drop-outside-basic" in sys.argv:
+            glyphs = {k: v for k, v in glyphs.items() if 0x4E00 <= ord(k) <= 0x9FFF}
         build_font(glyphs, ROOT / "build" / "GuanGeKai-B-Real.ttf",
                    family=FAMILY, style="Real", version=VERSION,
                    copyright_text=COPYRIGHT)
@@ -57,6 +59,9 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--reuse-contours", action="store_true",
                     help="rebuild from work-b/real_contours.jsonl instead of re-tracing masks")
+    ap.add_argument("--drop-outside-basic", action="store_true",
+                    help="drop glyphs outside 0x4E00-0x9FFF (the 5 extension-A forms), so the "
+                         "shipped cmap matches the advertised 20,992 basic-block coverage")
     ap.add_argument("--hole-repair", action="store_true",
                     help="escalate the closing kernel for glyphs that still have no counter "
                          "where WenKai draws one (audit rev3 2-3)")
@@ -72,6 +77,8 @@ def main():
         r = json.loads(line)
         meta[r["file"]] = r
     chosen = [json.loads(l) for l in open(wd / "chosen.jsonl")]
+    if args.drop_outside_basic:
+        chosen = [r for r in chosen if r["label"] and 0x4E00 <= ord(r["label"][0]) <= 0x9FFF]
     norm = json.load(open(wd / "norm.json"))
     if args.limit:
         chosen = chosen[: args.limit]

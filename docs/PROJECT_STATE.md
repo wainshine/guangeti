@@ -3,7 +3,7 @@
 > **一句话**：以明代写本《四书白文》为字形来源，做一套覆盖 CJK 基本区 20,992 字、OFL 1.1 授权的馆阁体字体（GuanGe Kai / 馆阁楷）。
 >
 > **三线现状（2026-10-28）**：A 四书 `GuanGe Kai` v1.6.5；B 史记 `GuanGe Kai B` v1.2.1；
-> **C 永乐大典 `GuanGe Kai C` v1.1.0（5,295 真迹 / 25.22%）**。
+> **C 永乐大典 `GuanGe Kai C` v1.2.0（5,299 真迹 / 25.24%）**。
 > C 线的状态、实验与数据见 `docs/PLAN-C.md`、`docs/EXPERIMENTS-C.md`、`docs/DATA-C.md`、
 > `README-C.md`；本文以下各节仍只描述 A 线。
 >
@@ -50,9 +50,9 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.7.0） | 15.7 MB | `6dfd79d6a1f16cc8` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.7.1） | 15.7 MB | `67ab18b2bd975f7d` |
 | `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `453d14661745ef2e` |
-| `GuanGeKai-v1.7.0.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `57686b31c32c2276` |
+| `GuanGeKai-v1.7.1.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `5cdb5bbf1f37725a` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。

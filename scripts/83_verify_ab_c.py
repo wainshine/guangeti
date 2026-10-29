@@ -30,7 +30,8 @@ A_FONTS = ["GuanGeKai-Regular.ttf", "GuanGeKai-Real.ttf"]
 B_FONTS = ["GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf"]
 # zip hashes are release-time snapshots: they change when a package is rebuilt,
 # which is expected.  Update them in the same commit as the release.
-ZIPS = {"GuanGeKai-v1.7.0.zip": "57686b31c32c22761eb7a47398bf0726eb207dd384f4e8309ed14fd6a5e74cfd",
+ZIPS = {"GuanGeKai-v1.7.1.zip": "5cdb5bbf1f37725a39ef06411ffe164b24f63df733f9368747c1b248e37220ac",
+        "GuanGeKai-B-v1.3.0.zip": "ec5d492bc5ac1b378f3fa3f9024eb452504178b7056d4c149f61ba7758f1641b",
         "GuanGeKai-B-v1.2.2.zip": "d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491"}
 
 
@@ -94,10 +95,10 @@ def main():
         "A provenance real": (sum(1 for v in json.loads(
             (ROOT / "release/provenance.json").read_text()).values() if v == "real"), 1675),
         "B coverage": (coverage(ROOT / "build/GuanGeKai-B-Regular.ttf")[0], 20992),
-        "B real glyphs": (n_real(ROOT / "build/GuanGeKai-B-Real.ttf"), 4078),
-        "B chosen": (lines(ROOT / "work-b/chosen.jsonl"), 4078),
+        "B real glyphs": (n_real(ROOT / "build/GuanGeKai-B-Real.ttf"), 4073),
+        "B chosen": (lines(ROOT / "work-b/chosen.jsonl"), 4073),
         "B provenance real": (sum(1 for v in json.loads(
-            (ROOT / "release-b/provenance.json").read_text()).values() if v == "real"), 4078),
+            (ROOT / "release-b/provenance.json").read_text()).values() if v == "real"), 4073),
     }
     for k, (got, want) in checks.items():
         good = got == want

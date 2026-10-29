@@ -17,6 +17,8 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import os as _os
+torch.set_num_threads(int(_os.environ.get("TORCH_THREADS", "6")))
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset

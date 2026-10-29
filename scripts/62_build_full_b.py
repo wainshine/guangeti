@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WB = ROOT / "work-b"
 BLOCK = (0x4E00, 0x9FFF)
 FAMILY = "GuanGe Kai B"
-VERSION = "1.2.2"
+VERSION = "1.3.0"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript 史記 "
              "(attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
@@ -41,13 +41,16 @@ def main():
     ap.add_argument("--min-real", type=int, default=1000)
     ap.add_argument("--allow-missing", action="store_true",
                     help="dry-run only: build even when coverage is incomplete")
+    ap.add_argument("--drop-outside-basic", action="store_true",
+                    help="drop glyphs outside 0x4E00-0x9FFF (the 5 extension-A forms) so the "
+                         "cmap matches the advertised basic-block coverage")
     args = ap.parse_args()
     wd = Path(args.work)
     real = load(wd / "real_contours.jsonl")
+    if args.drop_outside_basic:
+        real = {k: v for k, v in real.items() if BLOCK[0] <= ord(k) <= BLOCK[1]}
     gen = load(wd / "generated.jsonl")
     glyphs = {}
-    # Every genuine glyph we have goes in, even the handful outside the basic block
-    # (5 extension-A forms); the block itself is still checked to be complete below.
     for ch in sorted(set(real) | set(gen)):
         glyphs[ch] = real[ch] if ch in real else gen[ch]
     in_block = sum(1 for c in range(BLOCK[0], BLOCK[1] + 1) if chr(c) in glyphs)

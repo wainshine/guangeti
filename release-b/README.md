@@ -14,13 +14,13 @@
 
 ## 1. 這是什麼
 
-**版本**：本包为 **GuanGe Kai B v1.2.2**，随主版本 **GuanGeKai v1.7.0** 一起发布
-（同一项目、两个字形来源：A = 四书精写本 `GuanGe Kai`，B = 史记旧抄本 `GuanGe Kai B`，
+**版本**：本包为 **GuanGe Kai B v1.3.0**，随主版本 **GuanGeKai v1.7.1** 一起发布
+（同一项目、两个字形来源：A = 四书精写本 `GuanGe Kai`，B = 史记明抄本 `GuanGe Kai B`，
 两套家族名并存，互不覆盖）。
 
 - `GuanGeKai-B-Regular.ttf`：完整字集 **20,992 字**（CJK 基本區 100%）＝ 真跡 4,073 + 生成 16,919（含疑難字由第二模型補的 544 個）；
-  字型內另有 5 個擴展 A 的真跡字，故 `cmap` 實際 20,997 個碼位
-- `GuanGeKai-B-Real.ttf`：只有 4,078 個真跡字，全部逐字從掃描本切出、向量化
+  另含**標點 / 數字 / 空格 44 個碼位**，`cmap` 合計 **21,036**（與 A 線同口徑）
+- `GuanGeKai-B-Real.ttf`：只有 4,073 個真跡字，全部逐字從掃描本切出、向量化（不含標點）
 
 真跡字的字形**直接來自抄本**：切字、去噪、potrace 向量化，再歸一到統一字身框。
 生成字由 GAN（zi2zi U-Net + PatchGAN）以霞鶩文楷為骨架、以抄本筆形為風格生成；
@@ -48,13 +48,13 @@
 
 | | A 線 `GuanGe Kai` | **B 線 `GuanGe Kai B`** |
 |---|---|---|
-| 字形來源 | 明寫本《四書白文》（舊傳姜立綱） | **明舊抄本《史記》（舊傳姜立綱）** |
-| 性質 | 名家精寫本 | **舊抄本（抄手水平參差）** |
+| 字形來源 | 明寫本《四書白文》（舊傳姜立綱，存疑） | **明抄本《史記》（舊傳姜立綱）** |
+| 性質 | 名家精寫本 | **明抄本** |
 | 掃描原生解析度 | 300 dpi | **150 dpi** |
-| 真跡字數 | 1,675（8.0%） | **4,078（19.4%）** |
-| 真跡／生成 | 1,675 / 19,317 | **4,078 / 16,919** |
+| 真跡字數 | 1,675（8.0%） | **4,073（19.4%）** |
+| 真跡／生成 | 1,675 / 19,317 | **4,073 / 16,919** |
 
-兩套都是寫本，筆性的差別來自寫字的人：A 線出自名家，結體最勻；B 線是舊抄，行筆較率。**不要混用**，
+兩套都是寫本，一人一筆；差別在書、年代與紙墨。**不要混用**，
 排版時整段選用同一套。若系統裡同時安裝，字型選單會顯示為兩個家族。
 
 ## 3. 數據來源
@@ -91,13 +91,15 @@ PDF（1672 頁，雙頁對開）
    因守衛不通過而走帶狀掃掠回退，集中在筆畫複雜的字），筆形接近但不等同於抄本。
    需要嚴格字形時請用 `GuanGeKai-B-Real.ttf`。
    合成字整體比真跡**重約 8.2%**（墨量比 1.082），小字號差距很小（12px 時 ×1.008）。
-2. **抄本用字只覆蓋 4,078 字（19.4%）。** 剩餘 80.6% 是合成的；這是本項目最大的
+2. **抄本用字只覆蓋 4,073 字（19.4%）。** 剩餘 80.6% 是合成的；這是本項目最大的
    質量瓶頸，也是 B 線比 A 線好的地方（A 線只有 8.0%）。
-3. **沒有 hinting。** 小字號依賴系統自動微調。
-4. 抄本與通行本有**脫字、衍字、異體字**差異；標註以「抄本實際寫的字」為準
+3. **標點與數字取自霞鶩文楷，不是館閣體筆意。** 1:1 不縮放；與正文並排時字重略輕
+   （B 線的正文比 A 線細，所以這點在 B 上更明顯）。拉丁字母不補，由系統回退。
+4. **沒有 hinting。** 小字號依賴系統自動微調。
+5. 抄本與通行本有**脫字、衍字、異體字**差異；標註以「抄本實際寫的字」為準
    （例如抄本寫 `閒`、`爲`、`衆`），不強行改成通行本用字。因此某些常見字
    （如 `眾`、`爲`）在真跡集裡可能不在你最常用的那個碼位上。
-5. 極少數頁面（各冊首尾、書名頁、圖書館藏書票、以及十篇「表」的表格頁）不參與
+6. 極少數頁面（各冊首尾、書名頁、圖書館藏書票、以及十篇「表」的表格頁）不參與
    真跡字表；這些頁的內容無法用正文對齊驗證。
 
 ## 6. 授權與命名
@@ -125,9 +127,13 @@ python3 scripts/54_label_b.py
 python3 scripts/05_select.py --work work-b --min-samples 2 --drop-flag low_align
 python3 scripts/58_add_singletons_b.py --work work-b --out work-b/chosen.jsonl
 python3 scripts/06_norm.py --work work-b --pitch-floor 100
-python3 scripts/57_build_real_b.py --reuse-contours   # build/GuanGeKai-B-Real.ttf（從 real_contours.jsonl 重建，與 Regular 同源）
+python3 scripts/57_build_real_b.py --reuse-contours --drop-outside-basic
+                                              # build/GuanGeKai-B-Real.ttf（4,073 字，不含标点）
 # … GAN 訓練與生成見 docs/DATA-B.md §7
-python3 scripts/62_build_full_b.py            # build/GuanGeKai-B-Regular.ttf
+python3 scripts/62_build_full_b.py --drop-outside-basic
+                                              # build/GuanGeKai-B-Regular.ttf（基本區 20,992）
+python3 scripts/13_extend_punct.py --line B --inplace
+                                              # 補 44 個標點/數字/空格 → cmap 21,036
 python3 scripts/63_qa_b.py
 python3 scripts/64_package_b.py
 ```

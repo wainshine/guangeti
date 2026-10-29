@@ -113,7 +113,7 @@ def main():
             for i, (f, res) in enumerate(pool.imap(_vec_task, tasks, chunksize=200)):
                 if i and i % 100000 == 0:
                     print(f"  loaded {i}/{len(rows)} cells", flush=True)
-                if res is None:
+                if res is None or res[0] is None:
                     continue
                 v, meta, sharp = res
                 vecs[f] = v

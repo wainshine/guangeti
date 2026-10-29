@@ -1,16 +1,16 @@
 {
  "codepoints": 20992,
- "real": 4078,
+ "real": 4073,
  "real_basic": 4073,
- "real_ext_a": 5,
+ "real_ext_a": 0,
  "generated": 16919,
  "gan": 15784,
  "gan_ht": 544,
  "ribbon_fallback": 591,
  "missing": 0,
  "upm": 1000,
- "glyphs": 20998,
- "file_bytes": 15390716,
- "real_file_bytes": 3824004,
+ "glyphs": 21037,
+ "file_bytes": 15432708,
+ "real_file_bytes": 3818680,
  "family": "GuanGe Kai B"
 }

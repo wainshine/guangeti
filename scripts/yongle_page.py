@@ -402,7 +402,7 @@ def segment_page(rgb: np.ndarray, dpi: int = 300) -> dict:
 
 
 def assign_components(ink: np.ndarray, cells: list[dict], pitch: float,
-                      min_area: float = 60):
+                      min_area: float = 60, y_core=None):
     """Attach connected components to cells (two passes, as in pageproc).
 
     Each cell gets `comp_ids`, `bbox` (tight ink box) and `ink` (fill ratio).
@@ -428,7 +428,8 @@ def assign_components(ink: np.ndarray, cells: list[dict], pitch: float,
         cx, cy = cent[i]
         best = None
         for k, c in enumerate(cells):
-            if c["x0"] - 4 <= cx <= c["x1"] + 4 and c["y0"] - 4 <= cy <= c["y1"] + 4:
+            lo, hi = (y_core[k] if y_core is not None else (c["y0"] - 4, c["y1"] + 4))
+            if c["x0"] - 4 <= cx <= c["x1"] + 4 and lo <= cy <= hi:
                 # prefer the cell whose centre is closest
                 d = (cx - (c["x0"] + c["x1"]) / 2) ** 2 + (cy - (c["y0"] + c["y1"]) / 2) ** 2
                 if best is None or d < best[0]:
@@ -448,6 +449,11 @@ def assign_components(ink: np.ndarray, cells: list[dict], pitch: float,
         for i in comps:
             if i in owner:
                 continue
+            if y_core is not None:
+                cx, cy = cent[i]
+                if not any(lo <= cy <= hi and c["x0"] - 4 <= cx <= c["x1"] + 4
+                           for c, (lo, hi) in zip(cells, y_core)):
+                    continue
             x0 = int(stats[i, 0]); y0 = int(stats[i, 1])
             x1 = x0 + int(stats[i, 2]); y1 = y0 + int(stats[i, 3])
             area = int(stats[i, 4])

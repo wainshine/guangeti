@@ -35,3 +35,10 @@ data/fonts_target/
 data/ids/Unihan_IRGSources.txt
 release-c-v2/GuanGeKai-C-Real-v2.ttf
 release-c-v2/GuanGeKai-C-Regular-v2.ttf
+
+# ---- C 线人工标注 / 盲审图（评审用，不提交）----
+/docs/images/c-select-sheet-*.png
+/docs/images/c-gen-sheet-*.png
+/docs/images/c-blind-*.png
+/docs/images/c-v3d-blind-*.png
+/docs/images/c-v3d2-blind-*.png
