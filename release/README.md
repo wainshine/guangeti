@@ -107,8 +107,8 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 40 組實驗（E1–E40）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| | [docs/RELEASE-v1.7.2.md](docs/RELEASE-v1.7.2.md) | 想了解本版改了什麼的人 | **A v1.7.1**：補標點、數字與空格（20,992 → 21,034） |
-| [docs/RELEASE-v1.7.2.md](docs/RELEASE-v1.7.2.md) | 考古的人 | v1.7.0：字體元數據與術語更正 |
+| [docs/RELEASE-v1.7.2.md](docs/RELEASE-v1.7.2.md) | 想了解本版改了什麼的人 | **A v1.7.2**：字集口徑定稿（20,992 + 42 = 21,034）、工作點固化 |
+| [docs/releases/RELEASE-v1.7.0.md](docs/releases/RELEASE-v1.7.0.md) | 考古的人 | v1.7.0：字體元數據與術語更正 |
 | [README-B.md](README-B.md) | B 線本版說明 | **B v1.2.4**：字集口徑 20,992 + 42 = 21,034（v1.2.4 由 B 線重出） |
 | [docs/RELEASE-v1.2.0-C.md](docs/RELEASE-v1.2.0-C.md) | C 線本版說明 | **C v1.2.0**：v3c 全量重切、守衛回退尺寸修復 |
 | [docs/releases/](docs/releases/README.md) | 考古的人 | 已被取代的 17 份發布說明（按線與版本索引） |
@@ -221,10 +221,10 @@ python3 scripts/14_package.py          # 發布包
 ### 參考項目與思想
 
 * **[kaonashi-tyc/zi2zi](https://github.com/kaonashi-tyc/zi2zi)**（Apache-2.0）——
-  路線 B 的配方來源：U-Net + 全局判別器 + `L1×100 + 對抗 + 常量損失`，由我們獨立重寫為
+  `zi2zi-GAN` 的配方來源：U-Net + 全局判別器 + `L1×100 + 對抗 + 常量損失`，由我們獨立重寫為
   `scripts/21_train_gan.py`，未使用其任何權重
 * **[kaonashi-tyc/zi2zi-JiT](https://github.com/kaonashi-tyc/zi2zi-JiT)**（代碼 MIT）——
-  路線 C 的架構；**其預訓練權重沒有許可聲明**（LICENSE 僅寫 "MIT License (Software)"），
+  `zi2zi-JiT` 的架構；**其預訓練權重沒有許可聲明**（LICENSE 僅寫 "MIT License (Software)"），
   故本項目只將其輸出作為**評價參考**，從未進入發布字體
 * **[computer-grass](https://github.com/LingDong-/computer-grass)** —— 逐筆墨量擾動 `dip`
   與「針狀收筆」的思路；其字形數據的授權與 OFL 不兼容，**未使用**
