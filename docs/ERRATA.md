@@ -77,3 +77,22 @@ p5 0.086% | 中位 0.265% | p95 19.97% | 最大 97.99%
 `p14_0061_c00_l10_s012.png` 是页边碎片（`ink 0.025`，`agree_ab=True` 但内容是碎片）。
 成因：页边切格产生碎片 → 标签按行序列分配 → 双见证只验行文本。修复方案见
 `docs/CONVENTIONS.md` 之外的 C 线专项（结构闸 + 格级对账），由 C 线会话执行。
+
+## E7. `work/generated_simplified.jsonl` 的清理记录不成立
+
+**记录**：`docs/DATA.md` §7 曾写「`work/generated_simplified.jsonl` 已删除，与 `work/generated.jsonl`
+内容完全相同（sha256 一致）」。
+
+**实测（2026-10-30）**：
+
+```
+文件存在                        187 MB
+sha256(generated.jsonl)         8360364bb7704c41…
+sha256(generated_simplified)    9511eed31da56d31…
+```
+
+两条都不成立：文件没删，内容也不同。全仓库没有脚本引用它，`docs/` 里只有这一行记录。
+
+**处置**：文件暂留（来源与用途待查，删除不可逆）；`docs/DATA.md` 的该行已改为「保留（待查）」。
+
+**教训**：清理记录必须附一条可复跑的命令（`ls` + `sha256sum`），否则等于没记。

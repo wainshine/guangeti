@@ -121,10 +121,20 @@ def main():
 
     f = TTFont(full)
     cmap = f.getBestCmap()
+    # punctuation/digits/spaces are neither real nor generated; record them so the
+    # package provenance covers the full cmap (audit 2026-10-30 self-audit)
+    for c in cmap:
+        if not (BLOCK[0] <= c <= BLOCK[1]):
+            provenance[chr(c)] = "punct"
+    (out / "provenance.json").write_text(json.dumps(provenance, ensure_ascii=False))
     covered = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1) if c in cmap]
     (out / "coverage.txt").write_text("".join(covered))
+    punct = [c for c in cmap if not (BLOCK[0] <= c <= BLOCK[1])]
     stats = dict(
         codepoints=len(covered),
+        cmap_codepoints=len(cmap),
+        punctuation=len(punct),
+        punct=sum(1 for v in provenance.values() if v == "punct"),
         real=sum(1 for v in provenance.values() if v == "real"),
         real_basic=sum(1 for k, v in provenance.items() if v == "real"
                         and BLOCK[0] <= ord(k) <= BLOCK[1]),

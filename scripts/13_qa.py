@@ -78,6 +78,13 @@ def main():
         raise SystemExit(f"ABORT: coverage {len(have)} != {BLOCK[1]-BLOCK[0]+1}")
     if empty or tiny or huge:
         raise SystemExit(f"ABORT: empty={len(empty)} tiny={len(tiny)} huge={len(huge)}")
+    # punct gate (audit 3.2 / PLAN-PUNCT): single source = scripts/punct_set.py
+    import punct_set
+    _cm = f.getBestCmap()
+    _problems = punct_set.verify(_cm)
+    if _problems:
+        raise SystemExit("ABORT punct: " + "; ".join(_problems[:6]))
+
     # fontRevision must agree with the name-table version (audit 3-3)
     _f = TTFont(args.font)
     _ver = [str(n) for n in _f["name"].names if n.nameID == 5 and n.platformID == 3]

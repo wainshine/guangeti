@@ -1,5 +1,6 @@
 {
  "codepoints": 20992,
+ "codepoints_total": 21034,
  "real": 4073,
  "real_basic": 4073,
  "real_ext_a": 0,
@@ -9,8 +10,8 @@
  "ribbon_fallback": 591,
  "missing": 0,
  "upm": 1000,
- "glyphs": 21037,
- "file_bytes": 15432708,
+ "glyphs": 21035,
+ "file_bytes": 15432348,
  "real_file_bytes": 3818680,
  "family": "GuanGe Kai B"
 }

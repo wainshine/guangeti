@@ -230,9 +230,14 @@ def main():
         fails.append(f"fallback share {res['fallback_share']} > 0.12")
     if res.get("bbox_w_ratio") and not (0.95 <= res["bbox_w_ratio"] <= 1.10):
         fails.append(f"bbox ratio {res['bbox_w_ratio']}")
-    small = (res.get("size_sweep") or {}).get("12")
+    ss = res.get("size_sweep") or {}
+    small = ss.get(12) or ss.get("12")
     if small and small.get("bias") and small["bias"] > 1.15:
         fails.append(f"12px weight bias {small['bias']} > 1.15")
+    # 16px is noisier than 12px; use a 0.88 lower bound, not 0.90 (audit 2026-10-30).
+    small16 = ss.get(16) or ss.get("16")
+    if small16 and small16.get("bias") and not (0.88 <= small16["bias"] <= 1.15):
+        fails.append(f"16px weight bias {small16['bias']} outside 0.88-1.15")
     if fails:
         raise SystemExit("ACCEPTANCE FAILED: " + "; ".join(fails))
     print("ACCEPTANCE OK")

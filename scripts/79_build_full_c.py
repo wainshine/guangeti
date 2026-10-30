@@ -56,6 +56,8 @@ def main():
     ap.add_argument("--work", default=str(WB))
     ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-C-Regular.ttf"))
     ap.add_argument("--min-real", type=int, default=1000)
+    ap.add_argument("--no-punct", action="store_true",
+                    help="do not append the 42 punctuation/digit/space glyphs")
     ap.add_argument("--allow-missing", action="store_true",
                     help="dry-run only: build even when coverage is incomplete")
     args = ap.parse_args()
@@ -77,11 +79,22 @@ def main():
     out = Path(args.out)
     build_font(glyphs, out, family=FAMILY, style="Regular", version=VERSION,
                copyright_text=COPYRIGHT)
+    punct = 0
+    if not args.no_punct and out.resolve() != (ROOT / "build" / "GuanGeKai-C-Regular.ttf").resolve():
+        raise SystemExit("ABORT: non-canonical --out would silently skip the 42 punctuation glyphs; "
+                         "build to build/GuanGeKai-C-Regular.ttf or pass --no-punct")
+    if not args.no_punct:
+        import subprocess
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "13_extend_punct.py"),
+                        "--line", "C", "--inplace"], check=True)
+        from fontTools.ttLib import TTFont
+        cm = TTFont(out).getBestCmap()
+        punct = sum(1 for c in cm if not (BLOCK[0] <= c <= BLOCK[1]))
     # Build manifest: pins the exact inputs this font was built from.  `81_package_c.py`
     # compares these hashes instead of mtimes, so a later regeneration of generated.jsonl
     # cannot silently be paired with an older font (the v1.0.1 packaging incident).
     man = dict(
-        font=str(out), font_sha256=sha256(out),
+        font=str(out), font_sha256=sha256(out), punctuation=punct,
         chosen_sha256=sha256(wd / "chosen.jsonl"),
         generated_sha256=sha256(wd / "generated.jsonl"),
         real_sha256=(sha256(wd / "real_contours.jsonl")

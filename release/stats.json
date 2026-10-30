@@ -8,7 +8,8 @@
  "ribbon_fallback": 799,
  "missing": 0,
  "upm": 1000,
- "glyphs": 21037,
- "file_bytes": 15739884,
- "real_file_bytes": 3322124
+ "glyphs": 21035,
+ "file_bytes": 15739524,
+ "real_file_bytes": 3291812,
+ "codepoints_total": 21034
 }

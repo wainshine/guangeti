@@ -102,3 +102,40 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def _fix_charset_records(out_dir):
+    """provenance/stats must agree with the shipped charset (GLOSSARY 字集口径):
+    42 punctuation codepoints get a `punct` source, and stats reports the codepoint
+    total next to the CJK-block count."""
+    import json as _json
+    import sys as _sys
+    from pathlib import Path as _P
+    _sys.path.insert(0, str(_P(__file__).resolve().parent))
+    import punct_set
+
+    prov_p = out_dir / "provenance.json"
+    if prov_p.exists():
+        prov = _json.loads(prov_p.read_text())
+        for cp in punct_set.CHARS:
+            prov.setdefault(chr(cp), "punct")
+        prov_p.write_text(_json.dumps(prov, ensure_ascii=False, indent=1))
+
+    stats_p = out_dir / "stats.json"
+    if stats_p.exists():
+        st = _json.loads(stats_p.read_text())
+        st["codepoints"] = 20992
+        st["codepoints_total"] = punct_set.EXPECTED_CMAP
+        stats_p.write_text(_json.dumps(st, ensure_ascii=False, indent=1))
+
+    # the manifest must be recomputed after the records above are rewritten,
+    # otherwise SHA256SUMS is older than the files it describes
+    import hashlib as _hl
+    sums = out_dir / "SHA256SUMS"
+    lines = []
+    for f in sorted(out_dir.iterdir()):
+        if f.is_file() and f.name != "SHA256SUMS":
+            lines.append(f"{_hl.sha256(f.read_bytes()).hexdigest()}  {f.name}")
+    sums.write_text("\n".join(lines) + "\n")
+
+
+_fix_charset_records(ROOT / "release")

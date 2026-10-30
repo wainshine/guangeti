@@ -276,25 +276,8 @@ def segment_one(task):
                 a, b = cuts[k], cuts[k + 1]
                 if b - a < 6:
                     continue
-                merged = False
-                if (b - a) > 1.25 * step:
-                    sub = ink[a:b, x0:x1].any(1)
-                    rr = []
-                    st = None
-                    for ii, vv in enumerate(sub):
-                        if vv and st is None:
-                            st = ii
-                        if not vv and st is not None:
-                            rr.append((st, ii)); st = None
-                    if st is not None:
-                        rr.append((st, len(sub)))
-                    if len(rr) >= 2:
-                        hh = b - a
-                        merged = ((rr[0][1] - rr[0][0]) > 0.25 * hh
-                                  and (rr[-1][1] - rr[-1][0]) > 0.25 * hh
-                                  and (rr[-1][0] - rr[0][1]) > 0.08 * hh)
                 cells.append(dict(
-                    key=key, book_idx=idx, page=page, col=ci, li=li, sub=k, merged=bool(merged),
+                    key=key, book_idx=idx, page=page, col=ci, li=li, sub=k, merged=False,
                     slot=(int(a), int(b)), slot_x=(int(x0), int(x1)),
                     x0=int(x0), y0=int(a), x1=int(x1), y1=int(b),
                     pitch=round(P, 1), cpitch=round(float(step), 1),
@@ -463,7 +446,8 @@ def main():
     if args.limit:
         todo = todo[:args.limit]
     print(f"pages {len(todo)}", flush=True)
-    tasks = [(s["key"], s["book"], s["book_idx"], s["page"], args.dpi, 2.0,
+    ocr_scale = args.dpi / 150.0
+    tasks = [(s["key"], s["book"], s["book_idx"], s["page"], args.dpi, ocr_scale,
               s["angle"], s) for s in todo]
     t0 = time.time()
     all_rows = []

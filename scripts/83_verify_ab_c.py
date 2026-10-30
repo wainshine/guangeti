@@ -30,8 +30,8 @@ A_FONTS = ["GuanGeKai-Regular.ttf", "GuanGeKai-Real.ttf"]
 B_FONTS = ["GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf"]
 # zip hashes are release-time snapshots: they change when a package is rebuilt,
 # which is expected.  Update them in the same commit as the release.
-ZIPS = {"GuanGeKai-v1.7.1.zip": "5cdb5bbf1f37725a39ef06411ffe164b24f63df733f9368747c1b248e37220ac",
-        "GuanGeKai-B-v1.3.0.zip": "ec5d492bc5ac1b378f3fa3f9024eb452504178b7056d4c149f61ba7758f1641b",
+ZIPS = {"GuanGeKai-v1.7.2.zip": "b6a7f36d2b3e97fb5d02d5f8f8b5415650af8bedea6e086fa71fcc27ef9dd3d9",
+        "GuanGeKai-B-v1.2.4.zip": "543f20bae9bbe511394d2f0c8edee78e5ec4898eddaffd9a28d61dee4dc98062",
         "GuanGeKai-B-v1.2.2.zip": "d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491"}
 
 
@@ -145,6 +145,24 @@ def main():
     snap = {n: v["sha256"] for n, v in info["fonts"].items()}
     base.update(snap)
     base_p.write_text(json.dumps(base, ensure_ascii=False, indent=1))
+    # ---- 字集口径（GLOSSARY「字集口径」）：三线都必须是基本区 20,992 + 标点 42 = 21,034
+    import punct_set
+    from fontTools.ttLib import TTFont
+    punct_ok = True
+    for tag, fp in (("A", "build/GuanGeKai-Regular.ttf"),
+                    ("B", "build/GuanGeKai-B-Regular.ttf"),
+                    ("C", "build/GuanGeKai-C-Regular.ttf")):
+        if not Path(fp).exists():
+            continue
+        cm = TTFont(fp).getBestCmap()
+        bad = punct_set.verify(cm)
+        if bad:
+            punct_ok = False
+            ok = False
+            print(f"FAIL        {tag} 字集口径: {bad[0]}（共 {len(bad)} 项）")
+        else:
+            print(f"OK          {tag} 字集 {len(cm)} = 20,992 + 42")
+
     print("\nRESULT:", "A/B INTACT" if ok else "A/B CHANGED — investigate before release")
     return 0 if ok else 1
 

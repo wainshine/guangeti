@@ -195,7 +195,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", default=str(WB))
     ap.add_argument("--method", choices=["gan", "ribbon"], default="gan")
-    ap.add_argument("--ckpt", default=str(WB / "ckpt" / "c_ep030.pt"),
+    ap.add_argument("--ckpt", default=str(WB / "ckpt" / "c_ep034_v120.pt"),
                     help="release checkpoint; see data/release-c.json")
     ap.add_argument("--rel-width", default=str(WB / "stroke_rel_width.npy"))
     ap.add_argument("--out", default=str(WB / "generated_gan.jsonl"))
@@ -293,13 +293,18 @@ def main():
              for i in range(0, len(chars), step)]
     fb, done = [], 0
     wk_font = ImageFont.truetype(str(BASE_FONT), 256) if args.struct_guard else None
+    wk_font_big = ImageFont.truetype(str(BASE_FONT), S2) if args.struct_guard else None
     rel = np.load(args.rel_width)
     def _comps(m):
         n, _l, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
         return sum(1 for i in range(1, n) if st[i, 4] >= 20)
     def _ribbon_mask(ch):
-        wm = render_base(wk_font, ch, 256) > 127
-        fr = B.glyph_frames(wm, 256)
+        # render the mask AND its skeleton frames at the target raster size.
+        # Using 256-px frames on a 512-px canvas put the glyph in the top-left
+        # quarter (the 455-char guard fallback bug, audit 2026-10-30 P1).
+        wm256 = render_base(wk_font, ch, 256) > 127
+        wm = render_base(wk_font_big, ch, S2) > 127
+        fr = B.glyph_frames(wm, S2)
         if not fr:
             return None
         r = np.random.RandomState(ord(ch) % (2 ** 31))
@@ -307,7 +312,7 @@ def main():
         raw /= max(1e-6, raw.mean())
         w = np.power(raw, 1.4)
         w /= max(1e-6, w.mean())
-        scale = float(np.clip(ribbon_scale_c(float(wm.sum())) * 1.1, 0.3, 1.2))
+        scale = float(np.clip(ribbon_scale_c(float(wm256.sum())) * 1.1, 0.3, 1.2))
         return B.render_ribbon(fr, scale=scale, dips=w, end_skew=0.9, taper=0.2,
                                size=S2, ss=2)
     with ctx.Pool(args.workers) as pool, open(args.out, "w") as fh:

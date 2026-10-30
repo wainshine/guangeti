@@ -104,12 +104,12 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 | `masks/` | **4.8 GB**（1,214,431 个） | 二值掩膜 |
 | `cells.jsonl` | **614 MB** | 每格元数据（页/栏/行/坐标/字距/质量） |
 | `ocr_v6.jsonl`、`ocr_v5.jsonl` | 待补 | 两套行级 OCR 结果（58,771 / 58,732 行） |
-| `labeled.jsonl` | **697 MB** | 每格标签与见证一致性（1,003,482 格有标签，训练池；全量非空 1,065,904） |
-| `chosen.jsonl` | **5,299 行** | 每字一个 medoid 样本（v1.2.0：v3c 重切 + `--prefer-ab`） |
+| `labeled.jsonl` | **697 MB** | 每格标签与见证一致性（1,044,983 格有标签，训练池；全量 1,187,881 格） |
+| `chosen.jsonl` | **5,302 行** | 每字一个 medoid 样本（v1.2.0：v3d2 重切 + `--prefer-ab`） |
 | `norm.json` | 待补 | 字面框归一化参数 |
-| `pairs/pairs.npz` | **94 MB** | GAN 训练对（**4,999 对**；排除 300 个按字留出后） |
-| `pairs_clean.npz` | **32 MB**（3,213 字） | 留出页干净集 |
-| `pairs_clean_second.npz` | **24 MB**（2,442 字） | 同字第二样本，用于 chamfer 地板 |
+| `pairs/pairs.npz` | **94 MB** | GAN 训练对（**5,002 对**；排除 300 个按字留出后） |
+| `pairs_clean.npz` | **32 MB**（3,210 字） | 留出页干净集 |
+| `pairs_clean_second.npz` | **25 MB**（2,445 字） | 同字第二样本，用于 chamfer 地板 |
 | `ckpt/` | 每 10 轮约 400 MB | 快照 + best |
 
 **磁盘**：`work-c/` 实测约 **28 GB**（含 `pages150` 12 GB、`cells` 9.7 GB、`masks` 4.8 GB）；
@@ -117,20 +117,21 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 （重跑 `93_segment_c.py`，约 40 分钟 / 6 worker）。
 
 **语料规模**：OCR 得到 58,771 行 / **1,297,735 字**；唯一汉字 **6,864**；双见证逐字一致率
-**93.0%**（双见证格之间；含 a_only 90.3%）；最终真迹 **5,299 字**（基本区 25.24%，a_only 5.1%）。
+**93.0%**（双见证格之间；含 a_only 90.3%）；最终真迹 **5,302 字**（基本区 25.26%，a_only 5.0%）；
+另补 **42** 个标点/数字/空格（文楷 1.00），cmap **21,034**，CJK 基本区仍 20,992。
 
 ## 5. 校验和
 
 ```
-71535c214ad9951c884ca72fef8adade844b2f3b9e0ad83a60cae1b2ba4dcbe4  build/GuanGeKai-C-Regular.ttf
-594f774ad66d585c151f5e9414e5fb11dd7b1ce5d5e8041181c33dc6edc834de  build/GuanGeKai-C-Real.ttf
-ab936222cd371e4d0e56cd314611648c579baecca3bd029cafd920d728a897d5  GuanGeKai-C-v1.2.0.zip
+38220af604a898292ac55a825c775e287c4912bdcf933db214fe60274ae777ac  build/GuanGeKai-C-Regular.ttf
+0cbb7cb17f4b02689e2d23f9c83d67bd9b3913cc5fc49646a5943e24b8089680  build/GuanGeKai-C-Real.ttf
+fbee254515a8187dd9188268a866476f54ef29fe20e1437c89916cdb2f5589fa  GuanGeKai-C-v1.2.0.zip
 ```
 
 `release-c/SHA256SUMS` 是发布包的逐文件校验和（10 个文件，不含自身）。
-**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.0 / B v1.2.2 / C v1.2.0 同步），
+**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.2 / B v1.2.4 / C v1.2.0 同步），
 不再有术语 drift。`specimen-c.png` / `book-vs-font-c.jpg` 的图注本来就是「重寫本」，无旧词。
-体积：Regular **15.55 MB**（15,552,784 B）、Real **4.61 MB**（4,614,696 B）、zip **14.99 MB**（14,985,293 B）。
+体积：Regular **15.66 MB**（15,657,936 B）、Real **4.61 MB**（4,608,864 B）、zip **15.04 MB**（15,037,738 B）。
 
 ## 6. 重建步骤
 
@@ -149,8 +150,9 @@ python3 scripts/93_segment_c.py --workers 6
 python3 scripts/94_label_c.py
 python3 scripts/96_fix_labels_c.py --work work-c   # 10 个简体/繁体错配标签，必须在 05 之前
 python3 scripts/74_make_holdout_c.py --frac 0.06
+python3 scripts/99c_char_holdout_c.py --work work-c --n 300
 python3 scripts/05_select.py --work work-c --min-samples 2 \
-        --holdout-pages work-c/holdout_pages.json --prefer-clean bad
+        --holdout-pages work-c/holdout_pages.json --prefer-clean bad --prefer-ab
 python3 scripts/06_norm.py --work work-c --pitch-floor 180
 
 > 注：仓库现有的 `work-c/pairs_clean.npz` 建于 2026-10-28 06:45，早于 `96_fix_labels_c.py`
@@ -159,7 +161,8 @@ python3 scripts/06_norm.py --work work-c --pitch-floor 180
 
 # 5. 真迹字体 + 配对 + 拟合
 python3 scripts/76_build_real_c.py --close 3 --hole-repair   # 内含去噪 + 逐字墨量标定
-python3 scripts/08_make_pairs.py --work work-c --out work-c/pairs/pairs.npz
+python3 scripts/08_make_pairs.py --work work-c --exclude-chars work-c/char_holdout.json \
+        --out work-c/pairs/pairs.npz
 python3 scripts/73_fit_width_c.py
 
 # 6. 干净集 + 训练（见 EXPERIMENTS-C）

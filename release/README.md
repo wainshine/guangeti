@@ -8,7 +8,7 @@
   <img src="specimen.png" width="820" alt="GuanGe Kai specimen">
 </p>
 
-> **狀態：A v1.7.1 / B v1.2.2 / C v1.0.1（2026-10-29）** —— 本專案含三套字體：
+> **狀態：A v1.7.2 / B v1.2.4 / C v1.2.0（2026-10-30）** —— 本專案含三套字體：
 > 四書本（本頁，`GuanGe Kai`）、史記本（`GuanGe Kai B`，見 `README-B.md`）、
 > 永樂大典本（`GuanGe Kai C`，見 `README-C.md`）。三套均為 20,992 字全覆蓋。
 > 本頁以下內容只講 A 線；B、C 的指標與限制見各自的 README。
@@ -23,19 +23,19 @@
 
 | | A · 四書白文 | B · 史記 | C · 永樂大典 |
 |---|---|---|---|
-| 書體來源 | 名家精寫本（舊傳姜立綱，存疑） | 舊抄本（舊傳姜立綱） | 嘉靖內府錄副本（多人分抄） |
+| 書體來源 | 名家精寫本（舊傳姜立綱，存疑） | 明抄本（舊傳姜立綱） | 嘉靖內府錄副本（**多人分抄**） |
 | 家族名 | `GuanGe Kai` | `GuanGe Kai B` | `GuanGe Kai C` |
-| 版本 | **v1.7.1** | **v1.2.2** | **v1.0.1** |
-| 真跡 | 1,675 字 | 4,078 字 | **5,303 字**（基本區 25.3%） |
-| 帶狀回退 | 4.1% | 3.5% | 7.8% |
+| 版本 | **v1.7.2** | **v1.2.4** | **v1.2.0** |
+| 真跡 | 1,675 字 | 4,073 字 | **5,299 字**（基本區 25.2%） |
+| 帶狀回退 | 4.1% | 3.5% | 6.0% |
 | 覆蓋 | 20,992 / 20,992 | 20,992 / 20,992 | 20,992 / 20,992 |
-| 字集 | CJK 基本區 20,992 + **標點/數字/空格 44** | 同左 | 同左 |
+| 字集 | CJK 基本區 20,992 + **標點/數字/空格 42** | 同左 | 同左 |
 | 檔案 | `GuanGeKai-*.ttf` | `GuanGeKai-B-*.ttf` | `GuanGeKai-C-*.ttf` |
 | 詳細 | 本頁 | [README-B.md](README-B.md) | [README-C.md](README-C.md) |
 
 三套可同時安裝，用家族名區分。**字集只含 CJK 基本區與中文標點、數字、空格；
 拉丁字母（A–Z）不在字庫內，由排版軟體的系統字體回退顯示。**各自的發布說明：
-[A v1.7.0](docs/RELEASE-v1.7.0.md) · [B v1.2.2](docs/RELEASE-v1.2.2-B.md) · [C v1.0.1](docs/RELEASE-v1.0.1-C.md)。
+[A v1.7.2](docs/RELEASE-v1.7.2.md) · [B v1.2.4](README-B.md) · [C v1.2.0](docs/RELEASE-v1.2.0-C.md)。
 舊版本的發布說明見 [docs/releases/](docs/releases/README.md)。
 
 ## 這是什麼
@@ -107,12 +107,13 @@ GuanGeKai (20,992 字)
 | [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) | **接手的 agent / 審計者** | 現狀、決策、已知缺陷、未決問題、審計方法 |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 想复現或質疑結論的人 | 40 組實驗（E1–E40）的配置、指標、判定、复現命令 |
 | [docs/DATA.md](docs/DATA.md) | 關心許可與來源的人 | 輸入/輸出清單、逐項許可、校驗和、重建步驟 |
-| [docs/RELEASE-v1.7.0.md](docs/RELEASE-v1.7.0.md) | 想了解本版改了什麼的人 | **A v1.7.0**：字體元數據與術語更正（刻本 → 寫本）、新增發版閘 | <!-- term-ok -->
-| [docs/RELEASE-v1.2.2-B.md](docs/RELEASE-v1.2.2-B.md) | B 線本版說明 | **B v1.2.2**：術語更正與重打包 |
-| [docs/RELEASE-v1.0.1-C.md](docs/RELEASE-v1.0.1-C.md) | C 線本版說明 | **C v1.0.1**：字重標定、孔洞修復、簡繁錯配清理 |
+| | [docs/RELEASE-v1.7.2.md](docs/RELEASE-v1.7.2.md) | 想了解本版改了什麼的人 | **A v1.7.1**：補標點、數字與空格（20,992 → 21,034） |
+| [docs/RELEASE-v1.7.2.md](docs/RELEASE-v1.7.2.md) | 考古的人 | v1.7.0：字體元數據與術語更正 |
+| [README-B.md](README-B.md) | B 線本版說明 | **B v1.2.4**：字集口徑 20,992 + 42 = 21,034（v1.2.4 由 B 線重出） |
+| [docs/RELEASE-v1.2.0-C.md](docs/RELEASE-v1.2.0-C.md) | C 線本版說明 | **C v1.2.0**：v3c 全量重切、守衛回退尺寸修復 |
 | [docs/releases/](docs/releases/README.md) | 考古的人 | 已被取代的 17 份發布說明（按線與版本索引） |
-| [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.2.2 |
-| [README-C.md](README-C.md) | 想用永樂大典本的人 | GuanGe Kai C v1.0.1 |
+| [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.2.4 |
+| [README-C.md](README-C.md) | 想用永樂大典本的人 | GuanGe Kai C v1.2.0 |
 | [docs/PLAN-v1.5.md](docs/PLAN-v1.5.md) | 想知道下一步的人 | 把 GAN 推到可驗收的四個里程碑（M0–M4）與決策點 |
 | [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 考古的人 | **已作廢**：v1.4.0 起三線並行的原始設想 |
 | [docs/REPORTS/](docs/REPORTS/) | 想看實測數據的人 | 每次橫向評測的完整報告（指標表 + 兩個面板） |

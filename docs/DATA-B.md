@@ -43,6 +43,12 @@
 | `pairs/pairs.npz`、`pairs_single.npz` | 训练配对 / 干净集（只出现一次的字） |
 | `stroke_rel_width.npy` | 逐笔相对宽度分布（**B 线自己拟合**） |
 | `ckpt/` | GAN 检查点（每 10 轮快照 + 验证最佳） |
+> **过程文件清理（2026-10-30）**：删掉了 `dewarp_survey/`、`dewarp_qa/`、`sample20/`、`sample20b/`、
+> `dryrun/`、`t2/`、`t3/`、`preview/`、`qa/sheet_*.png` 以及 5 个旧变体 jsonl/npz，约 **2.1 GB**。
+> 这些都能由对应脚本重生成（`50_shiji_dewarp.py`、`51_segment_b.py --dump`、`63_qa_b.py`）。
+> **检查点 14 个全部保留、`cells/` 与 `masks/` 各 473,847 张一张未删**——后续换方法可能还要重选、重描。
+> 清理后 `work-b` ≈ **13.1 GB**（cells 6.27 + ckpt 5.60 + masks 0.50 + 其余 0.74）。
+
 | `dewarp_qa/`、`dewarp_survey/` | 纠偏前后对比图与指标（`dewarp_metrics.json`） |
 
 ## 3. 许可审查
@@ -158,61 +164,57 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
 （本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
 
-## 6. 校验和（v1.3.0）
+## 6. 校验和（v1.2.4）
 
 ```
-5e229d2f10144afda6a822df1fafcb108706d98f480f46814bf072987d5e6ec1  build/GuanGeKai-B-Regular.ttf
-1d25dfa5fe43fd45b51cc9d50208e3305df1dc8c187699524051b05d4bf12db0  build/GuanGeKai-B-Real.ttf
-ec5d492bc5ac1b378f3fa3f9024eb452504178b7056d4c149f61ba7758f1641b  GuanGeKai-B-v1.3.0.zip
+aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
+7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a  build/GuanGeKai-B-Real.ttf
+543f20bae9bbe511394d2f0c8edee78e5ec4898eddaffd9a28d61dee4dc98062  GuanGeKai-B-v1.2.4.zip
 ```
 
 历史版本（zip 由所有者手动清理，不主动删）：
 
 ```
+df74d6b6ef741f04f3cb60669865f3eb5090915247b136fb893d1a9d23ad1f78  GuanGeKai-B-v1.2.4.zip（首次构建，README 改动前的内部产物）
 d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1.2.2.zip
-58917b5d71b97480cca109243adbe687f6728e13fd9021cda6eede716cf70a72  GuanGeKai-B-v1.2.1.zip
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
-发布包内 `release-b/SHA256SUMS` 逐文件自校验。字体构建把时间戳钉死
-（`SOURCE_DATE_EPOCH`），同一份输入可复现字节一致的 TTF。
+发布包内 `release-b/SHA256SUMS` 逐文件自校验。
 
-**v1.3.0 的口径变化**：
+**版本号口径（2026-10-30 所有者定）**：B 线按 **patch 递增**，公开序列 v1.2.2 → **v1.2.4**
+（v1.2.3 未发布，直接跳过）；中间构建 **v1.3.0 / v1.3.1 编号作废、产物已清理**，
+不对应任何发布说明，文档里不再引用。
+三条线独立编号：A v1.7.2 / B v1.2.4 / C v1.2.0。
 
-- 删掉 5 个扩展 A 真迹字（`㓗㢮㯉䍧䳒`）→ `chosen` 4,078 → **4,073**，`cmap` 不再有区外码位；
-  过滤在 **builder 层**（`57/62 --drop-outside-basic`），所以 `Real ⊆ Regular` 成立；
-- 补 44 个标点/数字/空格（取自霞鹜文楷，1:1 不缩放）→ `cmap` 20,992 → **21,036**；
-- **`pairs.npz` 仍是 4,078 对的训练快照**（v1.2.2 生成），本轮不重训；下次重训时从 4,073 重建；
-- `-Real` 不含标点（只放真迹），与 A/C 同口径。
+**字集口径（v1.2.4 起，见 GLOSSARY）**：
 
-**包内 README 不再有 drift**：v1.2.2 重新打包后，`release-b/README.md` 与仓库
-`README-B.md` 只在图片路径前缀上不同（打包脚本按设计去掉 `docs/images/`），措辞一致。<!-- term-ok -->
-包内 `specimen-b.png` / `book-vs-font-b.jpg` 的图注不含旧术语，无需登记。<!-- term-ok -->
+- `cmap` = CJK 基本区 **20,992** + 标点/数字/空格 **42** = **21,034**；唯一定义源 `scripts/punct_set.py`；
+- 过滤在 **builder 层**（`57/62 --drop-outside-basic` 删掉 5 个扩展 A 字），所以 `Real ⊆ Regular` 成立；
+- `-Real` 不含标点（只放真迹）；
+- **`pairs.npz` 仍是 4,078 对的训练快照**（v1.2.2 生成），本轮不重训；下次重训时从 4,073 重建。
 
-**验收口径**：字重、字号偏移、回退率一律取 `work-b/accept_b.json`（每次发版在图之后跑）；
-干净集指标取 `work-b/eval_v120.json`（thr −0.10，与发版命令一致）。
-孔洞一律引用全字集 `--n 0` 的结果，不引用 300 字抽样。
+**v1.2.4 改了什么**：撤出 U+201C/U+201D（弯引号）——文楷的这两个字形只有 350/1000 em 宽，
+与汉字并排会黏字；中文正文用已有的 `「」『』`。现为 20,992 + **42** = `cmap` **21,034**。
 
-> 复验 A 线未被波及：`python3 scripts/67_verify_a.py` 必须打印 `A LINE INTACT`
-> 判据已改为**跟随 `release/SHA256SUMS`**（A 每次发版自动更新）；`v1.5.2` 的哈希只作历史兜底。
-> 脚本还会单独列出 `build/` 与 `release/` 的对照，用来判断"A 是否已重建但尚未重新打包"。
+**重新描摹 vs 缓存（2026-10-30 实测，已知不一致）**：`57 --close 7 --hole-repair`（从 masks 重新描摹）
+与 `57 --reuse-contours`（读 `real_contours.jsonl`）产出的 Real 字体**不是同一份字节**——
 
-### 6.5 B 线检查点（`work-b/ckpt/`）
+```
+重新描摹： f82ea61a…  （178 个字各少一个冗余点）
+读缓存：   7d10e460…  ← 发布用的就是这一份，可字节复现
+渲染比对： 178 个差异字全部 Dice = 1.000（形状完全相同）
+```
 
-| 文件 | 说明 |
-|---|---|
-| `b_ep010.pt` … `b_ep080.pt` | 每 10 轮快照，各 ≈400 MB；**ep080 是发版检查点**（干净集 Dice 0.523 / chamfer 5.60 / capKS 0.037，口径为发版的 thr −0.10，见 `eval_v120.json`），ep050/060 是对照 |
-| `b_best.pt` | 按训练内 valDice 选出的“最佳”。**已核对：内容与 `b_ep010.pt` 逐张量相同**（最后一次写入在 ep10，valDice 0.603）。它**不是发版检查点**——发版用 **ep080**，由干净集 Dice/chamfer 决定；打包脚本走路径参数，不会误读它 |
-| `b.pt` | 每轮覆盖写的最新权重（停在 ep51 的训练中断点） |
-| `b_split.json` | 按**字**划分的训练/验证清单 |
+原因在轮廓序列化：缓存往返后，闭合处的重复点被保留成一个额外的 `lineTo`。
+**发布链以缓存路径为准**（`--reuse-contours`），这样 `Real` 与 `Regular` 的同字轮廓一致；
+重新描摹只用于确认缓存没有过期。根治办法是在 `fontbuild.build_font()` 里丢掉
+"末点 == 起点" 的重复点（一行判断），下次发版可以做。
 
-`MANIFEST.json` 由 `python3 scripts/31_ckpt_manifest.py --ckpt-dir work-b/ckpt` 从磁盘重建，
-记录每个文件的体积、mtime 与 sha256 前 16 位。**每次续训/覆盖/删除检查点后必须重跑**——
-四书线在这件事上漏过三次（AGENTS.md 有记录），B 线从第一天就制度化。
-
-合计约 2.8 GB。按 A 线的保留规则（最终一轮 + 验证最佳 + 核心轮次 50/100/…），
-`b_ep080` 必须保留（发版检查点），`b_ep050`/`b_ep060` 是决策证据；`ep010–040` 是平台证据。
-磁盘充足，**均暂未清理**。若将来续训到 100+ 轮，按同一规则保留 100/150/… 即可。
+**可复现性（2026-10-30 实测）**：B 的构建链**是字节可复现的**。
+`fontbuild.build_font()` 把 `head.created/modified` 钉到 `SOURCE_DATE_EPOCH`，
+`13_extend_punct.py:113` 保存前 `base.recalcTimestamp = False`。
+实测 62→extend 连跑两次产出同一哈希；`57` 连跑两次同样一致。
 
 ## 7. 复现步骤（与 v1.1.0 发布链逐条对应）
 
@@ -231,7 +233,7 @@ python3 scripts/54_label_b.py                      # 标注 + 对齐；无 OCR �
 python3 scripts/05_select.py --work work-b --prefer-clean dewarp_fail
 cp work-b/chosen.jsonl work-b/chosen_min2.jsonl     # 留存"仅 ≥2 样本"的版本
 python3 scripts/58_add_singletons_b.py --work work-b --out work-b/chosen.jsonl
-                                                   # 双见证准入：3,807 -> 4,078（v1.3.0 起再剔 5 个扩展 A → 4,073）
+                                                   # 双见证准入：3,807 -> 4,078（v1.2.4 起再剔 5 个扩展 A → 4,073）
 
 python3 scripts/06_norm.py --work work-b --pitch-floor 100
 python3 scripts/57_build_real_b.py --close 7 --hole-repair
@@ -256,7 +258,7 @@ python3 scripts/60_generate_b.py --method gan --ckpt work-b/ckpt/b_ep080.pt \
 python3 scripts/61_fill_fallback_b.py              # 兜底：60 漏掉的字用带状扫掠补齐
 
 python3 scripts/62_build_full_b.py --drop-outside-basic   # 基本區 20,992（不帶 5 個扩展 A）
-python3 scripts/13_extend_punct.py --line B --inplace      # 補 44 個標點 → cmap 21,036
+python3 scripts/13_extend_punct.py --line B --inplace      # 補 42 個標點 → cmap 21,034
 python3 scripts/63_qa_b.py                         # 硬闸：覆盖率/空字形/真跡数/孔洞
 python3 scripts/68_accept_b.py                     # 硬闸：字重比/回退占比/包围盒
 

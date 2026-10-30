@@ -14,12 +14,12 @@
 
 ## 1. 這是什麼
 
-**版本**：本包为 **GuanGe Kai B v1.3.0**，随主版本 **GuanGeKai v1.7.1** 一起发布
+**版本**：本包为 **GuanGe Kai B v1.2.4**，随主版本 **GuanGeKai v1.7.2** 一起发布
 （同一项目、两个字形来源：A = 四书精写本 `GuanGe Kai`，B = 史记明抄本 `GuanGe Kai B`，
 两套家族名并存，互不覆盖）。
 
 - `GuanGeKai-B-Regular.ttf`：完整字集 **20,992 字**（CJK 基本區 100%）＝ 真跡 4,073 + 生成 16,919（含疑難字由第二模型補的 544 個）；
-  另含**標點 / 數字 / 空格 44 個碼位**，`cmap` 合計 **21,036**（與 A 線同口徑）
+  另含**標點 / 數字 / 空格 42 個碼位**，`cmap` 合計 **21,034**（與 A 線同口徑）
 - `GuanGeKai-B-Real.ttf`：只有 4,073 個真跡字，全部逐字從掃描本切出、向量化（不含標點）
 
 真跡字的字形**直接來自抄本**：切字、去噪、potrace 向量化，再歸一到統一字身框。
@@ -133,7 +133,7 @@ python3 scripts/57_build_real_b.py --reuse-contours --drop-outside-basic
 python3 scripts/62_build_full_b.py --drop-outside-basic
                                               # build/GuanGeKai-B-Regular.ttf（基本區 20,992）
 python3 scripts/13_extend_punct.py --line B --inplace
-                                              # 補 44 個標點/數字/空格 → cmap 21,036
+                                              # 補 42 個標點/數字/空格 → cmap 21,034
 python3 scripts/63_qa_b.py
 python3 scripts/64_package_b.py
 ```

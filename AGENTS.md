@@ -35,6 +35,11 @@
   - 任何删除先看 `work/ckpt/MANIFEST.json`，并在 `docs/DATA.md` §6.5.1 登记；
     **删完必须立刻重跑 `scripts/31_ckpt_manifest.py`**——这一步单独做已经漏过三次。
 
+## 字集口径（硬约束）
+
+CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**；唯一定义源 `scripts/punct_set.py`。
+`-Real.ttf` 不含标点。**禁止**在文档/脚本里写 `44`、`21,036`（均已作废）。
+
 ## 当前状态（v1.7.0）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = 1,675 真迹 + 19,317 合成

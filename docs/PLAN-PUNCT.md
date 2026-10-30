@@ -64,7 +64,7 @@ scripts/13_extend_punct.py        已实现，三线共用
 
 实测（A 线，2026-10-28）
   原字体   cmap 20,992   基本区 20,992   区外 0
-  补后     cmap 21,036   基本区 20,992   区外 44
+  补后     cmap 21,034   基本区 20,992   区外 42
   新增 44 码位：空格 ×2 + 半角数字 ×10 + 全角数字 ×10 + 中文标点 ×22
 
 处理
@@ -81,9 +81,9 @@ scripts/13_extend_punct.py        已实现，三线共用
 
 | 线 | 命令 | 结果 |
 |---|---|---|
-| **A** | `python3 scripts/13_extend_punct.py --line A --inplace` | cmap 20,992 → 21,036 |
-| **B** | `python3 scripts/13_extend_punct.py --line B --inplace` | 20,992（先删 5 个扩展 A）→ **21,036**，见 §7 |
-| **C** | `python3 scripts/13_extend_punct.py --line C --inplace` | 20,992 → 21,036 |
+| **A** | `python3 scripts/13_extend_punct.py --line A --inplace` | cmap 20,992 → 21,034 |
+| **B** | `python3 scripts/13_extend_punct.py --line B --inplace` | 20,992（先删 5 个扩展 A）→ **21,034**，见 §7 |
+| **C** | `python3 scripts/13_extend_punct.py --line C --inplace` | 20,992 → 21,034 |
 
 **每条线还要做三件事**：
 
@@ -103,9 +103,9 @@ B 的 cmap = 20,997 = 基本区 20,992 + **5 个扩展 A**（`㓗 㢮 㯉 䍧 �
 # 1) 先删 5 个扩展 A（builder 层，见 §7.2.1）
 python3 scripts/57_build_real_b.py --reuse-contours --drop-outside-basic   # Real 4,078 → 4,073
 python3 scripts/62_build_full_b.py --drop-outside-basic                   # Regular 20,997 → 20,992
-# 2) 再补 44 个标点
+# 2) 再补 42 个标点
 python3 scripts/13_extend_punct.py --line B --dry-run    # 应报：新增 44、删除 0
-python3 scripts/13_extend_punct.py --line B --inplace    # cmap → 21,036
+python3 scripts/13_extend_punct.py --line B --inplace    # cmap → 21,034
 # 3) 质检与打包
 python3 scripts/63_qa_b.py                               # 断言按基本区，不受影响
 rm -rf release-b && python3 scripts/64_package_b.py
@@ -113,7 +113,7 @@ rm -rf release-b && python3 scripts/64_package_b.py
 
 ### 7.2 决定：**删**（所有者 2026-10-28 定；重训押后）
 
-cmap = 20,997 − 5 + 44 = **21,036**；glyph 数 20,998 + 44 − 5 = **21,037**。
+cmap = 20,997 − 5 + 42 = **21,034**；glyph 数 20,998 + 42 − 5 = **21,037**。
 **本轮不重训**：模型仍是 v1.2.2 那份（训练时 4,078 对，含 5 个已删码位）。这 5 个字在字体里走真迹、
 从不经过 GAN，删掉不影响任何已发布字形；`pairs.npz` 保留为 v1.2.2 的训练快照并注明，
 下一次重训（v1.3.x）再从 4,073 重建。
@@ -126,7 +126,7 @@ cmap = 20,997 − 5 + 44 = **21,036**；glyph 数 20,998 + 44 − 5 = **21,037**
 
 1. `57_build_real_b.py` 与 `62_build_full_b.py` 各加 `--drop-outside-basic`
    （加载 `real_contours.jsonl` 时跳过 `0x4E00–0x9FFF` 之外，5 个字自然不进两个字体）；
-2. `13_extend_punct.py --line B --inplace` 只负责补 44 个标点，不再需要 drop 开关（留着兜底）。
+2. `13_extend_punct.py --line B --inplace` 只负责补 42 个标点，不再需要 drop 开关（留着兜底）。
 
 ### 7.3 执行清单（按依赖顺序）
 
@@ -135,11 +135,11 @@ cmap = 20,997 − 5 + 44 = **21,036**；glyph 数 20,998 + 44 − 5 = **21,037**
 | 1 | 加 drop 开关 | `57_build_real_b.py`、`62_build_full_b.py` | 两个脚本都能 `--drop-outside-basic` |
 | 2 | 重建 Real | `57 --reuse-contours --drop-outside-basic` | maxp 4,074（含 .notdef）= 4,073 字 |
 | 3 | 重建 Regular | `62 --drop-outside-basic` | 块内 20,992、无区外 |
-| 4 | 补标点 | `13_extend_punct --line B --inplace` | cmap **21,036**、glyph **21,037** |
+| 4 | 补标点 | `13_extend_punct --line B --inplace` | cmap **21,034**、glyph **21,037** |
 | 5 | 过滤 chosen | 备份后去掉 5 行 → 4,073 | `wc -l work-b/chosen.jsonl` = 4,073 |
 | 6 | **改闸门断言** | `83_verify_ab_c.py` 三处 `4078 → 4073` | 需 C 线知晓：B 变化会让它先变红 |
 | 7 | 重打包 | `rm -rf release-b && 64_package_b.py` | `stats.real 4073 / real_ext_a 0 / codepoints 20992` |
-| 8 | 文档 | `README-B.md`（4,078×4、20,997×1）、`docs/DATA-B.md` | 全改；写明 21,036 的构成 |
+| 8 | 文档 | `README-B.md`（4,078×4、20,997×1）、`docs/DATA-B.md` | 全改；写明 21,034 的构成 |
 | 9 | 发版 | 建议 **v1.3.0**（cmap 与真迹数都变了）+ 新 release note | 与 A 1.7.0 / C 同批或单独 |
 | 10 | 收尾 | `63_qa_b` → `97_check_terms` → `83_verify_ab_c` | 三者全绿 |
 
@@ -185,16 +185,16 @@ python3 scripts/98_style_sheet.py --line B             # 真迹/GAN/回退三行
 | `63_qa_b.py` coverage | **20,992**（按块统计，补标点不动） |
 | `63_qa_b.py` real-subset | **4,073**（`chosen.jsonl` 已过滤；`--real-expect` 走 chosen，自动跟上） |
 | `83_verify_ab_c.py` | B coverage 20,992；**三处 4,078 断言必须先改成 4,073**，否则先报 `B CHANGED` |
-| `64_package_b.py` `stats` | `codepoints 20992`、`real 4073`、`real_ext_a 0`；README 另写 cmap **21,036** |
+| `64_package_b.py` `stats` | `codepoints 20992`、`real 4073`、`real_ext_a 0`；README 另写 cmap **21,034** |
 | 渲染抽查 | `，。《》「」—…0123456789０１２３` 无方框 |
 | 回归抽查 | 原本 5 个扩展 A 码位（`㓗㢮㯉䍧䳒`）在 Regular 与 Real 里都应回退到系统字体 |
 | `release-b/SHA256SUMS` | 字体与 zip 哈希都会变，重打包后自校验 |
 
 ### 7.7 两处数字勘误（A 版原文）
 
-- §6 表 B 行「20,997 → **21,031**」应为 **21,036**（20,997 − 5 + 44）。已改。
+- §6 表 B 行「20,997 → **21,031**」应为 **21,034**（20,997 − 5 + 42）。已改。
 - §5「区外新增 == 44（B 开 `--drop-outside-basic` 时为 39）」：44 是新增数，39 是净增；
-  B 按 §7.2 删 5 个后，**新增 44、净增 39**，最终 cmap 21,036。
+  B 按 §7.2 删 5 个后，**新增 44、净增 39**，最终 cmap 21,034。
 
 ## 8. 验收
 
@@ -210,7 +210,7 @@ python3 scripts/98_style_sheet.py --line B             # 真迹/GAN/回退三行
 
 ```
 63_qa_b              coverage 20992/20992（按块统计），真迹 4,073
-64_package_b         stats.codepoints 20,992、real 4,073、real_ext_a 0；README 写 cmap 21,036
+64_package_b         stats.codepoints 20,992、real 4,073、real_ext_a 0；README 写 cmap 21,034
 83_verify_ab_c       B coverage 20,992；三处 4,078 断言先改成 4,073 才会 PASS
 回归抽查             㓗㢮㯉䍧䳒 在 Regular 与 Real 里都应回退到系统字体
 ```

@@ -79,6 +79,33 @@ def main():
     fails = []
     if len(have) != BLOCK[1] - BLOCK[0] + 1:
         fails.append(f"coverage {len(have)} != {BLOCK[1]-BLOCK[0]+1}")
+    # 标点硬闸（AUDIT-2026-10-30 §3.2 / GLOSSARY「字集口径」）：
+    # 唯一定义源是 scripts/punct_set.py，这里只调用它的 verify()，不自己维护列表。
+    import punct_set
+    punct = set(punct_set.CHARS)
+    outside = {c for c in cmap if not (BLOCK[0] <= c <= BLOCK[1])}
+    punct_problems = punct_set.verify(cmap)
+    print(f"punct {len(punct) - sum(1 for c in punct if c not in cmap)}/{len(punct)}"
+          f"  outside {len(outside)}  cmap {len(cmap)}")
+    if punct_problems:
+        fails.append(f"字集口径 {len(punct_problems)} 项不符（{punct_problems[0]} 等）"
+                     f" — rerun 13_extend_punct.py --line B --inplace")
+    extra_outside = sorted(outside - punct)
+    if extra_outside:
+        fails.append(f"{len(extra_outside)} non-punct codepoints outside the basic block "
+                     f"(e.g. {[hex(c) for c in extra_outside[:6]]})")
+    # 标点码位在、但字形是空的（extend 只写了 cmap 没写轮廓时的失效模式）
+    empty_punct = []
+    for _cp in sorted(punct):
+        if _cp not in cmap or _cp in (0x0020, 0x3000):
+            continue                      # 两个空格按设计就没有轮廓
+        _bp = BoundsPen(gs)
+        gs[cmap[_cp]].draw(_bp)
+        if not _bp.bounds:
+            empty_punct.append(hex(_cp))
+    if empty_punct:
+        fails.append(f"{len(empty_punct)} punctuation glyphs are empty "
+                     f"(e.g. {empty_punct[:6]})")
     if empty:
         fails.append(f"{len(empty)} empty glyphs")
     if tiny:

@@ -207,9 +207,14 @@ def main():
         fails.append(f"fallback share {res['fallback_share']} > 0.12")
     if res.get("bbox_w_ratio") and not (0.95 <= res["bbox_w_ratio"] <= 1.10):
         fails.append(f"bbox ratio {res['bbox_w_ratio']}")
-    small = (res.get("size_sweep") or {}).get("12")
-    if small and small.get("bias") and small["bias"] > 1.15:
-        fails.append(f"12px weight bias {small['bias']} > 1.15")
+    # AUDIT-2026-10-30 §2.1 (same bug as 84_accept_c:233): size_sweep is keyed by
+    # int in memory and by str after a JSON round-trip, so .get("12") alone is a
+    # dead gate. Look up both and make it two-sided.
+    _sweep = res.get("size_sweep") or {}
+    small = _sweep.get("12") or _sweep.get(12) or {}
+    _sb = small.get("bias")
+    if _sb is not None and not (0.90 <= _sb <= 1.15):
+        fails.append(f"12px weight bias {_sb} outside 0.90-1.15")
     if fails:
         raise SystemExit("ACCEPTANCE FAILED: " + "; ".join(fails))
     print("ACCEPTANCE OK")

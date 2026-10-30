@@ -42,3 +42,7 @@ release-c-v2/GuanGeKai-C-Regular-v2.ttf
 /docs/images/c-blind-*.png
 /docs/images/c-v3d-blind-*.png
 /docs/images/c-v3d2-blind-*.png
+
+# ---- 本地密钥（vision API 等，不提交）----
+.env
+.env.*

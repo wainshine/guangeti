@@ -10,7 +10,7 @@ from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.reverseContourPen import ReverseContourPen
 
 EM = 1000
-VERSION = "1.7.1"  # single source of truth for the font version
+VERSION = "1.7.2"  # single source of truth for the font version
 OFL_TEXT = (
     "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
     "This license is available with a FAQ at: https://openfontlicense.org"
@@ -188,4 +188,5 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
     fb.font["head"].created = stamp
     fb.font["head"].modified = stamp
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    fb.font.recalcTimestamp = False     # keep head.modified = SOURCE_DATE_EPOCH (byte-reproducible)
     fb.save(str(out_path))

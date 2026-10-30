@@ -96,6 +96,12 @@ def main():
     ext = sorted(ch for ch in real_chars if not (BLOCK[0] <= ord(ch) <= BLOCK[1]))
     for ch in ext:
         provenance[ch] = "real"
+    # 标点/数字/空格（punct_set.CHARS）：来自霞鹜文楷，不是真迹也不是 GAN。
+    # 此前 provenance 只有基本区 20,992 条，与 cmap 21,034 不一致（AUDIT-2026-10-30 todo 3）。
+    import punct_set
+    punct = [chr(c) for c in punct_set.CHARS]
+    for ch in punct:
+        provenance[ch] = "punct"
     (out / "provenance.json").write_text(json.dumps(provenance, ensure_ascii=False))
 
     f = TTFont(full)
@@ -103,7 +109,8 @@ def main():
     covered = [chr(c) for c in range(BLOCK[0], BLOCK[1] + 1) if c in cmap]
     (out / "coverage.txt").write_text("".join(covered))
     stats = dict(
-        codepoints=len(covered),
+        codepoints=len(covered),                 # 基本区覆盖（83 按此口径核对）
+        codepoints_total=len(covered) + len(punct),   # 含标点，= len(cmap)
         real=sum(1 for v in provenance.values() if v == "real"),
         real_basic=sum(1 for k, v in provenance.items() if v == "real"
                         and BLOCK[0] <= ord(k) <= BLOCK[1]),

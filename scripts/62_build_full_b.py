@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WB = ROOT / "work-b"
 BLOCK = (0x4E00, 0x9FFF)
 FAMILY = "GuanGe Kai B"
-VERSION = "1.3.0"
+VERSION = "1.2.4"
 COPYRIGHT = ("GuanGe Kai B (館閣楷 B). Real glyphs traced from the Ming manuscript 史記 "
              "(attributed to 姜立綱), NUS Libraries 藏本 / digitised by NUS Libraries. "
              "Generated glyphs derived from LXGW WenKai (OFL 1.1). "
@@ -47,9 +47,16 @@ def main():
     args = ap.parse_args()
     wd = Path(args.work)
     real = load(wd / "real_contours.jsonl")
-    if args.drop_outside_basic:
-        real = {k: v for k, v in real.items() if BLOCK[0] <= ord(k) <= BLOCK[1]}
     gen = load(wd / "generated.jsonl")
+    if args.drop_outside_basic:
+        # AUDIT-2026-10-30 §3.5: filter gen too. It is empty today, but a stray
+        # out-of-block generated glyph would otherwise slip in silently — every QA
+        # on this line only looks at the basic block.
+        n_real_out = sum(1 for k in real if not (BLOCK[0] <= ord(k) <= BLOCK[1]))
+        n_gen_out = sum(1 for k in gen if not (BLOCK[0] <= ord(k) <= BLOCK[1]))
+        real = {k: v for k, v in real.items() if BLOCK[0] <= ord(k) <= BLOCK[1]}
+        gen = {k: v for k, v in gen.items() if BLOCK[0] <= ord(k) <= BLOCK[1]}
+        print(f"dropped outside basic block: real {n_real_out}, gen {n_gen_out}")
     glyphs = {}
     for ch in sorted(set(real) | set(gen)):
         glyphs[ch] = real[ch] if ch in real else gen[ch]

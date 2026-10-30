@@ -49,7 +49,7 @@ _GAN_CACHE = None
 _HARD_CACHE = None
 
 
-HARDTAIL = os.environ.get("GAN_HARDTAIL", "")
+HARDTAIL = os.environ.get("GAN_HARDTAIL", str(ROOT / "work" / "ckpt" / "m2_ep080.pt"))
 GEN_THR = float(os.environ.get("GAN_THR", "-0.05"))        # primary model threshold
 HARD_THR = float(os.environ.get("GAN_HARD_THR", "-0.45"))  # fill-in model threshold
 
@@ -77,7 +77,9 @@ def gan_chunk(args):
         spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
         m = iu.module_from_spec(spec); spec.loader.exec_module(m)
         g = m.Generator()
-        ck = os.environ.get("GAN_CKPT", str(ROOT / "work" / "ckpt" / "m2_ep080.pt"))
+        # default = the release working point (data/release-a.json): the hybrid uses the
+        # weighted ep090 as primary and ep080 as the hard-tail fill-in (E40)
+        ck = os.environ.get("GAN_CKPT", str(ROOT / "work" / "ckpt" / "m2wt_ep090.pt"))
         g.load_state_dict(torch.load(ck, map_location="cpu")["G"])
         g.eval()
         _GAN_CACHE = g
