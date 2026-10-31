@@ -105,7 +105,7 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 | `cells.jsonl` | **614 MB** | 每格元数据（页/栏/行/坐标/字距/质量） |
 | `ocr_v6.jsonl`、`ocr_v5.jsonl` | 待补 | 两套行级 OCR 结果（58,771 / 58,732 行） |
 | `labeled.jsonl` | **697 MB** | 每格标签与见证一致性（1,044,983 格有标签，训练池；全量 1,187,881 格） |
-| `chosen.jsonl` | **5,302 行** | 每字一个 medoid 样本（v1.2.0：v3d2 重切 + `--prefer-ab`） |
+| `chosen.jsonl` | **5,302 行** | 每字一个 medoid 样本（v1.2.1：沿用 v3d2 重切 + `--prefer-ab`） |
 | `norm.json` | 待补 | 字面框归一化参数 |
 | `pairs/pairs.npz` | **94 MB** | GAN 训练对（**5,002 对**；排除 300 个按字留出后） |
 | `pairs_clean.npz` | **32 MB**（3,210 字） | 留出页干净集 |
@@ -123,15 +123,15 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 ## 5. 校验和
 
 ```
-38220af604a898292ac55a825c775e287c4912bdcf933db214fe60274ae777ac  build/GuanGeKai-C-Regular.ttf
+68fd1aeb633c92cda954fcbbd7e0a65f2ec9bf921d65e9758276de17e37f5796  build/GuanGeKai-C-Regular.ttf
 0cbb7cb17f4b02689e2d23f9c83d67bd9b3913cc5fc49646a5943e24b8089680  build/GuanGeKai-C-Real.ttf
-fbee254515a8187dd9188268a866476f54ef29fe20e1437c89916cdb2f5589fa  GuanGeKai-C-v1.2.0.zip
+9acc6463eb6bdcb9ad8852d08586a2bb7bddf5db81bdf40228453c2d3f4a713b  GuanGeKai-C-v1.2.1.zip
 ```
 
 `release-c/SHA256SUMS` 是发布包的逐文件校验和（10 个文件，不含自身）。
-**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.2 / B v1.2.4 / C v1.2.0 同步），
+**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.2 / B v1.2.4 / C v1.2.1 同步），
 不再有术语 drift。`specimen-c.png` / `book-vs-font-c.jpg` 的图注本来就是「重寫本」，无旧词。
-体积：Regular **15.66 MB**（15,657,936 B）、Real **4.61 MB**（4,608,864 B）、zip **15.04 MB**（15,037,738 B）。
+体积：Regular **15.20 MB**（15,201,924 B）、Real **4.61 MB**（4,608,864 B）、zip **14.75 MB**（14,751,732 B）。
 
 ## 6. 重建步骤
 

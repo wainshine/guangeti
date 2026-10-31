@@ -7,13 +7,13 @@
  "real_basic": 5302,
  "real_ext_a": 0,
  "generated": 15690,
- "gan": 14752,
+ "gan": 14195,
  "gan_ht": 0,
- "ribbon_fallback": 938,
+ "ribbon_fallback": 1495,
  "missing": 0,
  "upm": 1000,
  "glyphs": 21035,
- "file_bytes": 15657936,
+ "file_bytes": 15201924,
  "real_file_bytes": 4608864,
  "family": "GuanGe Kai C"
 }
