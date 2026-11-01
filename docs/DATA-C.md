@@ -110,6 +110,9 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 | `pairs/pairs.npz` | **94 MB** | GAN 训练对（**5,002 对**；排除 300 个按字留出后） |
 | `pairs_clean.npz` | **32 MB**（3,210 字） | 留出页干净集 |
 | `pairs_clean_second.npz` | **25 MB**（2,445 字） | 同字第二样本，用于 chamfer 地板 |
+| `ocr_bench.json` | **0.3 MB** | 700 个唯一人工审计格：**128 切格失败 + 572 切格通过**；其中 100 格已有 `content_oracle` 真值：90 正确 / 3 确认错标 / 1 存疑 / 6 不可读。原始 1,272 条见 `ocr_bench_raw.json`（572 条为锚点重复） |
+| `content_oracle.json` | **27 KB** | oracle100 的 100 格盲读真值：94 可读（90 正确 + 3 错标 + R072 存疑），6 格不可读；含 file→label/verdict |
+| `calib28_verdicts.json` | **8.4 KB** | calib28 构成：23 真错标 + 4 匹配器误报 + 1 无图；`ink_truth` 已按 owner csheet 红字补齐 27/28（C009=skip） |
 | `ckpt/` | 每 10 轮约 400 MB | 快照 + best |
 
 **磁盘**：`work-c/` 实测约 **28 GB**（含 `pages150` 12 GB、`cells` 9.7 GB、`masks` 4.8 GB）；
@@ -148,6 +151,8 @@ python3 scripts/93_segment_c.py --workers 6
 
 # 4. 标签 + 留出页 + 选优 + 归一
 python3 scripts/94_label_c.py
+# 4.1 OCR 人工基准（700 唯一格；1,272 原始记录）
+python3 scripts/99z_build_ocr_bench_c.py
 python3 scripts/96_fix_labels_c.py --work work-c   # 10 个简体/繁体错配标签，必须在 05 之前
 python3 scripts/74_make_holdout_c.py --frac 0.06
 python3 scripts/99c_char_holdout_c.py --work work-c --n 300

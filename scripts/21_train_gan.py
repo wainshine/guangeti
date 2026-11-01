@@ -182,6 +182,10 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--data", default=str(ROOT / "work" / "pairs" / "pairs.npz"),
                     help="npz with X/Y/chars; work/pairs_multi.npz for multi-instance")
+    ap.add_argument("--val-data", default="",
+                    help="optional separate clean npz for validation (e.g. work-c/pairs_clean.npz)")
+    ap.add_argument("--val-n", type=int, default=8,
+                    help="number of fixed validation pairs to score (default 8; use 300 for C)")
     ap.add_argument("--hinge", action="store_true", help="hinge loss instead of BCE")
     ap.add_argument("--weight-complexity", type=float, default=0.0,
                     help="alpha for per-sample L1 weight by ink density (0 = off; B/E10)")
@@ -208,6 +212,12 @@ def main():
     val_chars = set(uniq[:max(1, len(uniq) // 40)])      # ~2.5% of characters
     val = np.array([i for i, c in enumerate(all_chars) if c in val_chars], dtype=int)
     tr = np.array([i for i, c in enumerate(all_chars) if c not in val_chars], dtype=int)
+    val_path = args.data
+    if args.val_data:
+        vd = np.load(args.val_data, allow_pickle=True)
+        val_chars = set(str(c) for c in vd["chars"])
+        val = np.arange(len(vd["chars"]), dtype=int)
+        val_path = args.val_data
     if args.limit:
         tr = tr[:args.limit]
     _train_ds = Pairs(tr, args.data, aug=args.aug, alpha=args.weight_complexity)
@@ -280,8 +290,8 @@ def main():
         if (ep + 1) % 5 == 0 or ep == 0:
             G.eval()
             with torch.no_grad():
-                nval = min(8, len(val))
-                vb = Pairs(val[:nval], args.data)
+                nval = min(args.val_n, len(val))
+                vb = Pairs(val[:nval], val_path)
                 xa = torch.stack([vb[i][0] for i in range(nval)]).to(dev)
                 yb = torch.stack([vb[i][1] for i in range(nval)]).cpu().numpy()
                 ya = xa.cpu().numpy()
@@ -292,13 +302,14 @@ def main():
                     dice.append(2 * (p & t).sum() / max(1, p.sum() + t.sum()))
                 val_dice = float(np.mean(dice))
                 msg += f" valDice {val_dice:.3f}"
-                sheet = np.zeros((3 * 256, 8 * 256), np.uint8)
-                for k in range(nval):
+                nshow = min(8, nval)
+                sheet = np.zeros((3 * 256, nshow * 256), np.uint8)
+                for k in range(nshow):
                     sheet[0:256, k*256:(k+1)*256] = ((ya[k, 0] + 1) * 127.5).astype(np.uint8)
                     sheet[256:512, k*256:(k+1)*256] = ((gen[k, 0] + 1) * 127.5).astype(np.uint8)
                     sheet[512:768, k*256:(k+1)*256] = ((yb[k, 0] + 1) * 127.5).astype(np.uint8)
                 from PIL import Image
-                Image.fromarray(sheet).resize((8*128, 3*128)).save(args.sample)
+                Image.fromarray(sheet).resize((nshow*128, 3*128)).save(args.sample)
             G.train()
         print(msg, flush=True)
         torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
