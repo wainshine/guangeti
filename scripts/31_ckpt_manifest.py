@@ -42,9 +42,9 @@ def main():
     ck = Path(args.ckpt_dir)
     out_path = Path(args.out) if args.out else ck / "MANIFEST.json"
     items = []
-    for p in sorted(ck.glob("*.pt")):
+    for p in sorted(ck.rglob("*.pt")):
         items.append({
-            "file": p.name,
+            "file": str(p.relative_to(ck)),
             "kind": kind_of(p.name),
             "size_mb": round(p.stat().st_size / 1e6, 1),
             "sha256_16": hashlib.sha256(p.read_bytes()).hexdigest()[:16],
@@ -54,7 +54,7 @@ def main():
     man = {
         "note": "每次训练或覆盖检查点后必须重跑本脚本；sha256 与磁盘失配说明文件已被覆盖",
         "retention": ("保留：最终一轮 + 验证最佳轮 + 核心轮次 50/100/150/200/300/400/500…；"
-                      "其余中间轮次可删。删除前先看这里，并在 docs/DATA.md §6.5.1"
+                      "C 线另保留 best + ep030/050/060/070/080/090（有 100 也留）。删除前先看这里，并在 docs/DATA.md §6.5.1"
                       "（B 线：docs/DATA-B.md §6.5）登记；删完立刻重跑本脚本"),
         "invalid_reason": INVALID,
         "items": items,

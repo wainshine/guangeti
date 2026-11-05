@@ -78,6 +78,11 @@ def main():
     print("tiny sample", tiny[:20])
     print("huge sample", huge[:20])
     fails = []
+    import punct_set
+    punct_problems = punct_set.verify(cmap)
+    print("punct", "OK" if not punct_problems else punct_problems)
+    if punct_problems:
+        fails.append("punct: " + "; ".join(punct_problems))
     if len(have) != BLOCK[1] - BLOCK[0] + 1:
         fails.append(f"coverage {len(have)} != {BLOCK[1]-BLOCK[0]+1}")
     if empty:

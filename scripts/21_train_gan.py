@@ -243,11 +243,14 @@ def main():
         if "D" in ck:
             D.load_state_dict(ck["D"])
         start_ep = int(ck.get("epoch", 0))
-        print(f"resumed {args.resume} at epoch {start_ep} -> target {args.epochs}", flush=True)
+        best_dice = float(ck.get("best_dice", -1.0))
+        print(f"resumed {args.resume} at epoch {start_ep} -> target {args.epochs}"
+              f" (best_dice {best_dice:.4f})", flush=True)
     optG = torch.optim.Adam(G.parameters(), lr=args.lr, betas=(0.5, 0.999))
     optD = torch.optim.Adam(D.parameters(), lr=args.lr, betas=(0.5, 0.999))
     bce = nn.BCEWithLogitsLoss()
-    best_dice = -1.0
+    if not args.resume:
+        best_dice = -1.0
 
     for ep in range(start_ep, args.epochs):
         t0 = time.time()
@@ -295,7 +298,11 @@ def main():
                 xa = torch.stack([vb[i][0] for i in range(nval)]).to(dev)
                 yb = torch.stack([vb[i][1] for i in range(nval)]).cpu().numpy()
                 ya = xa.cpu().numpy()
-                gen = G(xa).cpu().numpy()
+                # MPS BatchNorm eval is wrong for very large batches; keep <=32.
+                gen_chunks = []
+                for bi in range(0, nval, 32):
+                    gen_chunks.append(G(xa[bi:bi+32]).cpu().numpy())
+                gen = np.concatenate(gen_chunks, axis=0)
                 dice = []
                 for k in range(nval):
                     p = gen[k, 0] > 0; t = yb[k, 0] > 0
@@ -312,20 +319,20 @@ def main():
                 Image.fromarray(sheet).resize((nshow*128, 3*128)).save(args.sample)
             G.train()
         print(msg, flush=True)
-        torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
-                   args.out)
+        torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1,
+                    "best_dice": best_dice}, args.out)
         # Periodic snapshot: a 6-hour run must never leave only its last epoch behind.
         ck = Path(args.ckpt_dir)
         ck.mkdir(parents=True, exist_ok=True)
         tag = Path(args.out).stem
         if (ep + 1) % args.save_every == 0 or ep + 1 == args.epochs:
-            torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
-                       ck / f"{tag}_ep{ep+1:03d}.pt")
+            torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1,
+                        "best_dice": best_dice}, ck / f"{tag}_ep{ep+1:03d}.pt")
             print(f"  snapshot -> {ck.name}/{tag}_ep{ep+1:03d}.pt", flush=True)
-        if val_dice is not None and val_dice >= best_dice:
+        if val_dice is not None and val_dice > best_dice:
             best_dice = val_dice
-            torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1},
-                       ck / f"{tag}_best.pt")
+            torch.save({"G": G.state_dict(), "D": D.state_dict(), "epoch": ep + 1,
+                        "best_dice": best_dice}, ck / f"{tag}_best.pt")
     print("done", flush=True)
 
 

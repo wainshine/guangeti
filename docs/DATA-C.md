@@ -202,3 +202,17 @@ python3 scripts/97_check_terms.py           # 术语检查
 
 C 线现状（2026-10-28）：`c.pt` = ep52（训练实际停止轮）、`c_best.pt` = **ep45**（valDice 最佳）、
 发布用 **ep30**；三者不同，理由见 EXPERIMENTS-C C/E15。`c_ep030_v100.pt` 是 v1.0.0 模型的归档。
+
+## 5.1 v1.3.0 校验和（2026-11-02）
+
+v1.3.0 清理了 20 个全坏格，真迹 **5,257**；`自` 换回完整样本。
+v1.2.1 的校验和仍保留在 §5，属历史版本，不是当前 `build/`。
+
+```
+765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48  build/GuanGeKai-C-Regular.ttf
+6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d  build/GuanGeKai-C-Real.ttf
+4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498  GuanGeKai-C-v1.3.0.zip
+```
+
+`release-c/` 当前为 v1.3.0；v1.2.1 的 `release-c` 备份在
+`work-c/v121_backup/release-c-v1.2.1/`。完整发布说明见 `docs/RELEASE-v1.3.0-C.md`。
