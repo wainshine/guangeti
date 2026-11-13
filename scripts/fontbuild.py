@@ -103,7 +103,8 @@ def _orient(contours):
 
 def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Kai",
                style: str = "Regular", version: str = VERSION,
-               copyright_text: str = "", upm: int = EM) -> None:
+               copyright_text: str = "", upm: int = EM,
+               drop_duplicate_last_point: bool = False) -> None:
     """glyphs: {char: [contour, ...]} in font units."""
     chars = sorted(glyphs)
     order = [".notdef"] + [f"uni{ord(ch):04X}" for ch in chars]
@@ -133,7 +134,15 @@ def build_font(glyphs: dict[str, list], out_path: Path, family: str = "GuanGe Ka
         for c, flip in _orient(contours):
             rec = RecordingPen()
             rec.moveTo(c["start"])
-            for s in c["segs"]:
+            segs = c["segs"]
+            if drop_duplicate_last_point and segs:
+                # a cache round-trip can keep "close" as a trailing lineTo back to
+                # the start; dropping it makes re-traced and cached contours identical
+                last = segs[-1]
+                end = (last[1], last[2]) if last[0] == "L" else (last[5], last[6])
+                if end == tuple(c["start"]):
+                    segs = segs[:-1]
+            for s in segs:
                 if s[0] == "L":
                     rec.lineTo((s[1], s[2]))
                 else:

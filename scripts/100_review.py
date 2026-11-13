@@ -573,10 +573,14 @@ def main() -> int:
     if clean_path.exists():
         d = np.load(clean_path, allow_pickle=True)
         clean = sorted(int(ord(c)) for c in d["chars"].tolist())
+        if args.line == "C":
+            title = f"B2  泛化集 {len(clean)} 字（按字留出，未訓練）"
+            subtitle = "C 线：pairs_holdout 与 pairs 零字重叠；这一板的差才是模型差。"
+        else:
+            title = f"B2  泛化集 {len(clean)} 字（只出現一次，從未訓練）"
+            subtitle = "直接看模型沒見過的字；這一板差 = 模型差，不是抽樣倒楣。"
         board_contact(outdir / f"B2_clean{len(clean)}.png", "B2",
-                      f"B2  泛化集 {len(clean)} 字（只出現一次，從未訓練）",
-                      "直接看模型沒見過的字；這一板差 = 模型差，不是抽樣倒楣。",
-                      clean, font_path, boards)
+                      title, subtitle, clean, font_path, boards)
     else:
         print(f"   B2 skipped: {rel(clean_path)} missing")
         if args.line == "C":
