@@ -8,7 +8,7 @@
 | 文件 | 体积 | 来源 | 许可 | 入库 |
 |---|---|---|---|---|
 | `史记.二十四册.传姜立纲抄本.新加坡国立大学藏.水印.pdf` | 1.4 GB | 新加坡国立大学图书馆藏明抄本《史记》（二十四册）之数字化影像，页面水印 `Original from and digitized by National University of Singapore Libraries` 即来源标识 | 原书公有领域；扫描件为公版作品的忠实再现（§3） | ❌ 不入库 |
-| `data/reference-b/shiji_raw.txt` | 1.8 MB | 史記全文（繁体、带标点），下载自 [183-lgtm/guji1](https://github.com/183-lgtm/guji1) `j.史書/史記.txt`；文件头注明上游为 bgc2017/chtxt（2021-02-15 版） | **文本本身公有领域**（史記成书于西汉）；本仓库只用其**汉字序列**做 OCR 对齐，不用其标点、校记（§4） | ✅ 入库 |
+| `data/reference-b/shiji_raw.txt` | 1.8 MB | 史记全文（繁体、带标点），下载自 [183-lgtm/guji1](https://github.com/183-lgtm/guji1) `j.史書/史記.txt`；文件头注明上游为 bgc2017/chtxt（2021-02-15 版） | **文本本身公有领域**（史記成书于西汉）；本仓库只用其**汉字序列**做 OCR 对齐，不用其标点、校记（§4） | ✅ 入库 |
 | `data/reference-b/reference.txt` | 1.7 MB | 由 `53_build_reference_b.py` 从上一行生成：120 篇、499,740 字、4,940 个唯一字 | 同上 | ✅ 入库 |
 | `data/base/LXGWWenKai-Regular.ttf` | 25 MB | [LXGW WenKai v1.530](https://github.com/lxgw/LxgwWenKai/releases)，与 A 线同一份 | **OFL 1.1，含 Reserved Font Name**（霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW） | ❌ 不入库 |
 
@@ -115,10 +115,10 @@ A 线 `docs/DATA.md` 里那条待办已于 2026-10-25 删除；B 线不复制这
 
 | 檔案 | 說明 |
 |---|---|
-| `docs/images/book-vs-font-b.jpg` | 手工合成：左為 p1000 原書頁（《平原君虞卿列傳》），右為同一段文字用 `GuanGeKai-B-Real` 豎排。**不是**任何腳本的輸出，重跑流程不會也不需要重建它 |
+| `docs/images/book-vs-font-b.jpg` | 手工合成：左为 p1000 原书页（《平原君虞卿列传》），右为同一段文字用 `GuanGeKai-B-Real` 竖排。**不是**任何脚本的输出，重跑流程不会也不需要重建它 |
 
-> 教訓來自 A 線：`docs/images/book-vs-font.png` 曾被自動腳本覆蓋成「可生成」的樣張。
-> 能自動生成的圖與手工拼圖必須分開命名。
+> 教训来自 A 线：`docs/images/book-vs-font.png` 曾被自動腳本覆蓋成「可生成」的樣張。
+> 能自动生成的图与手工拼图必须分开命名。
 
 ## 5. 数字水印的处理
 
@@ -169,13 +169,12 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 ```
 aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
 7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a  build/GuanGeKai-B-Real.ttf
-543f20bae9bbe511394d2f0c8edee78e5ec4898eddaffd9a28d61dee4dc98062  GuanGeKai-B-v1.2.4.zip
+2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip
 ```
 
 历史版本（zip 由所有者手动清理，不主动删）：
 
 ```
-df74d6b6ef741f04f3cb60669865f3eb5090915247b136fb893d1a9d23ad1f78  GuanGeKai-B-v1.2.4.zip（首次构建，README 改动前的内部产物）
 d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1.2.2.zip
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
@@ -186,6 +185,12 @@ c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1
 （v1.2.3 未发布，直接跳过）；中间构建 **v1.3.0 / v1.3.1 编号作废、产物已清理**，
 不对应任何发布说明，文档里不再引用。
 三条线独立编号：A v1.7.2 / B v1.2.4 / C v1.2.0。
+
+**`data/release-b.json` 现在是 B 线的单一计数与口径源**（v1.2.4 补齐）：
+`real 4073 / gan 15784 / gan_ht 544 / ribbon 591 / punct 42 / codepoints_total 21034`，
+另有 `clean` 块记录未见字口径——`work-b/pairs_single.npz` 629 字（与训练集交集 0），
+**dice 0.525 / chamfer 5.60 / 崩坏率 2.9%**，附复现命令与产物路径。
+自动核对（`73_selfaudit_b`、发布报告）读它即可，不必再从 `provenance.json` 现算。
 
 **字集口径（v1.2.4 起，见 GLOSSARY）**：
 
@@ -257,8 +262,8 @@ python3 scripts/60_generate_b.py --method gan --ckpt work-b/ckpt/b_ep080.pt \
                                                    # 16,919 字，约 25 分钟
 python3 scripts/61_fill_fallback_b.py              # 兜底：60 漏掉的字用带状扫掠补齐
 
-python3 scripts/62_build_full_b.py --drop-outside-basic   # 基本區 20,992（不帶 5 個扩展 A）
-python3 scripts/13_extend_punct.py --line B --inplace      # 補 42 個標點 → cmap 21,034
+python3 scripts/62_build_full_b.py --drop-outside-basic   # 基本区 20,992（不带 5 个扩展 A）
+python3 scripts/13_extend_punct.py --line B --inplace      # 补 42 个标点 → cmap 21,034
 python3 scripts/63_qa_b.py                         # 硬闸：覆盖率/空字形/真跡数/孔洞
 python3 scripts/68_accept_b.py                     # 硬闸：字重比/回退占比/包围盒
 

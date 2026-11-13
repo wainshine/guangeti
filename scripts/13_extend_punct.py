@@ -86,7 +86,7 @@ def extend(font_path: Path, out_path: Path, drop_outside: bool, dry: bool) -> No
     dropped = []
     if drop_outside:
         keep_uni = [n for _c, n in added]
-        added_cp = set(CHARS)          # 本脚本负责的 44 个码位永不删除
+        added_cp = set(CHARS)          # 本脚本负责的码位（数量见 punct_set.CHARS）永不删除
         outside = [c for c in base.getBestCmap()
                    if not (0x4E00 <= c <= 0x9FFF) and c not in added_cp]
         dropped = outside

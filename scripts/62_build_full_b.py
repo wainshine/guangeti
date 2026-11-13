@@ -43,7 +43,8 @@ def main():
                     help="dry-run only: build even when coverage is incomplete")
     ap.add_argument("--drop-outside-basic", action="store_true",
                     help="drop glyphs outside 0x4E00-0x9FFF (the 5 extension-A forms) so the "
-                         "cmap matches the advertised basic-block coverage")
+                         "cmap matches the advertised basic-block coverage. 不含标点：标点不在 "
+                         "real/gen 里，由 13_extend_punct.py 在构建之后补上")
     args = ap.parse_args()
     wd = Path(args.work)
     real = load(wd / "real_contours.jsonl")

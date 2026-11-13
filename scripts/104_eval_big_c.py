@@ -38,7 +38,10 @@ def load_gen(ckpt: str):
     ck = torch.load(ckpt, map_location="cpu")
     G.load_state_dict(ck["G"])
     G.eval()
-    dev = "mps" if torch.backends.mps.is_available() else "cpu"
+    # Release/visual evaluation is CPU-canonical (AUDIT-2026-11-01-MPS-VAL):
+    # MPS and CPU disagree on the same checkpoint; never draw the shipped-glyph
+    # panel on MPS.
+    dev = "cpu"
     G.to(dev)
     return G, dev
 

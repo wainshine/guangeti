@@ -58,6 +58,14 @@ PRESETS = {
     "C": dict(font="build/GuanGeKai-C-Regular.ttf", prov="release-c/provenance.json",
               family="GuanGe Kai C"),
 }
+# B2 must use each line's own never-trained set.  C's pairs_clean.npz is
+# page-held-out but shares characters with training; pairs_holdout.npz is the
+# character-disjoint 300-char set.
+CLEAN_DEFAULT = {
+    "A": ROOT / "work" / "pairs_single.npz",
+    "B": ROOT / "work-b" / "pairs_single.npz",
+    "C": ROOT / "work-c" / "pairs_holdout.npz",
+}
 
 BG, FG, LABEL, DIM, RULE = 252, 20, 105, 150, 210
 COLS, CELL = 24, 96
@@ -198,7 +206,7 @@ def board_contact(out: Path, board_id: str, title: str, sub: str, chars: list[st
 
 
 def board_strata(out: Path, board_id: str, prov: dict, font_path: Path,
-                 seed: int, n: int, boards: list) -> None:
+                 seed: int, n: int, boards: list, stratum_mix: int = 0) -> None:
     buckets: dict[str, list[str]] = {}
     for ch, src in prov.items():
         buckets.setdefault(src, []).append(ch)
@@ -226,9 +234,10 @@ def board_strata(out: Path, board_id: str, prov: dict, font_path: Path,
     d.line((pad, 76, width - pad, 76), fill=RULE, width=1)
 
     y = head
-    for key in keys:
+    for i, key in enumerate(keys):
         chars = sorted(buckets[key])
-        picked = sorted(random.Random(seed).sample(chars, min(cols, len(chars))))
+        picked = sorted(random.Random(seed + stratum_mix * i).sample(
+            chars, min(cols, len(chars))))
         d.text((pad, y), STRATUM_LABEL.get(key, key), font=label_font, fill=LABEL)
         d.text((pad, y + 20), f"{len(chars):,} 字  {100.0*len(chars)/total:.1f}%",
                font=small, fill=DIM)
@@ -560,7 +569,7 @@ def main() -> int:
                   f"{rel(font_path)}  {family}  ·  seed {args.seed}  ·  {len(cmap):,} 字中抽樣",
                   sample, font_path, boards)
 
-    clean_path = Path(args.clean) if args.clean else ROOT / "work" / "pairs_single.npz"
+    clean_path = Path(args.clean) if args.clean else CLEAN_DEFAULT[args.line]
     if clean_path.exists():
         d = np.load(clean_path, allow_pickle=True)
         clean = sorted(int(ord(c)) for c in d["chars"].tolist())
@@ -569,9 +578,12 @@ def main() -> int:
                       "直接看模型沒見過的字；這一板差 = 模型差，不是抽樣倒楣。",
                       clean, font_path, boards)
     else:
-        print("   B2 skipped: work/pairs_single.npz missing")
+        print(f"   B2 skipped: {rel(clean_path)} missing")
+        if args.line == "C":
+            raise SystemExit("C B2 requires work-c/pairs_holdout.npz (character-disjoint)")
 
-    board_strata(outdir / "B3_strata.png", "B3", prov, font_path, args.seed, 20, boards)
+    board_strata(outdir / "B3_strata.png", "B3", prov, font_path, args.seed, 20, boards,
+                 stratum_mix=(100003 if args.line == "C" else 0))
 
     if not args.no_text:
         board_text(outdir / "B4_text-large.png", "B4", font_path, (24, 48), boards)

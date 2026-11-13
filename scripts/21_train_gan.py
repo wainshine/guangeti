@@ -217,6 +217,10 @@ def main():
         vd = np.load(args.val_data, allow_pickle=True)
         val_chars = set(str(c) for c in vd["chars"])
         val = np.arange(len(vd["chars"]), dtype=int)
+        # IMPORTANT: recompute tr after replacing val_chars; otherwise the
+        # internal 2.5% random split remains in training and a page-held-out
+        # "clean" set can be 50%+ seen.
+        tr = np.array([i for i, c in enumerate(all_chars) if c not in val_chars], dtype=int)
         val_path = args.val_data
     if args.limit:
         tr = tr[:args.limit]

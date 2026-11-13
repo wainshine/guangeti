@@ -216,3 +216,21 @@ v1.2.1 的校验和仍保留在 §5，属历史版本，不是当前 `build/`。
 
 `release-c/` 当前为 v1.3.0；v1.2.1 的 `release-c` 备份在
 `work-c/v121_backup/release-c-v1.2.1/`。完整发布说明见 `docs/RELEASE-v1.3.0-C.md`。
+
+## 5.2 work-c-big（大字实验，非发布链）
+
+`work-c-big/` 是 C/E32 的大字字头实验工作区，**不属于 v1.2.1/v1.3.0 发布链**，也未纳入 `release-c/`。
+
+主要产物：
+
+```
+work-c-big/chosen.jsonl        651
+work-c-big/pairs/pairs.npz      651 对
+work-c-big/pairs_clean.npz      109（页留出，但与训练同字，非 unseen）
+work-c-big/ckpt/               ep10–120 + best + MANIFEST
+work-c-big/generated.jsonl     gen 19,090 + base 1,251
+work-c-big/report/             大字 vs C 面板、unseen 复跑
+```
+
+注意：`pairs_clean.npz` 是页留出，不是字级 unseen；C/E32 的 109 字面板含 62 个训练同字。
+被审计确认的污染与回退口径更正见 `docs/EXPERIMENTS-C.md` C/E32。

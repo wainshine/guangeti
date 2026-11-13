@@ -59,6 +59,7 @@ TERMS = [
     ("刻刀/刀刻", re.compile(r"刻刀|刀刻|雕版|版刻|摹刻|翻刻")),
     ("woodblock", re.compile(r"woodblock|block-print|blockprint", re.I)),
     ("路线 A/B/C", re.compile(r"路[线線]\s*[ABC](?![0-9A-Za-z])")),
+    ("过期的字集数字", re.compile(r"44\s*个码位|cmap\s*21,?036")),
     ("方案 A/B/C", re.compile(r"方案\s*[ABC](?![0-9A-Za-z])")),
 ]
 GATE_ID = re.compile(r"(?<![A-Za-z0-9_])R(?:0b?|[1-9])(?![0-9A-Za-z_])")

@@ -43,8 +43,12 @@ def load_gan(path):
     m = module_from_spec(spec)
     spec.loader.exec_module(m)
     g = m.Generator()
+    # 评估一律 CPU（AUDIT-2026-11-01-MPS-VAL：同一 checkpoint 的 MPS 与 CPU 推理
+    # Dice 差 0.11）。map_location="cpu" 之后模型不会再被搬到别的设备，这里显式断言，
+    # 避免以后有人加一行 .to(device) 就把历史数字变成不可比。
     g.load_state_dict(torch.load(path, map_location="cpu")["G"])
     g.eval()
+    assert next(g.parameters()).device.type == "cpu", "评估必须在 CPU 上跑"
     return g
 
 

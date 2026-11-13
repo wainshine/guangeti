@@ -51,7 +51,7 @@ B = 史记明抄本（`GuanGe Kai B`，本包）、C = 永乐大典嘉靖内府�
 ```
 aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
 7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a  build/GuanGeKai-B-Real.ttf
-543f20bae9bbe511394d2f0c8edee78e5ec4898eddaffd9a28d61dee4dc98062  GuanGeKai-B-v1.2.4.zip
+2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip
 ```
 
 包内 `release-b/SHA256SUMS` 逐文件自校验。

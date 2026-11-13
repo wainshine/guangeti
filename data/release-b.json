@@ -18,5 +18,26 @@
  "checkpoint_hardtail": "work-b/ckpt/b_wt_ep090.pt",
  "font_sha256": "aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d",
  "real_sha256": "7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a",
- "zip_sha256": "543f20bae9bbe511394d2f0c8edee78e5ec4898eddaffd9a28d61dee4dc98062"
+ "zip_sha256": "2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46",
+ "real": 4073,
+ "gan": 15784,
+ "gan_ht": 544,
+ "ribbon": 591,
+ "punct": 42,
+ "codepoints_total": 21034,
+ "clean": {
+  "set": "work-b/pairs_single.npz",
+  "note": "单次出现、从未参与训练；B 线没有对照文本，这是唯一的未见字口径（v1.2.4 复核：与训练集交集 0）",
+  "n": 629,
+  "dice": 0.525,
+  "ink": 1.017,
+  "cap_mid": 0.631,
+  "cap_ks": 0.04,
+  "chamfer": 5.6,
+  "broken": 0.029,
+  "floor_same_char_chamfer": 3.57,
+  "cmd": "python3 scripts/65_eval_b.py --gan work-b/ckpt/b_ep080.pt --n 629 --thr -0.10 --close 7",
+  "out": "work-b/eval_v124_release.json",
+  "measured": "2026-11-13"
+ }
 }

@@ -20,8 +20,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# 发布说明的文件名跟着 data/release-b.json 走，别再写死版本号
+# （写死会在每次换版本时让自审直接崩在 FileNotFoundError）。
+_CFG = json.loads((ROOT / "data" / "release-b.json").read_text())
+REL_NOTE = f"docs/RELEASE-v{_CFG['version']}-B.md"
 DOCS = ["README-B.md", "docs/PLAN-B.md", "docs/EXPERIMENTS-B.md",
-        "docs/DATA-B.md", "docs/RELEASE-v1.2.1-B.md"]
+        "docs/DATA-B.md", REL_NOTE]
 BLOCK = (0x4E00, 0x9FFF)
 
 fails: list[str] = []
@@ -66,11 +70,14 @@ def main() -> int:
     cm_r = fr.getBestCmap()
     cov = sum(1 for c in range(BLOCK[0], BLOCK[1] + 1) if c in cm_r)
     check("Regular covers the basic block", cov == stats["codepoints"] == 20992, f"{cov}")
-    check("Regular cmap == codepoints + ext-A", len(cm_r) == stats["codepoints"] + stats["real_ext_a"],
-          f"{len(cm_r)}")
+    # 基本区 + 标点(42) + 区外真迹(ext-A，v1.2.4 起为 0)
+    want_cmap = stats.get("codepoints_total") or (
+        stats["codepoints"] + stats.get("punct", 0) + stats["real_ext_a"])
+    check("Regular cmap == 基本区 + 标点 + ext-A", len(cm_r) == want_cmap,
+          f"{len(cm_r)} vs {want_cmap}")
     check("Real glyph count", fm["maxp"].numGlyphs - 1 == stats["real"], f"{fm['maxp'].numGlyphs-1}")
     check("family name", fr["name"].getDebugName(1) == fm["name"].getDebugName(1) == "GuanGe Kai B")
-    check("package version", fr["name"].getDebugName(5) == "Version 1.2.1",
+    check("package version", fr["name"].getDebugName(5) == f"Version {_CFG['version']}",
           repr(fr["name"].getDebugName(5)))
     # fontRevision must follow the shared-library formula (16.16 fixed point), and the
     # doc must quote the same number: it is the value users see in font properties.
@@ -118,8 +125,9 @@ def main() -> int:
     check("coverage.txt length", len((rel / "coverage.txt").read_text()) == stats["codepoints"])
 
     print("== 4. checksums quoted in docs ==")
-    zips = re.findall(r"([0-9a-f]{64})  GuanGeKai-B-v1\.2\.1\.zip", text)
-    zp = ROOT / "GuanGeKai-B-v1.2.1.zip"
+    zname = f"GuanGeKai-B-v{_CFG['version']}.zip"
+    zips = re.findall(r"([0-9a-f]{64})  " + re.escape(zname), text)
+    zp = ROOT / zname
     if zp.exists():
         want = sha256(zp)
         check("doc zip hash == disk", bool(zips) and set(zips) == {want}, want[:16])
@@ -132,7 +140,7 @@ def main() -> int:
     # 面向使用者/摘要的三份文档不得出现已被取代的口径；EXPERIMENTS-B 是实验记录，
     # 历史值（ep50 当时的候选工作点）本来就该留在那里。
     user_docs = "\n".join(Path(d).read_text() for d in
-                          ("README-B.md", "docs/PLAN-B.md", "docs/RELEASE-v1.2.1-B.md"))
+                          ("README-B.md", "docs/PLAN-B.md", REL_NOTE))
     stale = ["17.7 MB", "3.97 MB", "18.4 MB", "19.4 MB", "1,567 個", "15,360",
              "ep50 是发版"]
     for s in stale:

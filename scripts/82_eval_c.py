@@ -256,6 +256,10 @@ def main():
         rows["_floor_same_char"] = dict(n=len(fl), chamfer=round(float(np.median(fl)), 2))
         print(f"{'真跡互比地板':17s} {'':6s} {'':6s} {'':6s} {'':6s} {'':6s} "
               f"{np.median(fl):8.2f}   (same character, two genuine samples, n={len(fl)})")
+    else:
+        rows["_floor_missing"] = True
+        print("真跡互比地板：MISSING (pairs_clean_second.npz/pairs_clean.npz)；"
+              "chamfer 结论不可用于与基线比较")
     rows["_genuine_cap_mid"] = round(float(np.median(real_cap)), 3)
     out = Path(args.out) if args.out else wd / "eval_c.json"
     out.write_text(json.dumps(rows, ensure_ascii=False, indent=1))

@@ -111,6 +111,7 @@ def main():
     stats = dict(
         codepoints=len(covered),                 # 基本区覆盖（83 按此口径核对）
         codepoints_total=len(covered) + len(punct),   # 含标点，= len(cmap)
+        punct=len(punct),
         real=sum(1 for v in provenance.values() if v == "real"),
         real_basic=sum(1 for k, v in provenance.items() if v == "real"
                         and BLOCK[0] <= ord(k) <= BLOCK[1]),
