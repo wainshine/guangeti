@@ -123,13 +123,13 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- **当前交付基线 v3**：`audit/facts/frozen-hashes-2026-11-14T1007.json`
-  （`head_at_capture = 6bbcf3c`，2026-11-14 10:07；**非 audit-only**，含 `docs/ERRATA.md` E8）。
-  `previous_snapshot.committed_in = 3336143`；v3 自身 `committed_in = pending`（由下一次快照/CHANGELOG 回填）。
-  抓取时工作区干净；v3 写入后主会话对 `audit/` 的修订待提交（audit-only，不构成漂移）。
-- **历史版本**：v2 `...T0950.json`（规则快照，`committed_in = 3336143`）、v1 `...T0940.json`（自指过期）、
-  v0 `frozen-hashes-2026-11-14.json`（过期）；均标 superseded，不删除。
-- 主会话每次闸门对比 v3；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
+- **当前交付基线 v4**：`audit/facts/frozen-hashes-2026-11-14T1015.json`
+  （`head_at_capture = 5940a6d`，2026-11-14 10:15；**非 audit-only**，含 `docs/EXPERIMENTS-B.md` B1）。
+  `previous_snapshot.committed_in = 3336143 → v3 的 committed_in 已回填为 5940a6d`；v4 自身 `committed_in = pending`。
+  抓取时工作区干净；v4 写入后主会话对 `audit/` 的修订待提交（audit-only，不构成漂移）。
+- **历史版本**：v3 `...T1007.json`（`committed_in = 5940a6d`）、v2 `...T0950.json`（`committed_in = 3336143`）、
+  v1 `...T0940.json`（自指过期）、v0（过期）；均标 superseded，不删除。
+- 主会话每次闸门对比 v4；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
 - 写盘副作用清单：`83` 写 `work-c/ab_baseline.json`、`work-c/verify_ab.json`（且无 --help/--no-write）；
   `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件；QA/accept 脚本写各自 `work*/qa/` 与
   `accept_*.json`（§1 已列入主会话禁跑清单）。X10 跟踪 `83 --no-write/--help`。

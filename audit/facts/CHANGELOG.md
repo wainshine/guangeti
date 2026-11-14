@@ -223,3 +223,21 @@
   **两者一起提交时按 X8 建 v4**（`head_at_capture`=该提交、`previous_snapshot.committed_in`=v3 实际提交号）；
   在 v4 落盘前，v3 仍是 `6bbcf3c` 的交付基线，但工作区已不等于抓取时状态（已记入 v3 `state_after_capture`）。
 - 本轮 `audit/` 修订待所有者提交（audit-only，不构成漂移）。**协调层 final，转入执行。**
+
+## 2026-11-14 10:15 CST — 所有者提交 `5940a6d`（v1.2.1 + B1）
+
+- commit 主题：`更新`。内容：`audit/{OPERATING,TASKS,facts/2026-11-14,facts/CHANGELOG,facts/frozen-hashes-…T1007}.md|json`、
+  `docs/AUDIT-2026-11-14.md`、`docs/EXPERIMENTS-B.md`（B1）。
+- 性质：**非 audit-only**（含 `docs/EXPERIMENTS-B.md`）→ 按 X8 触发 v4。
+- B1 已提交完成（62 的 VERSION 1.2.4 解释 + 确定性复核）；E8 末句仍是"可选"（A5b-follow 保留 P3）。
+
+## 2026-11-14 10:18 CST — v4 交付快照建立（执行阶段开始）
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1015.json`：
+  `head_at_capture = 5940a6d`、`last_non_audit_commit = 5940a6d`、`git_status_at_capture = []`、
+  `previous_snapshot.committed_in = 5940a6d`（v3 回填）、v4 `committed_in = pending`、
+  `delivery_status = delivery-baseline (v4)`。
+- 更新 OPERATING §7（当前基线 v4）、facts §1/v4、TASKS X1/X8/B1（完成）、报告 §9.11。
+- 抓取时工作区干净；v4 写入后主会话只改 `audit/`（audit-only，不构成漂移）。
+- **执行阶段开始**：A1/A2a/A3/A4 → C1/C2/C3/C6/C7 → B2/B4/B6；主会话只读复核，
+  等三线提交/交金样后按 OPERATING §6 出「可发/不可发」复核单。

@@ -39,7 +39,7 @@
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| B1 | E15「中间态无法归因」改为「已解释」：62 的中间态变化来自 `62_build_full_b.py:19 VERSION="1.2.4"`（`bcb74b4`），62 连跑确定性（`446cc896…`） | **已完成（文档已改，未提交）**：`docs/EXPERIMENTS-B.md` 已加说明；因是非 audit 路径，提交时按 X8 建 v4 | 已完成（待提交） |
+| B1 | E15「中间态无法归因」改为「已解释」：62 的中间态变化来自 `62_build_full_b.py:19 VERSION="1.2.4"`（`bcb74b4`），62 连跑确定性（`446cc896…`） | **已完成并提交**：`docs/EXPERIMENTS-B.md` 说明已随 `5940a6d` 提交；非 audit 路径已触发 v4 | 完成 |
 | B2 | `release_date` / `artifacts_built_at` 语义落地（O6，三线同义） | 两字段写入 DATA-B 或 release-b.json | 待办 |
 | B3 | 澄清「21 个未提交文件」为当时状态；当前 git status 不成立 | 一句更正 | 已关闭（澄清） |
 | B4 | golden repro 两步金样：Regular = `62 --drop-outside-basic` → `13_extend_punct --line B --inplace` → `aa19d6d2`；Real = `57 --reuse-contours --drop-outside-basic` → `7d10e460` | 命令 + 哈希 + 日志；主会话比对 | 待办 |
@@ -67,14 +67,14 @@
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| X1 | 外部冻结台账 v3（`head_at_capture=6bbcf3c`，含 E8；`previous_snapshot.committed_in=3336143`） | `audit/facts/frozen-hashes-2026-11-14T1007.json` | 完成（v3 交付基线） |
-| X2 | 发布清单 v2：**先写跨线检查项清单**，各线自行实现；不复用 73 代码 | 清单 + 一条线试跑 | 进行中 |
+| X1 | 外部冻结台账 v4（`head_at_capture=5940a6d`，含 B1；`previous_snapshot.committed_in=5940a6d`） | `audit/facts/frozen-hashes-2026-11-14T1015.json` | 完成（v4 交付基线） |
+| X2 | 跨线发布检查项清单（不复用 73 代码）：初稿已写 `audit/facts/release-gate-checklist.md` v0 | 待 A/B/C review；一条线按清单试跑一次后改「完成」 | 初稿完成（待 review） |
 | X3 | 状态快照协议（含"audit 提交不算漂移"、`committed_in` 回填） | OPERATING §5；本板 X8 | 完成（规则） |
 | X4 | 共享变更协议（已发布哈希停手、24h 回归窗口、83 写 C 的归属） | OPERATING §3 | 完成（规则）/待演练 |
 | X5 | 三线事实表 v2 | `audit/facts/2026-11-14.md`（rev v2） | 完成（v2） |
 | X6 | 审计报告状态更新（§9.5/§9.6） | `docs/AUDIT-2026-11-14.md` | 完成（v2） |
 | X7 | 追溯登记 2026-11-14 前共享改动（`21_train_gan`、`100_review`、83 B zip 行等） | 影响面 + 83/97 + A review，登记 CHANGELOG | 待办 |
-| **X8** | 快照重建与 `committed_in` 回填：仅非 audit 提交/发版触发；每次新快照必须带 `previous_snapshot.committed_in` = 上一版实际提交号 | v2 `committed_in=3336143`（已回填）；**v3 已建**（`head_at_capture=6bbcf3c`、`previous_snapshot.committed_in=3336143`、v3 `committed_in=pending`）；下一次非 audit 提交/发版时建 v4 并回填 v3 的实际提交号 | **v3 完成；v3 自身待回填** |
+| **X8** | 快照重建与 `committed_in` 回填：仅非 audit 提交/发版触发；每次新快照必须带 `previous_snapshot.committed_in` = 上一版实际提交号 | v2 `committed_in=3336143`、v3 `committed_in=5940a6d`（均已回填）；**v4 已建**（`head_at_capture=5940a6d`、`previous_snapshot.committed_in=5940a6d`、v4 `committed_in=pending`）；下一次非 audit 提交/发版时建 v5 并回填 v4 的实际提交号 | **v4 完成；v4 自身待回填** |
 | X9 | 文档数字 vs `release-*.json` 持久对账闸（只读，主会话提案） | 小脚本或检查单；覆盖 README/DATA/AGENTS/PROJECT_STATE 关键数字 | 待办 |
 | **X10** | `83_verify_ab_c.py` 增加 `--no-write`/`--baseline-out` 与真正的 `--help`；`ZIPS` 改读 `data/release-*.json`（A 执行，共享变更协议） | 默认不回写；B 可安全运行；三线回归 + 97 | 待办（P1） |
 | X11 | 主会话闸门写法：只读等价复算（shasum/fontTools/JSON/punct_set），**不运行 83/67/73、不复制 work 目录** | OPERATING §1/§6 | 完成（规则） |
@@ -98,5 +98,6 @@
 | B5 / B7 | 已关闭（historical clause / 嵌套单一源） |
 | 主会话误跑 83（见 CHANGELOG 09:50） | work-c 两个缓存被重写、内容未变；制品不变 |
 | E8 提交 / v3 建立 | `6bbcf3c`（含 `docs/ERRATA.md` E8，非 audit）；v3 `frozen-hashes-2026-11-14T1007.json` 已建，`previous_snapshot.committed_in=3336143` |
+| B1 提交 / v4 建立 | `5940a6d`（含 `docs/EXPERIMENTS-B.md` B1，非 audit）；v4 `frozen-hashes-2026-11-14T1015.json` 已建，`previous_snapshot.committed_in=5940a6d`；v3 的 `committed_in` 回填为 `5940a6d` |
 | 主会话禁跑清单补全 | OPERATING §1：QA/accept/生成/打包脚本全部列入；只读白名单已定 |
 | `committed_in` 回填验收 | OPERATING §5 + X8；v2 已回填 3336143，v3 pending 待下次非 audit 提交 |
