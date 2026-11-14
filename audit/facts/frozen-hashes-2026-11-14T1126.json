@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 11:26 提交；A6b 收尾 + v7，混合）",
  "last_non_audit_commit": "bcdeb1082be11ed3c2db37b8f791cdf5ec7bdf70",
  "last_non_audit_subject": "更新（README 4.1% / method 口径 / DATA §4.9/§5 更新 + v7）",
- "committed_in": "pending（v8 自身所在提交；由下一次快照/CHANGELOG 回填）",
+ "committed_in": "8b810f350550638179bfcba14168b3086557ea6b (mixed commit 2026-11-14 11:48: DATA §5 修复 + E8 措辞 + v8)",
  "git_status_at_capture": [],
  "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
  "audit_only_commits_ignored": [

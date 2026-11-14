@@ -336,3 +336,21 @@
   制品未变；三线 SHA 自检 OK；97 OK；MANIFEST A 24（release 2 项）。
 - 新待办：`A6b-follow`（DATA §5 排版回归，P2）；X7/X9/X10/X2 仍未做；A2b 可选；A5b-follow P3。
 - 更新 OPERATING §7（v8）、facts v8、TASKS v1.6、报告 §9.15。v8 写入后主会话只改 `audit/`（audit-only）；下轮按 X8 建 v9。
+
+## 2026-11-14 11:48 CST — 所有者提交 `8b810f3`（DATA §5 修复 + E8 措辞，混合提交）
+
+- 9 文件：`docs/DATA.md`（删残留 3 行旧 B v1.0.1 + 错位 fence，统一 release*/SHA256SUMS 说明）、
+  `docs/ERRATA.md`（E8 末句改为「若重打包，必须顺带改为 Ming manuscript」）、`audit/*`（v8）。
+- 性质：**混合提交** → 触发 v9。
+- 两个 follow-up 均闭环：A6b-follow（DATA §5 排版）、A5b-follow（E8「必须」）。
+
+## 2026-11-14 11:50 CST — v9 交付基线 / A 线收尾复核
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1148.json`：`head_at_capture = 8b810f3`、
+  `previous_snapshot.committed_in = 8b810f3`、`committed_in = pending`、`delivery_status = delivery-baseline (v9)`；
+  v8 的 `committed_in=8b810f3` 已回填。
+- 核验：DATA §5 排版已修（97 OK）；E8「必须」已落；制品未变；三线 SHA 自检 OK；MANIFEST A 24（release 2 项）。
+- **A 线闭环**（A1–A7 + A5b/A6a/A6b follow-up 全完成；A2b 可选未做）。
+- 剩余仅跨线：X7（97/31/21/100 登记）、X9（文档数字对账）、X10（83 `--no-write/--help` + ZIPS 读 json）、
+  X2（checklist review）。
+- 更新 OPERATING §7（v9）、facts v9、TASKS v1.7、报告 §9.16。v9 写入后主会话只改 `audit/`（audit-only）；下轮按 X8 建 v10。
