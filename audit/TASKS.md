@@ -1,4 +1,4 @@
-# 三线任务板 v1.5（主会话维护，2026-11-14 11:06 核验 `2f523d1` 文档收尾提交）
+# 三线任务板 v1.6（主会话维护，2026-11-14 11:28 核验 `bcdeb10` A6b 收尾提交）
 
 > 规则：见 `audit/OPERATING.md` v1.2.1。主会话不代写；三线执行并回报；所有者裁定优先级。
 > 本版依据 `beaa524`（三线合并交付，2026-11-14 10:34）的实测核验，逐项更新状态。
@@ -29,7 +29,8 @@
 | A5b | E8 登记已发布 OFL drift | E8 已提交（`6bbcf3c`）；末句"可选" | 完成 |
 | A5b-follow | E8 末句改"重打包则必须修正"（所有者建议） | 一句文档；随 A 的下一个非 audit 提交 | 待办（P3） |
 | A6a | 指标 n 口径收口 | AGENTS C 段 `unseen 0.470`（n=300）；holes n=300 1.9%（4/214）+ n=200 1.4%（2/145，`work/holes_a_n200.json`）；EXPERIMENTS 总表加口径脚注（E32/E36/E39） | 完成 |
-| A6b | PROJECT_STATE/README/DATA §4.9/§5 旧口径清理 | 大部分完成：README 拓扑/程序化/C 指针/去色已改；PROJECT_STATE 118/139/211 已改；DATA 重建链 36 步已标注旧链；release_ckpts 已文档化。**残余**：README 已知限制仍写「9.5% 觸發守衛」（现 4.1% ribbon）；`docs/method.md §5.0` 仍 9.5%/0.549/5.92/5.16；DATA §5 校验和仍列 v1.5.0–v1.5.2 / B v1.0.1；DATA §4.9 称 build ID0 仍 `Ming woodblock print`（实测已是 `Ming manuscript`） | 部分完成 |
+| A6b | PROJECT_STATE/README/DATA §4.9/§5 旧口径清理 | 完成：README 拓扑/程序化/C 指针/去色、已知限制 4.1%；PROJECT_STATE 118/139/211；method.md 4.1%/0.539/6.13/5.42；DATA §4.9 ID0 已修复说明；DATA §5 A/B/C 当前校验和 | 完成 |
+| A6b-follow | **P2 排版回归**：`docs/DATA.md` §5 历史版本段落后残留 3 行旧 B v1.0.1 哈希 + 2 个错位 code fence（L130-138），导致 `release-b/SHA256SUMS` 等段落被吞进代码块 | 删残留 3 行、修 fence，保留「历史版本见 docs/releases/ 与 DATA-B/C」一句；97 仍 OK | 待办（P2） |
 | A7 | README B/C 单行例外 | 已写入 AGENTS「文档约定」 | 完成 |
 
 ## 2. B 线（B 会话）
@@ -63,12 +64,12 @@
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| X1 | 外部冻结台账 v7（`head=2f523d1`） | `audit/facts/frozen-hashes-2026-11-14T1103.json` | 完成 |
+| X1 | 外部冻结台账 v8（`head=bcdeb10`） | `audit/facts/frozen-hashes-2026-11-14T1126.json` | 完成 |
 | X2 | 跨线发布检查项清单 | `audit/facts/release-gate-checklist.md` v0 已写；待三线 review | 待复核 |
 | X3/X4/X11 | 快照/共享变更/主会话只读规则 | 已写入 OPERATING v1.2.1 | 完成 |
 | X5/X6 | 事实台账 v5 / 报告同步 | 已完成 | 完成 |
 | X7 | 追溯登记共享改动 | 97（A5a）、31（A2a release 标记）、早前 21_train_gan/100_review（C）：登记影响面 + 83/97 + A review | 待办 |
-| X8 | 快照重建与 `committed_in` 回填 | v6 `committed_in=2f523d1` 已回填；v7 已建（`previous_snapshot.committed_in=2f523d1`），v7 自身待回填 | 完成（v7） |
+| X8 | 快照重建与 `committed_in` 回填 | v7 `committed_in=bcdeb10` 已回填；v8 已建（`previous_snapshot.committed_in=bcdeb10`），v8 自身待回填 | 完成（v8） |
 | X9 | 文档数字 vs release-*.json 持久对账闸 | 小脚本/检查单（可在 checklist 的 G 节先手查） | 待办 |
 | X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | 共享脚本变更；未做 | 待办（P1） |
 
@@ -76,7 +77,7 @@
 
 | 线 | 结论 | 说明 |
 |---|---|---|
-| A | **基本通过** | A1/A2a/A3/A4/A5a/A5b/A7 完成；A6a 完成；A6b 余 4 处文档残余（README 9.5%、method.md、DATA §5、DATA §4.9） |
+| A | **通过（1 处排版待修）** | A1/A2a/A3/A4/A5a/A5b/A6a/A6b/A7 完成；**新发现 DATA §5 排版回归**（`docs/DATA.md:130-138` 残留旧 B v1.0.1 三行 + 错位 fence），交 A6b-follow |
 | B | **通过（无需重发）** | B2/B4/B6 完成、证据齐、制品未变；仅 DATA-B 一句 P3 |
 | C | **通过** | C1–C12 完成、金样日志齐；C4 日期与 README-C 已改 |
 | 制品 | **无回归** | 六 TTF/三 zip 哈希未变；B/C build 重建后字节一致；A build 未重建 |
@@ -101,3 +102,5 @@
 | release 标记入库 | `data/release_ckpts_a.json` + 31 `--release-file` + DATA §6.5.1；work 清理不再丢 |
 | A6b 大部分 | README/PROJECT_STATE/DATA 旧口径已改（余 4 处见 A6b） |
 | 快照 v7 | `2f523d1`；v6 `committed_in=2f523d1` 已回填 |
+| A6b 四项残余 | README 4.1%、method.md、DATA §4.9 ID0、DATA §5 当前校验和 |
+| 快照 v8 | `bcdeb10`；v7 `committed_in=bcdeb10` 已回填；新发现 DATA §5 排版回归（A6b-follow） |

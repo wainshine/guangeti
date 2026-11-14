@@ -123,14 +123,14 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- **当前交付基线 v7**：`audit/facts/frozen-hashes-2026-11-14T1103.json`
-  （`head_at_capture = 2f523d1`，2026-11-14 11:03；**混合提交**：A6a/A6b 文档 + release 标记入库 + v6）。
-  `previous_snapshot.committed_in = 2f523d1`（v6 的实际提交）；v7 自身 `committed_in = pending`。
-  抓取时工作区干净；v7 写入后主会话对 `audit/` 的修订待提交（audit-only，不构成漂移）。
-- **历史版本**：v6 `...T1050.json`（`committed_in = 2f523d1`）、v5 `...T1035.json`（`committed_in = 6858c08`）、
-  v4（`committed_in = 56edd05`）、v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、
-  v1/v0（过期）；均标 superseded，不删除。
-- 主会话每次闸门对比 v7；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
+- **当前交付基线 v8**：`audit/facts/frozen-hashes-2026-11-14T1126.json`
+  （`head_at_capture = bcdeb10`，2026-11-14 11:26；**混合提交**：A6b 收尾 + v7）。
+  `previous_snapshot.committed_in = bcdeb10`（v7 的实际提交）；v8 自身 `committed_in = pending`。
+  抓取时工作区干净；v8 写入后主会话对 `audit/` 的修订待提交（audit-only，不构成漂移）。
+- **历史版本**：v7 `...T1103.json`（`committed_in = bcdeb10`）、v6 `...T1050.json`（`committed_in = 2f523d1`）、
+  v5（`committed_in = 6858c08`）、v4（`committed_in = 56edd05`）、v3（`committed_in = 5940a6d`）、
+  v2（`committed_in = 3336143`）、v1/v0（过期）；均标 superseded，不删除。
+- 主会话每次闸门对比 v8；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
 - 写盘副作用清单：`83` 写 `work-c/ab_baseline.json`、`work-c/verify_ab.json`（且无 --help/--no-write）；
   `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件；QA/accept 脚本写各自 `work*/qa/` 与
   `accept_*.json`（§1 已列入主会话禁跑清单）。X10 跟踪 `83 --no-write/--help`。

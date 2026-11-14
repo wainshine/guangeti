@@ -128,16 +128,9 @@ C 线（永乐大典本，v1.3.0）：
 ```
 
 历史版本（v1.5.0–v1.6.5、B v1.0.1–v1.2.1、C v1.0.x）见对应 `docs/releases/` 与 `docs/DATA-B/C.md`；不再在本文重复。
-b76cfc016e1094c8b3299298b52802abb9f8322495b72b6ba38272f984492cec  build/GuanGeKai-B-Regular.ttf
-79aadc231a3bef0b3ddfc14205448aeb705aae8b53ae00b296bcbb426a3d35be  build/GuanGeKai-B-Real.ttf
-f95b5e7fb736e48ed232d16e9f05baab12920a25eb996924fc6898ba0e1f02f1  GuanGeKai-B-v1.0.1.zip
-```
 
-`release-b/SHA256SUMS` 是 B 线发布包的逐文件校验和，已验证通过；B 线的数据与实验记录见 `docs/DATA-B.md` 与 `docs/EXPERIMENTS-B.md`。
-
-```
-
-`release/SHA256SUMS` 是发布包的逐文件校验和（重新打包会变）。
+`release/SHA256SUMS`、`release-b/SHA256SUMS`、`release-c/SHA256SUMS` 是各发布包的逐文件校验和
+（重新打包会变）；B/C 的数据与实验记录见 `docs/DATA-B.md` / `docs/DATA-C.md`。
 
 ---
 

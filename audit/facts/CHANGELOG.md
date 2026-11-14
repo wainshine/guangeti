@@ -319,3 +319,20 @@
   DATA §5 校验和仍列 v1.5.0–v1.5.2 / B v1.0.1；DATA §4.9 称 build ID0 仍 `Ming woodblock print`（实测已是 `Ming manuscript`）。
 - 跨线未做：X7（97/31/21/100 登记）、X9（数字对账）、X10（83 `--no-write`）、X2（checklist review）。
 - 更新 OPERATING §7（v7）、facts v7、TASKS v1.5、报告 §9.14。v7 写入后主会话只改 `audit/`（audit-only）；下轮按 X8 建 v8。
+
+## 2026-11-14 11:26 CST — 所有者提交 `bcdeb10`（A6b 收尾，混合提交）
+
+- 10 文件：`README.md`（已知限制 4.1%）、`docs/method.md`（4.1%/0.539/6.13/5.42）、`docs/DATA.md`（§4.9 ID0 已修复、§5 A/B/C 当前校验和）、`audit/*`（v7）。
+- 性质：**混合提交** → 触发 v8。
+- **新发现（P2）**：DATA §5 历史版本段落（`docs/DATA.md:130-138`）残留 3 行旧 B v1.0.1 哈希 + 错位 code fence，
+  导致 `release-b/SHA256SUMS` 与 `release/SHA256SUMS` 段落被吞进代码块；交 A6b-follow（A 清理）。
+
+## 2026-11-14 11:28 CST — v8 交付基线 / A6b 收尾复核
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1126.json`：`head_at_capture = bcdeb10`、
+  `previous_snapshot.committed_in = bcdeb10`、`committed_in = pending`、`delivery_status = delivery-baseline (v8)`；
+  v7 的 `committed_in=bcdeb10` 已回填。
+- 核验：A6b 四项残余全部修复（README 4.1% / method.md / DATA §4.9 ID0 / DATA §5 当前校验和）；
+  制品未变；三线 SHA 自检 OK；97 OK；MANIFEST A 24（release 2 项）。
+- 新待办：`A6b-follow`（DATA §5 排版回归，P2）；X7/X9/X10/X2 仍未做；A2b 可选；A5b-follow P3。
+- 更新 OPERATING §7（v8）、facts v8、TASKS v1.6、报告 §9.15。v8 写入后主会话只改 `audit/`（audit-only）；下轮按 X8 建 v9。

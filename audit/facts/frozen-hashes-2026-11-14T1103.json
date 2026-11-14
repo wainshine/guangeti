@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 11:03 提交；A6a/A6b 文档 + release 标记入库 + v6）",
  "last_non_audit_commit": "2f523d17d1dfc502ecf551106c054fb1051fedc7",
  "last_non_audit_subject": "更新（A6a/C 口径/洞 n200 + A6b README/PROJECT_STATE/DATA + release_ckpts_a.json + 31 --release-file）",
- "committed_in": "pending（v7 自身所在提交；由下一次快照/CHANGELOG 回填）",
+ "committed_in": "bcdeb1082be11ed3c2db37b8f791cdf5ec7bdf70 (mixed commit 2026-11-14 11:26: A6b 收尾 + v7)",
  "git_status_at_capture": [],
  "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
  "audit_only_commits_ignored": [
