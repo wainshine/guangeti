@@ -1,0 +1,209 @@
+{
+ "purpose": "主会话外部冻结台账 v12（交付基线）：只读比对用，不写回发布目录，不作自更新基线。",
+ "revision": 13,
+ "supersedes": "v0–v11",
+ "generated_at": "2026-11-14T16:18:00+08:00",
+ "head_at_capture": "43c33df7078af54171c10a4cdc91d1a4493ef09a",
+ "head_subject": "更新（所有者 2026-11-14 16:13 提交；M-P3/M-P4 文档 + v11 + A-P9 release-a 日期修正）",
+ "last_non_audit_commit": "43c33df7078af54171c10a4cdc91d1a4493ef09a",
+ "last_non_audit_subject": "更新（文档/v11 + release-a release_date=2026-10-30 证据修正）",
+ "committed_in": "pending（v12 自身所在提交；由下一次快照/CHANGELOG 回填）",
+ "git_status_at_capture": [
+  " M audit/OPERATING.md",
+  " M audit/TASKS.md",
+  " M audit/facts/CHANGELOG.md",
+  " M audit/facts/frozen-hashes-2026-11-14T1608.json",
+  " M docs/PROJECT_STATE.md"
+ ],
+ "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
+ "audit_only_commits_ignored": [
+  "6d20782462d304bad339ddbc54248aed6f01052f",
+  "333614384376cc89a40b7cd7390e6e9c5bc532f3",
+  "56edd05f45e25d75e9efa07664d6e9681e14b07e",
+  "6858c08a3be01e210bd8a528e5c0defc3099cb5a",
+  "f2fc6ed40c6bee99e94d77c5a2301f73d862e093",
+  "a134850267912a38507ba32025a2f5312ef35489"
+ ],
+ "artifacts": {
+  "build/GuanGeKai-Regular.ttf": "e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac",
+  "build/GuanGeKai-Real.ttf": "bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86",
+  "build/GuanGeKai-B-Regular.ttf": "aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d",
+  "build/GuanGeKai-B-Real.ttf": "7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a",
+  "build/GuanGeKai-C-Regular.ttf": "765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48",
+  "build/GuanGeKai-C-Real.ttf": "6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d",
+  "GuanGeKai-v1.7.2.zip": "14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b",
+  "GuanGeKai-B-v1.2.4.zip": "2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46",
+  "GuanGeKai-C-v1.3.0.zip": "4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498",
+  "OFL.txt": "51aae3b7dd5ba387b0b693f0965ae4ea3a9de40134e3e73c6c0922d6387774cc",
+  "release/OFL.txt": "51aae3b7dd5ba387b0b693f0965ae4ea3a9de40134e3e73c6c0922d6387774cc",
+  "release-b/OFL.txt": "51aae3b7dd5ba387b0b693f0965ae4ea3a9de40134e3e73c6c0922d6387774cc",
+  "release-c/OFL.txt": "51aae3b7dd5ba387b0b693f0965ae4ea3a9de40134e3e73c6c0922d6387774cc"
+ },
+ "known_released_defect": {
+  "id": "OFL-woodblock",
+  "severity": "accepted-drift (was P0)",
+  "detail": "仓库根与三个已发布包内的 OFL.txt 第 8 行仍写 \"Ming-dynasty woodblock print\"；性质为来源描述偏差，不涉及 OFL 条款/版权行；三包同哈希 51aae3b7…。",
+  "owner_decision": "O7 已裁决：不改、不单独 patch 重发。",
+  "e8_status": "已提交（6bbcf3c）；末句\"可选\"保留，A5b-follow P3",
+  "follow_up": "若将来因其他原因重打包，把该句改为 manuscript 或删句（建议，不阻断）。不新增失败当前包的 gate。"
+ },
+ "release_dir_self_check": {
+  "release": "OK",
+  "release-b": "OK",
+  "release-c": "OK",
+  "method": "cd <dir> && shasum -a 256 -c SHA256SUMS"
+ },
+ "checkpoint_manifests": {
+  "work/ckpt/MANIFEST.json": {
+   "items": 24,
+   "disk_pt": 24,
+   "release": [
+    "m2wt_ep090.pt (epoch 90)",
+    "m2_ep080.pt (epoch 80)"
+   ]
+  },
+  "work-b/ckpt/MANIFEST.json": {
+   "items": 14,
+   "release": [
+    "b_ep080.pt (epoch 80)",
+    "b_wt_ep090.pt (epoch 90)"
+   ]
+  },
+  "work-c/ckpt/MANIFEST.json": {
+   "items": 43,
+   "release": [
+    "v1.3/c_ep090.pt (epoch 90)"
+   ]
+  }
+ },
+ "golden_repro": {
+  "A_Regular": {
+   "path": "11_build_full -> 13_extend_punct --line A --inplace (from work/)",
+   "sha256": "e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac",
+   "status": "**verified**：work/logs/golden_repro_a_2026-11-14.log（11→13，e6d8a104 一致；13_qa real-subset OK）"
+  },
+  "A_Real_published_path_retrace": {
+   "path": "07_build_real masks retrace",
+   "sha256": "bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86",
+   "status": "**verified**：同上（07 retrace，bf278ab1 一致）"
+  },
+  "A_Real_reuse_cache_NOT_published": {
+   "path": "07_build_real --reuse-contours",
+   "sha256": "5733ca42f8a389d2ceaebd6681249292bb70c8fad166a273f8e73243938be52a",
+   "status": "explained path difference; not a font defect"
+  },
+  "B_Regular": {
+   "path": "62_build_full_b --drop-outside-basic -> 13_extend_punct --line B --inplace",
+   "sha256": "aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d",
+   "status": "**verified**：work-b/golden_repro_2026-11-14.log（62→extend，aa19d6d2 一致）"
+  },
+  "B_Real_cache_published": {
+   "path": "57_build_real_b --reuse-contours --drop-outside-basic",
+   "sha256": "7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a",
+   "status": "**verified**：同上（57 --reuse-contours --drop-outside-basic，7d10e460 一致）"
+  },
+  "B_Real_retrace_NOT_published": {
+   "path": "57_build_real_b retrace",
+   "sha256_prefix": "f82ea61a",
+   "status": "B-reported prefix; not published"
+  },
+  "C_Regular": {
+   "path": "79_build_full_c (internally appends 42 punct)",
+   "sha256": "765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48",
+   "status": "**verified**：work-c/logs-v1.3/golden_c_v13.log（79，765d0848 一致）"
+  },
+  "C_Real": {
+   "path": "76_build_real_c --close 3 --hole-repair",
+   "sha256": "6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d",
+   "status": "**verified**：同上（76 --close 3 --hole-repair，6caf9d82 一致）"
+  }
+ },
+ "shared_scripts_sha256_16": {
+  "scripts/punct_set.py": "001321caec2c31ef",
+  "scripts/fontbuild.py": "0641da0f0213dd08",
+  "scripts/glyphvec.py": "61d7fdd23effca59",
+  "scripts/07_build_real.py": "d7458e289636658a",
+  "scripts/11_build_full.py": "d79d528e9593f675",
+  "scripts/13_extend_punct.py": "5be618897b4f00aa",
+  "scripts/13_qa.py": "e8d36a99094fc79a",
+  "scripts/14_package.py": "449fde16f0029c0d",
+  "scripts/05_select.py": "9222e2229562ac11",
+  "scripts/06_norm.py": "055b7e303ff3dc51",
+  "scripts/08_make_pairs.py": "9667fcf8ac5e3645",
+  "scripts/10_generate.py": "238e78a969a1af51",
+  "scripts/21_train_gan.py": "3aeb72ad39ac42d8",
+  "scripts/31_ckpt_manifest.py": "d071e7d86dfa1103",
+  "scripts/57_build_real_b.py": "e0b6d6509f6a18de",
+  "scripts/62_build_full_b.py": "d13dcc493b8155a8",
+  "scripts/67_verify_a.py": "e02d441e3dd9ae44",
+  "scripts/68_accept_b.py": "edb49cfe922eae68",
+  "scripts/73_selfaudit_b.py": "051cdf303c0bbf93",
+  "scripts/76_build_real_c.py": "5c659a7c3e9f8463",
+  "scripts/79_build_full_c.py": "a9486ec413f5e8d0",
+  "scripts/83_verify_ab_c.py": "1d34cc1309f8e2fd",
+  "scripts/84_accept_c.py": "24db09165bb81ac1",
+  "scripts/95_compare_lines.py": "c53b9c2ce6e41321",
+  "scripts/97_check_terms.py": "e73fb0595078c0f1",
+  "scripts/100_review.py": "c7029fe8635d4efa",
+  "scripts/43_chamfer_floor.py": "062cf2d3e6d24e83",
+  "scripts/71_holes.py": "4e24b0d102691cd5",
+  "scripts/01_segment.py": "ab1b4c96ed643187",
+  "scripts/02_ocr.py": "24d312f269334551"
+ },
+ "known_write_side_effects": {
+  "scripts/83_verify_ab_c.py": "写 work-c/ab_baseline.json（:134-147）与 work-c/verify_ab.json（:144）；且没有 --help/--no-write（2026-11-14 09:50 主会话传 --help 实际执行并重写了这两个文件；内容未变、制品哈希不变；X10）",
+  "scripts/67_verify_a.py": "写 work-b/verify_a_snapshot.json（:39,126-131）",
+  "scripts/73_selfaudit_b.py": "调用 67_verify_a（:191），因此也写 work-b/"
+ },
+ "open_facts": [
+  "主会话: 提交 docs/audit + v12；回填 committed_in",
+  "A: A-P9/A-P10 完成；B/C: 线侧完成",
+  "所有者: O3/O6 已确认；O2 现状；O7 关闭"
+ ],
+ "delivery_status": "delivery-baseline (v12)；下一次快照只在制品/脚本/data 变化或发版后建立",
+ "state_after_capture": "v12 写入后主会话只改 audit/（audit-only）；下一次脚本/data/制品变更或发版时建 v13。",
+ "schema_note": "仅使用 head_at_capture；无旧版 head 键。v4 是当前交付基线；v3 的 committed_in 已回填为 5940a6d。",
+ "previous_snapshot": {
+  "file": "audit/facts/frozen-hashes-2026-11-14T1608.json",
+  "committed_in": "43c33df7078af54171c10a4cdc91d1a4493ef09a"
+ },
+ "audit_only_commit_notes": {
+  "6d20782462d304bad339ddbc54248aed6f01052f": "v1.1 audit/report only",
+  "333614384376cc89a40b7cd7390e6e9c5bc532f3": "v1.2 audit/report only",
+  "56edd05f45e25d75e9efa07664d6e9681e14b07e": "v4 + checklist audit/report only",
+  "6858c08a3be01e210bd8a528e5c0defc3099cb5a": "v5 核验 + audit/report only",
+  "f2fc6ed40c6bee99e94d77c5a2301f73d862e093": "v9 + docs §9.16 audit/report only",
+  "a134850267912a38507ba32025a2f5312ef35489": "第2代审计收尾/报告 §9.18 audit-only"
+ },
+ "recent_errata": [
+  "E8：OFL.txt 来源描述 drift，接受不 patch",
+  "E9：真迹地板 5.16 / GAN 5.92 / 差 15% 口径不成立，已撤回；新口径 floor 5.42（n=800）/ clean617 6.13"
+ ],
+ "check_report": {
+  "commit": "43c33df (2026-11-14 16:13, 18 files; 文档/v11 + release-a)",
+  "done": [
+   "M-P3 共享文档直改；M-P4 X9 升级；v11 已提交",
+   "A-P9：保留 release_date=2026-10-30 / artifacts_built_at=2026-10-30；证据 bcb74b4/README 状态行/zip mtime；PROJECT_STATE 改“2026-11-13 快照”",
+   "A-P10：A 对 M-P3 的 A 线文档逐项核对并签字通过"
+  ],
+  "open": [
+   "提交本批 docs/audit + v12；owner commit 后回填 v12 committed_in",
+   "无其他未闭合项（B/C 线侧完成）"
+  ],
+  "artifacts": "unchanged；release SHA 自检 OK；97/DOC NUMBERS OK"
+ },
+ "audit_tools": {
+  "audit/tools/check_doc_numbers.py": "a5f6b1f008866f7b"
+ },
+ "data_declarations": {
+  "data/release_ckpts_a.json": "ca567eac437c789fffe1b12ad59f6c4040f48c55aa27c296a9c8feecf98e88f5",
+  "data/release_ckpts_b.json": "3ee8e5fba478d640d19386890d6d43d61cce711d810c64ee93f4989ee13baa80",
+  "data/release_ckpts_c.json": "239f18bac6f5e269c6df6776b587fb14de2e9474b43ee71f8036b07f3dfaf246"
+ },
+ "release_manifests": {
+  "data/release-a.json": "9caa01fc116f0b91b12ba9138aa47d10731b0a54538b4284f1e22fe49d6828d0",
+  "data/release-b.json": "d92e8b5ebd3dbf6f81273076a65ecc5e19d52e96fb4fffde42db341571c831f0",
+  "data/release-c.json": "79da8c267362db34024322345079cd463a4fd6b77f6dedd01f6d6f7a63d1b6ae"
+ },
+ "dirty_scope_note": "抓取时：data/脚本/制品均为 HEAD 43c33df 的状态；仅 docs/audit 修订未提交（不构成基线漂移）。"
+}

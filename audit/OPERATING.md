@@ -129,18 +129,17 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- **当前交付基线 v11**：`audit/facts/frozen-hashes-2026-11-14T1608.json`
-  （`head_at_capture = 1282bdd`，2026-11-14 16:08；**非 audit-only**：第 5 代审计 Phase 1+2 线侧）。
-  `previous_snapshot.committed_in = b2346b8`（v10）；v11 自身 `committed_in = pending`。
-  抓取时工作区干净；v11 写入后主会话只改 `audit/` 与文档（docs-only 不新建快照）。
-- **历史版本**：v10 `...T1216.json`、v9 `...T1148.json`、v8 `...T1126.json`、v7 `...T1103.json`、
+- **当前交付基线 v12**：`audit/facts/frozen-hashes-2026-11-14T1618.json`
+  （`head_at_capture = 43c33df`，2026-11-14 16:13；M-P3/M-P4 文档 + v11 + A-P9 `release-a` 日期证据修正）。
+  `previous_snapshot.committed_in = 43c33df`（v11；v11 自身 committed_in 也是 43c33df）；v12 自身 `committed_in = pending`。
+  抓取时 data/脚本/制品均为 HEAD 状态，仅 docs/audit 未提交（不构成基线漂移）。
+- **历史版本**：v11 `...T1608.json`、v10 `...T1216.json`、v9 `...T1148.json`、v8 `...T1126.json`、v7 `...T1103.json`、
   v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、v4（`committed_in = 56edd05`）、
   v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）；均标 superseded。
-- 主会话每次闸门对比 v11；制品哈希不变且**非 audit** 脚本/数据提交未出现时视为无漂移。
+- 主会话每次闸门对比 v12；制品/脚本/data 不变且无发版时视为无漂移。
 - 写盘副作用清单：`83` 默认只读；仅 `--write`/`--out-dir` 才写 `work-c/`；`67`/`73` 写 `work-b/`；
   QA/accept 脚本写各自 `work*/qa/` 与 `accept_*.json`（§1 禁跑清单）。
-- **v11 新增 `data_declarations`**：`data/release_ckpts_{a,b,c}.json` 的 SHA-256 与 `release_manifests`；
-  `work-b/ckpt/MANIFEST.json` 被 gitignore，data 声明文件才是发布检查点的持久证据。
+- **v12 记录**：`data_declarations`（release_ckpts a/b/c）与 `release_manifests`（release-a 已按 A-P9 重新登记）。
 
 ## 8. 任务与汇报
 

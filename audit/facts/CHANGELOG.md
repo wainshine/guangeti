@@ -494,3 +494,19 @@
 - M-P4：check_doc_numbers 纳入 docs/DATA.md，加数值词边界、裸哈希、重建链 `13_extend_punct` 检查；复跑 DOC NUMBERS OK。
 - 门禁：97 OK；83 默认 A/B INTACT；六 TTF/三 zip/release SHA 未变。
 - 剩余：A-P9（P3）、A-P10（签字）；v11 已建，等提交后回填 committed_in。
+
+## 2026-11-14 16:13 CST — `43c33df` 提交（文档/v11 + A-P9），发现 A-P9 date 回归
+
+- `43c33df` 包含 M-P3/M-P4 文档、v11 台账、`data/release-a.json` 的 A-P9（新增 `artifacts_built_at=2026-10-30`）。
+- **问题**：同一改动把 `release_date` 从 2026-11-13 改为 2026-10-30。O6 定义 `release_date=签核日`；
+  `docs/PROJECT_STATE.md` 仍写三线现状 2026-11-13；此前 release-a 也是 11-13。若无签核日证据，应改回 11-13，
+  `artifacts_built_at` 保留 10-30。在修正前不建 v12；v11 的 release_manifests 已因 release-a 变更而过期。
+
+## 2026-11-14 16:18 CST — A-P9 证据裁定 / A-P10 签字 / v12
+
+- A 提供证据：`bcb74b4`（2026-10-30 16:52 升 1.7.2）、README 状态行（2026-10-30）、zip mtime（10-30 17:12）。
+  裁定：`release_date=2026-10-30` 有定义/打包/宣告证据；原 2026-11-13 是主会话引入的噪声。保留 A-P9 日期。
+- `docs/PROJECT_STATE.md:5` 改为“三线现状（2026-11-13 快照）… A 发布日 2026-10-30 … C 发布日 2026-11-02”。
+- A-P10：A 对 M-P3 的 A 线文档逐项核对并签字通过。
+- v12 = `frozen-hashes-2026-11-14T1618.json`：head `43c33df`、prev v11=43c33df、`committed_in=pending`；
+  release_manifests 的 release-a 按当前文件重新登记。

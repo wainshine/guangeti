@@ -26,8 +26,8 @@
 | A-P6 | P2 | `14_package.py` 去模块级 `_fix_charset_records` 副作用、尊重 `--out`、从 cmap 算 codepoints | import 不写 release；`--out` 只写目标 |
 | A-P7 | P2 | `10_generate.py` fallback 去重；`--ckpt` 在 gan 分支的语义明确（或删/或文档） | 同字只记一次；文档与 CLI 一致 |
 | A-P8 | P2 | `97_check_terms.py` docstring/scan_fonts 路径更新 | TERMS OK |
-| A-P9 | P3 | `release-a.json` 补 `artifacts_built_at`（O6） | 与 B/C 同义 ISO 日期 |
-| A-P10 | 签字 | 主会话 M-P3 改完 A 线文档后，A 确认 A 线口径 | 不重复写，只 review |
+| A-P9 | P3 | `release-a.json` 保留 `release_date=2026-10-30` / `artifacts_built_at=2026-10-30`；证据：`bcb74b4` 10-30 16:52 升 1.7.2、README 状态行 10-30、zip mtime 10-30 17:12 | **完成**（原 11-13 是主会话引入的噪声，已由 A 证据推翻；PROJECT_STATE 改“2026-11-13 快照”） |
+| A-P10 | 签字 | 主会话 M-P3 改完 A 线文档后，A 确认 A 线口径 | **A 签字通过（2026-11-14）**：RELEASE/method/重建链/E30/ERRATA 等逐项核对通过 |
 
 ## 2. B 线
 
@@ -133,3 +133,13 @@ Phase 3（收尾）:
 - **M-P4 X9 升级**：`check_doc_numbers.py` 纳入 `docs/DATA.md`（12 文档/2444 行）、加数值正则词边界、裸 64-hex 不在代码围栏检查、重建链必须含 `13_extend_punct`；复跑 `DOC NUMBERS OK`。
 - **门禁**：`97 TERMS OK`；`83` 默认 `A/B INTACT`；六 TTF/三 zip/release SHA 未变；`diff --check` OK。
 - **剩余**：A-P9（P3，release-a artifacts_built_at）、A-P10（A 线文档签字）；M-P5 等提交后回填 v11。
+
+### A-P9 / A-P10 / v12（2026-11-14 16:18）
+
+- **A-P9 完成（证据推翻主会话误判）**：`bcb74b4`（10-30 16:52 升 1.7.2）、当时 README 状态行 10-30、zip mtime 10-30 17:12；
+  `release-a.json` 保持 `release_date=2026-10-30`、`artifacts_built_at=2026-10-30`。`PROJECT_STATE:5` 改为
+  “三线现状（2026-11-13 快照）… A 发布日 2026-10-30 … C 发布日 2026-11-02”。
+- **A-P10 签字通过**：A 对 RELEASE-v1.7.2 开篇/复现句/指标行、method、重建链、E30、DATA 游离哈希、ERRATA E10 逐项核过。
+- **v12 已建**：`frozen-hashes-2026-11-14T1618.json`（head `43c33df`、prev v11=43c33df、`committed_in=pending`）；
+  `release_manifests` 的 release-a 已按 A-P9 当前文件重新登记。
+- 剩余：提交本批 docs/audit + v12；提交后回填 v12 `committed_in`。B/C 线侧无待办。

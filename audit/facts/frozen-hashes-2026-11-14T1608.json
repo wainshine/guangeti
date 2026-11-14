@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 16:08 提交；第5代审计 Phase1+Phase2 线侧，非 audit-only）",
  "last_non_audit_commit": "1282bddf9087453dd9067feb7a104bd018d5df35",
  "last_non_audit_subject": "更新（线程/检查点/83/71/43/14/10/97 + B/C 文档与声明文件）",
- "committed_in": "pending（v11 自身所在提交；由下一次快照/CHANGELOG 回填）",
+ "committed_in": "43c33df7078af54171c10a4cdc91d1a4493ef09a (mixed commit 2026-11-14 16:13: docs/v11 + release-a; v11 随后因 release-a 变更由 v12 取代)",
  "git_status_at_capture": [],
  "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
  "audit_only_commits_ignored": [
