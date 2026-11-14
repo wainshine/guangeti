@@ -13,13 +13,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CKPT_DIR = ROOT / "work" / "ckpt"
 CK = ROOT / "work" / "ckpt"
+_RELEASE: set[str] = set()
 # 该文件已于 2026-10-24 22:05 删除（见 DATA §6.5.1），条目保留用于说明历史
 CORE_EPOCHS = {50, 100, 150, 200, 300, 400, 500}
+
+
+RELEASE_LIST = CK / "release_ckpts.json"
+
+
+def _release_names() -> set[str]:
+    """Release checkpoints are declared in a tiny file so the flag survives regeneration."""
+    try:
+        return {str(x) for x in json.loads(RELEASE_LIST.read_text())}
+    except Exception:
+        return set()
+
+
+_RELEASE = _release_names()          # evaluated once at import: file is tiny
 
 
 def kind_of(name: str) -> str:
     """Classify a checkpoint for the retention rule (owner, 2026-10-25)."""
     import re as _re
+    if name in _RELEASE:
+        return "release"
     if name.endswith("_best.pt"):
         return "best"
     m = _re.search(r"_ep(\d+)\.pt$", name)

@@ -150,7 +150,7 @@ python3 scripts/14_package.py          # 發布包
 
 > **v1.5.0 起發布版依賴訓練**：合成字由 GAN 生成（`--method gan`），
 > 需要檢查點 `work/ckpt/m2_ep080.pt`（380 MB，不入庫；重訓見 `docs/PLAN-v1.5.md`）。
-> 沒有檢查點時可退回 `--method ribbon`——畫質較弱（Dice 0.414 vs 0.549），但不需要模型。
+> 沒有檢查點時可退回 `--method ribbon`——畫質較弱（Dice 0.414 vs 0.539），但不需要模型。
 > 複現實驗見 [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)。
 
 原始 PDF 需放在倉庫根目錄，檔名為 `四书白文.18卷.旧传明.姜立纲.pdf`（版權原因**不入庫**）。

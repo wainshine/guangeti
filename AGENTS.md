@@ -59,7 +59,7 @@ CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**；唯
 
 - `build/GuanGeKai-C-Regular.ttf`：**21,034 码位** = 5,257 真迹 + 14,422 GAN + 1,313 带状回退（6.25%）+ 42 标点；
   `build/GuanGeKai-C-Real.ttf`：仅 5,257 真迹（基本区 **25.04%**，三条线里最高）。
-- **v1.3.0（2026-11-12）**：训练 val 改用字级未见 `pairs_holdout`（与 pairs 零重叠），页留出 0.471 /
+- **v1.3.0（发布日 2026-11-02；共享文档登记日 2026-11-12）**：训练 val 改用字级未见 `pairs_holdout`（与 pairs 零重叠），页留出 0.471 /
   unseen 0.4666 双口径在案；ribbon 口径按 `generated.jsonl` 全量 `src=='base'` 计（1,313，非仅守卫失败）。
 - **v1.2.0 质量修复**（2026-10-29）：v3c 全量重切（两列墨迹中缝 + 每行白廊校验、`merged/tiny/full`；
   碎片过滤默认关闭），`05 --prefer-ab`；把 v1.1.0 的 ep30 在 v3c pairs 上以 lr 1e-4 微调到 **ep34**；
@@ -170,7 +170,7 @@ python3 scripts/97_check_terms.py                            # 7. 术语检查�
 | `13_qa` 覆盖率 | `20992/20992` |
 | `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
 | `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
-| `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%**，见 `work/holes_a.json`） |
+| `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%（n=300，4/214）**；n=200 抽样为 0.7%，见 `work/holes_a.json`） |
 | `95_compare_lines` 出的三线对照图 | 三条线并排看不出「某条线整体偏细/偏粗/缺笔画」；发现即为回归 |
 | `98_style_sheet` 出的 `style-A.png` | 真迹行与 GAN 行风格连续；回退行若明显「等宽细笔」属已知，但占比不应升高 |
 | `97_check_terms.py` | 打印 `TERMS OK`（白名单与「已知遗留」不算） |
