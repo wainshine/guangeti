@@ -889,6 +889,12 @@ E11 的目视只看了 10 个字，容易被个例带偏（"ep100 好像更好"�
 发布链因此以缓存路径为准（这样 `Real` 与 `Regular` 的同字轮廓一致）；
 根治办法是在 `fontbuild.build_font()` 里丢掉「末点 == 起点」的重复点（一行判断，留待下版）。
 
+**中间态哈希说明（2026-11-14 复核，回应 B1）**：62 的中间产物哈希 10-30 测到 `9398505f…`、
+11-13 测到 `446cc896…`，**不是构建漂移**——差异来自版本串变更
+（`62_build_full_b.py:19 VERSION` 由 `1.3.1` 改为 `1.2.4`，`git log -S'VERSION = "1.2.4"'` 指向 `bcb74b4`）。
+复核实测：**62 连跑两次同为 `446cc896…`**（确定性），`62 → 13_extend_punct` 仍是发布版 `aa19d6d2…`。
+`drop_duplicate_last_point`（默认关）与此无关，它解释的是"重描摹 vs 读缓存"的 178 字冗余点差异，不是中间态漂移。
+
 **另**：`data/release-b.json` 补齐了计数（`real/gan/gan_ht/ribbon/punct/codepoints_total`）
 与 clean 口径（`clean` 块：pairs_single 629 字、dice 0.525 / chamfer 5.60 / 崩坏率 2.9%，
 命令与产物路径都记在字段里），免得自动核对只能从 provenance 现算。

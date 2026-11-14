@@ -1,9 +1,11 @@
-# 主会话运行规则 v1.2（2026-11-14 09:52 修订）
+# 主会话运行规则 v1.2.1（2026-11-14 10:15 修订）
 
 > 本文件是协调层规则，放在 `audit/`，不改变项目现有结构。
 > 修订依据：A/B/C 三线对 v1.1 的对抗性审查（快照自指、已发布 OFL 错误、83 被 B 跑会写 C 工作区、
-> 门禁漏 accept、`/tmp` 通道未定义、共享归属无原文等）。
-> 当前快照 v2：`audit/facts/frozen-hashes-2026-11-14T0950.json`（`head_at_capture = 6d20782`）。
+> 门禁漏 accept、`/tmp` 通道未定义、共享归属无原文等），以及所有者对收口文件自指问题的终审。
+> **当前交付基线 v3**：`audit/facts/frozen-hashes-2026-11-14T1007.json`
+> （`head_at_capture = 6bbcf3c`，含 `docs/ERRATA.md` E8；`previous_snapshot.committed_in = 3336143`）。
+> v2 `...T0950.json` 为历史规则快照（`committed_in = 3336143`）。
 > 更正记录：`audit/facts/CHANGELOG.md`。**audit 自身提交不构成基线漂移**（§5）。
 
 ## 1. 主会话定位与边界
@@ -93,7 +95,7 @@
   快照 schema 只使用 `head_at_capture`，不设旧版 `head` 键；下游解析以 `head_at_capture` 为准。
 
 **漂移定义**：基线漂移只由 **① 制品哈希变化** 与 **② 非 audit 路径的提交**触发；
-`audit/**` 与 `docs/AUDIT-*` 的提交（如 `6d20782`）**不构成基线漂移**。这样避免
+`audit/**` 与 `docs/AUDIT-*` 的提交（如 `6d20782`、`3336143`）**不构成基线漂移**。这样避免
 「写台账→提交→台账过期」的循环。快照文件版本化保存，不删除旧版；CHANGELOG 记录每次修订。
 
 ## 6. 发布门禁（主会话只读复核）
@@ -121,15 +123,13 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- **v2 规则快照**：`audit/facts/frozen-hashes-2026-11-14T0950.json`（`head_at_capture = 6d20782`，
-  `last_non_audit_commit = 27eab26`）。**其实际提交已回填为 `3336143`**（audit-only，2026-11-14 09:57）。
-  v2 只是"v1.2 规则快照"，**不是最终交付基线**。
-- **v3 交付快照**：待 A 的 `docs/ERRATA.md` E8 提交（这是非 audit 提交，会触发重建）后建立；
-  `head_at_capture` = 该提交，`previous_snapshot.committed_in = 3336143`，v3 自身 `committed_in = pending`。
-  在 v3 落盘前，当前工作区的真实状态是：`HEAD 3336143`（audit-only）+ `M docs/ERRATA.md`（E8，待提交）。
-- 历史版本：`frozen-hashes-2026-11-14.json`（v0，过期）、`...T0940.json`（v1，自指过期）——
-  均标 superseded，不删除。
-- 主会话每次闸门对比当前版本；制品哈希不变且非 audit 提交未出现时视为无漂移。
+- **当前交付基线 v3**：`audit/facts/frozen-hashes-2026-11-14T1007.json`
+  （`head_at_capture = 6bbcf3c`，2026-11-14 10:07；**非 audit-only**，含 `docs/ERRATA.md` E8）。
+  `previous_snapshot.committed_in = 3336143`；v3 自身 `committed_in = pending`（由下一次快照/CHANGELOG 回填）。
+  抓取时工作区干净；v3 写入后主会话对 `audit/` 的修订待提交（audit-only，不构成漂移）。
+- **历史版本**：v2 `...T0950.json`（规则快照，`committed_in = 3336143`）、v1 `...T0940.json`（自指过期）、
+  v0 `frozen-hashes-2026-11-14.json`（过期）；均标 superseded，不删除。
+- 主会话每次闸门对比 v3；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
 - 写盘副作用清单：`83` 写 `work-c/ab_baseline.json`、`work-c/verify_ab.json`（且无 --help/--no-write）；
   `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件；QA/accept 脚本写各自 `work*/qa/` 与
   `accept_*.json`（§1 已列入主会话禁跑清单）。X10 跟踪 `83 --no-write/--help`。

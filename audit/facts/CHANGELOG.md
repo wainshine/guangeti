@@ -177,3 +177,49 @@
 - 所有者：O3（签核模型）、O6（日期语义，含字段类型 ISO 字符串）确认；提交本批 v1.2.1 文件。
 - 主会话：E8 提交后建 v3（含 `previous_snapshot.committed_in=3336143`）；此后按 X8 规则维护。
 - 三线：A1/A2a/A3/A4 → C1/C2/C3/C6/C7 → B1/B2/B4/B6。
+
+## 2026-11-14 10:07 CST — 所有者提交 `6bbcf3c`（v1.2.1 + E8）
+
+- commit 主题：`更新`。内容：`audit/{OPERATING,TASKS,facts/2026-11-14,facts/CHANGELOG,facts/frozen-hashes-…T0950}.md|json`、
+  `docs/AUDIT-2026-11-14.md`、**`docs/ERRATA.md`（E8）**。
+- 性质：**非 audit-only**（含 `docs/ERRATA.md`）→ 按漂移规则触发新快照。
+- E8 已提交，末句保留"可选，不强制"（A 建议的"重打包则必须"未应用；记录为可选后续，不阻断）。
+- 工作区在提交后干净。
+
+## 2026-11-14 10:10 CST — v3 交付快照建立（协调层收口）
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1007.json`：
+  `head_at_capture = 6bbcf3c`、`last_non_audit_commit = 6bbcf3c`、`git_status_at_capture = []`、
+  `previous_snapshot.committed_in = 3336143`、v3 `committed_in = pending`、
+  `delivery_status = delivery-baseline (v3)`。
+- 更新 OPERATING §7（当前基线 v3）、facts §1（v3/历史快照）、TASKS X1/X8/A5b（完成）、报告 §9.9。
+- v3 写入后主会话对 `audit/` 的修订待所有者提交（audit-only，不构成漂移）；**协调层到此收口**。
+- 仍待所有者：O3（签核模型）、O6（日期语义，ISO 日期类型）。此后转入三线任务执行。
+
+## 2026-11-14 10:15 CST — 所有者确认 O3/O6 + 收口文件自指修正
+
+所有者确认：
+
+- **O3**：A/B/C 各自签发布说明；主会话只出"可发/不可发"复核单，不代签。
+- **O6**：`release_date` = 签核日；`artifacts_built_at` = 打包日；统一 ISO 日期字符串，三线同义。
+
+按所有者终审修正 4 处自指问题：
+
+1. **标题/current snapshot 同步**：OPERATING 标题 → v1.2.1、头部当前基线 → v3（`...T1007.json`，head `6bbcf3c`）；
+   TASKS 标题 → v1.2.1；facts 标题已为 v3、§1 HEAD 已为 `6bbcf3c`（本轮复核确认）。
+2. **v3 `last_non_audit_subject`** 改为 `6bbcf3c` 的实际主题「更新（v1.2.1 协调修订 + docs/ERRATA.md E8）」。
+3. **v3 `audit_only_commits_ignored`** 补 `3336143`（v1.2 audit/report only），并加 `audit_only_commit_notes`。
+4. **TASKS O3/O6** 状态改「已确认（所有者 2026-11-14）」；facts §7 同步。
+
+其他：
+
+- facts §3 的影响表述改为所有者口径：不影响授权/分发/安装/cmap/字形，只影响项目内部 provenance/事实一致性。
+- 新增 `TASKS A5b-follow`（P3）：E8 末句"可选→必须"（所有者建议），随 A 的下一个非 audit 提交一起做，
+  届时按 X8 触发 v4；不单独为一句触发发版/重打包。
+- OPERATING §5 漂移示例补 `3336143`。
+- HEAD `6bbcf3c`；`docs/ERRATA.md` E8 已提交；制品哈希未变；`97 TERMS OK`。
+- **v3 抓取后的非 audit 脏文件**：B 于 10:11 修改 `docs/EXPERIMENTS-B.md`（B1 中间态哈希说明，未提交）；
+  该文件是非 audit 路径。主会话 `audit/` 修订 + v3 文件也待提交（audit-only）。
+  **两者一起提交时按 X8 建 v4**（`head_at_capture`=该提交、`previous_snapshot.committed_in`=v3 实际提交号）；
+  在 v4 落盘前，v3 仍是 `6bbcf3c` 的交付基线，但工作区已不等于抓取时状态（已记入 v3 `state_after_capture`）。
+- 本轮 `audit/` 修订待所有者提交（audit-only，不构成漂移）。**协调层 final，转入执行。**
