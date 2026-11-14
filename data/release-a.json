@@ -7,7 +7,7 @@
   "primary_threshold": -0.05,
   "hardtail_ckpt": "work/ckpt/m2_ep080.pt",
   "hardtail_threshold": -0.45,
-  "res": 512,
+  "res": 256,
   "simplify": 2.0
  },
  "counts": {
@@ -17,8 +17,8 @@
   "ribbon_fb": 799,
   "punct": 42
  },
- "reproduce": "python3 scripts/10_generate.py --method gan --res 512 --simplify 2.0 --workers 6 --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45",
- "note": "E40: the fill-in model needs its own threshold; -0.45 was calibrated so its ink matches the primary model (3.8% gap).",
+ "reproduce": "python3 scripts/10_generate.py --method gan --res 256 --simplify 2.0 --workers 6 --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45",
+ "note": "E40: the fill-in model needs its own threshold; -0.45 was calibrated so its ink matches the primary model (3.8% gap). 2026-11-14 实测：res 256 逐字复现 6/6，res 512 为 0/6；旧命令的 512 是 v1.3.5 ribbon 时代遗留。",
  "font_metadata": "Ming manuscript (fixed in 1.7.0; earlier builds said woodblock print)",
  "charset": {
   "basic": 20992,

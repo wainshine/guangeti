@@ -148,6 +148,7 @@ M0 墨量校准（0.5h）→ M1 目标图去模糊（1h）→ M2 5 层 hinge 判
 ```bash
 python3 scripts/07_build_real.py --reuse-contours   # 1. 真字子集（无 work/masks 时用缓存）
 python3 scripts/11_build_full.py            # 2. 完整字体
+python3 scripts/13_extend_punct.py --line A --inplace   # 2.5 补 42 个标点/数字/空格（必须在 11 之后、14 之前）
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应打印 real-subset ... OK）
 python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json work/holes_a.json  # 3.4 孔洞审计（记录，不阻断）
 python3 scripts/23_compare_all.py --n 40                              # 3.5 重出对比面板（默认用 617 干净字）

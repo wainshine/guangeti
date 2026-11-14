@@ -1,0 +1,89 @@
+{
+ "purpose": "主会话外部冻结台账 v0：只读比对用，不写回发布目录，不作自更新基线。",
+ "generated_at": "2026-11-14T09:14:19+08:00",
+ "head": "e308ad55a0c10ee754f8047ebb3c098c96bda582",
+ "git_status": ["M AGENTS.md", "M data/release-a.json", "?? audit/", "?? docs/AUDIT-2026-11-14.md"],
+ "uncommitted": {
+  "AGENTS.md": {
+   "sha256": "94f2fb2aeae2d1052aafe78257b65bae480084905b98757049586b9ac7594956",
+   "change": "发布流程第 2 步后新增步 2.5：13_extend_punct.py --line A --inplace"
+  },
+  "data/release-a.json": {
+   "sha256": "8fb0642c817456c4f2db2b1802b7c95d057b703f7d601a76314dab317fb5bd7e",
+   "change": "generator.res 512→256；reproduce 行同步；note 增加 2026-11-14 实测 6/6 vs 0/6"
+  }
+ },
+ "artifacts": {
+  "build/GuanGeKai-Regular.ttf": "e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac",
+  "build/GuanGeKai-Real.ttf": "bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86",
+  "build/GuanGeKai-B-Regular.ttf": "aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d",
+  "build/GuanGeKai-B-Real.ttf": "7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a",
+  "build/GuanGeKai-C-Regular.ttf": "765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48",
+  "build/GuanGeKai-C-Real.ttf": "6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d",
+  "GuanGeKai-v1.7.2.zip": "14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b",
+  "GuanGeKai-B-v1.2.4.zip": "2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46",
+  "GuanGeKai-C-v1.3.0.zip": "4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498"
+ },
+ "release_dir_self_check": {
+  "release": "OK",
+  "release-b": "OK",
+  "release-c": "OK",
+  "method": "cd <dir> && shasum -a 256 -c SHA256SUMS"
+ },
+ "checkpoint_manifests": {
+  "work/ckpt/MANIFEST.json": {"items": 20, "release_deps_present": false, "note": "磁盘 24 个 .pt，缺 m2wt.pt/m2wt_best.pt/m2wt_ep090.pt/m2wt_ep100.pt"},
+  "work-b/ckpt/MANIFEST.json": {"items": 14, "release_deps_present": true, "note": "含 b_ep080.pt 与 b_wt_ep090.pt"},
+  "work-c/ckpt/MANIFEST.json": {"items": 43, "note": "C 会话自报口径，待 C 复核"}
+ },
+ "golden_repro": {
+  "A_Regular": {"path": "11_build_full -> 13_extend_punct (from work/)", "sha256": "e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac", "verified": "main-session 2026-11-14"},
+  "A_Real_published_path_retrace": {"path": "07_build_real (masks retrace, no --reuse-contours)", "sha256": "bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86", "verified": "main-session 2026-11-14"},
+  "A_Real_reuse_cache_NOT_published": {"path": "07_build_real --reuse-contours", "sha256": "5733ca42f8a389d2ceaebd6681249292bb70c8fad166a273f8e73243938be52a", "verified": "main-session 2026-11-14"},
+  "B_Regular": {"path": "62_build_full_b (from work-b/)", "sha256": "aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d", "verified": "B-reported; pending main golden run"},
+  "B_Real_cache_published": {"path": "57_build_real_b --reuse-contours", "sha256": "7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a", "verified": "B-reported; pending main golden run"},
+  "B_Real_retrace_NOT_published": {"path": "57_build_real_b retrace", "sha256_prefix": "f82ea61a", "verified": "B-reported prefix only"},
+  "C_Regular": {"path": "79_build_full_c (TBD)", "sha256": "765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48", "verified": "artifact hash; repro path pending C"},
+  "C_Real": {"path": "76_build_real_c (TBD)", "sha256": "6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d", "verified": "artifact hash; repro path pending C"}
+ },
+ "shared_scripts_sha256_16": {
+  "scripts/punct_set.py": "001321caec2c31ef",
+  "scripts/fontbuild.py": "0641da0f0213dd08",
+  "scripts/glyphvec.py": "61d7fdd23effca59",
+  "scripts/07_build_real.py": "d7458e289636658a",
+  "scripts/11_build_full.py": "d79d528e9593f675",
+  "scripts/13_extend_punct.py": "5be618897b4f00aa",
+  "scripts/13_qa.py": "e8d36a99094fc79a",
+  "scripts/14_package.py": "0c53ac379c1bf031",
+  "scripts/05_select.py": "9222e2229562ac11",
+  "scripts/06_norm.py": "055b7e303ff3dc51",
+  "scripts/08_make_pairs.py": "9667fcf8ac5e3645",
+  "scripts/10_generate.py": "09877e067d457bfa",
+  "scripts/21_train_gan.py": "7af2a7edeb002e5d",
+  "scripts/31_ckpt_manifest.py": "91e2cd0d2222dd5b",
+  "scripts/67_verify_a.py": "e02d441e3dd9ae44",
+  "scripts/73_selfaudit_b.py": "76348ddd20dee04d",
+  "scripts/83_verify_ab_c.py": "454afb8117ead444",
+  "scripts/95_compare_lines.py": "c53b9c2ce6e41321",
+  "scripts/97_check_terms.py": "c8ed545b01b35e38"
+ },
+ "known_self_updating_baselines": {
+  "scripts/83_verify_ab_c.py": "回写 work-c/ab_baseline.json（:134-147）→ 不可作漂移监测",
+  "scripts/67_verify_a.py": "回写 work-b/verify_a_snapshot.json（:39,126-131）",
+  "scripts/73_selfaudit_b.py": "调用 67_verify_a（:191），因此跑 73 也会写 A 侧快照"
+ },
+ "open_facts": [
+  "A MANIFEST 缺 4 个 m2wt 检查点，发布主检查点无登记 SHA-256",
+  "docs/DATA.md:176/181 仍写 --res 512",
+  "A --reuse-contours 与发布 Real 哈希不符（A 待复核）",
+  "A floor 5.16 无脚本/无落盘",
+  "C 0.4666 vs 唯一产物 0.469 未对齐",
+  "C clean 0.471/6.19/12.0% 疑似 v1.2.1 继承",
+  "C fallback_share_of_block=0.0712 为旧值（1,495/20,992）应删",
+  "C 发布日期 11-02 vs AGENTS 11-12",
+  "C 未记录修复运行待确认（15,715/836 vs 15,735/17）",
+  "C-big 体量应为 5.5 GB（非 10.9 GB）",
+  "B release-b.json release_date=2026-10-30 vs 制品 2026-11-13",
+  "B E15 中间态归因措辞待改",
+  "AGENTS/DATA 的 holes 基线、0.549/0.539 口径、项目文档陈旧等 P1 项（见 docs/AUDIT-2026-11-14.md）"
+ ]
+}
