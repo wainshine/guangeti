@@ -186,6 +186,10 @@ c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1
 不对应任何发布说明，文档里不再引用。
 三条线独立编号：A v1.7.2 / B v1.2.4 / C v1.2.0。
 
+**日期字段语义（O6，2026-11-14 统一）**：`release_date` = 签核/定版日；`artifacts_built_at` = 分发包
+最后一次构建日（`release-b/` 与 zip 的打包日）。v1.2.4 的两者是 `2026-10-30` / `2026-11-13`：
+版本在 10-30 定版，分包在 11-13 重打；字体字节在 11-14 重建验证与包内一致，不改变 `artifacts_built_at`。
+
 **`data/release-b.json` 现在是 B 线的单一计数与口径源**（v1.2.4 补齐）：
 `real 4073 / gan 15784 / gan_ht 544 / ribbon 591 / punct 42 / codepoints_total 21034`，
 另有 `clean` 块记录未见字口径——`work-b/pairs_single.npz` 629 字（与训练集交集 0），

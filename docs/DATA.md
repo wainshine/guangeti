@@ -173,7 +173,8 @@ python3 scripts/05_select.py            # 每字选优
 python3 scripts/06_norm.py              # 归一化参数
 python3 scripts/07_build_real.py        # 真字子集字体
 # v1.5.0 起合成走 GAN（守卫回退 ribbon）：
-python3 scripts/10_generate.py --method gan --workers 6 --res 512 --simplify 2.0 \
+python3 scripts/10_generate.py --method gan --workers 6 --res 256 --simplify 2.0 \
+        --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45 \
         --out work/generated_gan.jsonl
 python3 scripts/36_fill_fallback.py            # 补齐守卫回退的字（ribbon 轮廓）
 mv work/generated_gan.jsonl work/generated.jsonl
@@ -210,6 +211,12 @@ python3 scripts/14_package.py           # 发布包
 - `work/ckpt/MANIFEST.json` 由 `python3 scripts/31_ckpt_manifest.py` 从磁盘重建
   （训练会**覆盖同名文件**，手写清单必然失配）；删除任何一项前先看它；
 - 若确实需要腾空间，先确认发布包里已有等价结果，并在本文件记录删了什么、为什么。
+- **发布检查点（2026-11-14 登记）**：
+  - 主模型 `work/ckpt/m2wt_ep090.pt`（sha256 `5f5ac04e…`，400.1 MB，mtime 2026-10-26 22:46）
+    —— `data/release-a.json > generator.primary_ckpt`；
+  - 补位模型 `work/ckpt/m2_ep080.pt` —— `generator.hardtail_ckpt`；
+  - 两者均已入 `MANIFEST.json`（当前 24/24，`31_ckpt_manifest.py` 2026-11-14 重建）；
+    此前的清单已漏登 `m2wt*` 四个文件（第 4 次清单失配），已修复。
 
 **当前检查点分布（2026-10-25 19:30 核对）**：
 

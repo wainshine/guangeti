@@ -138,6 +138,9 @@ def main() -> None:
     targets += sorted(ROOT.glob("*.md"))
     targets += sorted((ROOT / "docs").glob("*.md"))
     targets += sorted((ROOT / "scripts").glob("*.py"))
+    index_html = ROOT / "docs" / "index.html"
+    if index_html.exists():          # project page: prose, not history
+        targets.append(index_html)
     for d in ("release", "release-b", "release-c"):
         targets += sorted((ROOT / d).glob("README.md"))
 

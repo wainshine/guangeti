@@ -113,3 +113,22 @@ sha256(generated_simplified)    9511eed31da56d31…
 
 **将来**：若因其他原因重新打包，可顺带把该句改为 `Ming manuscript`（可选，不强制）。
 新增的许可来源检查只对**新构建**生效，不做追溯阻断。
+
+## E9. 「真迹地板 5.16 / GAN 5.92 / 差 15%」口径不成立（已撤回）
+
+**原表述**（AGENTS、README、PROJECT_STATE、EXPERIMENTS E32）：
+“真迹互比地板 5.16 px，GAN 5.92 px，仍差 15%（0.77 px，KS p<0.001）”。
+
+**复现（2026-11-14，`scripts/43_chamfer_floor.py` + `work/chamfer_floor.json`）**：
+
+| 口径 | 中位 | n |
+|---|---|---|
+| 同字两样本（floor，`work/pairs_multi.npz`） | **5.42**（CI 5.28–5.60） | 800 对 |
+| clean617（单次字，未见）GAN | **6.13** | 617 |
+
+两个旧数字都没复现；更关键的是**字集不同**：地板用重复字、GAN 数字用单次字。
+重复字更常见规整、单次字更生僻，直接相除会把字集难度算成模型差距。
+
+**处置**：AGENTS / README / PROJECT_STATE / EXPERIMENTS E32 全部改为
+“地板 5.42（n=800，重复字）；clean617 GAN 6.13（n=617）；不直接相除”。
+**禁止再引用“5.92 / 5.16 / 差 15%”**。

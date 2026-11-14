@@ -23,7 +23,7 @@
  "clean_dice": 0.471,
  "clean_chamfer": 6.19,
  "same_char_floor": 6.61,
- "weight_bias": 0.998,
+ "weight_bias": 1.009,
  "fallback_share": 0.0834,
  "holdout_frac": 0.06,
  "holdout_pages": 207,
@@ -43,7 +43,6 @@
  "turdsize": 3,
  "struct_guard": true,
  "epochs_trained": 90,
- "fallback_share_of_block": 0.0712,
  "weight_bias_px": {
   "12": 0.906,
   "16": 0.902,
@@ -55,9 +54,9 @@
  "clean_font_dice": 0.484,
  "clean_font_chamfer": 6.52,
  "unseen_n": 300,
- "unseen_dice": 0.4666,
- "unseen_chamfer": 6.26,
- "unseen_broken": 0.07,
+ "unseen_dice": 0.47,
+ "unseen_chamfer": 6.38,
+ "unseen_broken": 0.083,
  "generated_chars": 15735,
  "clean_broken": 0.12,
  "codepoints": 21034,
@@ -69,5 +68,20 @@
  "font_sha256": "765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48",
  "real_sha256": "6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d",
  "zip": "GuanGeKai-C-v1.3.0.zip",
- "zip_sha256": "4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498"
+ "zip_sha256": "4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498",
+ "clean_eval_n": 200,
+ "clean_eval_source": "work-c/eval_v121_ep090.json (c_ep090, n=200); inherited from v1.2.1, v1.3.0 not retested",
+ "unseen_source": "work-c/eval_v130_unseen_c2.json (c_ep090, n=300, --close 2); old 0.4666/0.469 artifacts do not reproduce on current pairs_holdout",
+ "fallback_share_of_basic": 0.0625,
+ "fallback_share_basis": "1,313/20,992; 0.0834 is 1,313/15,735 synthetic",
+ "weight_bias_source": "work-c/accept_c.json measured 1.009; 0.998 was stale",
+ "artifacts_built_at": "2026-11-02",
+ "release_date_basis": "release_date = signoff/build date 2026-11-02; AGENTS 2026-11-12 is the doc-update date and is owned by A",
+ "generation_log": {
+  "logged_initial": "work-c/logs-v1.3/gen_v13_ep90.log: 15,715 requested; fallback 836",
+  "final_generated": "work-c/generated.jsonl: 15,735 lines; gen 14,422 + base 1,313",
+  "unlogged_final_run": "work-c/generated.jsonl mtime 2026-11-02 08:38:22; log mtime 01:36:02; a later 77_generate run was not logged",
+  "fallback_list": "work-c/gan_fallback.json: 17 entries"
+ },
+ "unseen_command": "python3 scripts/82_eval_c.py --gan work-c/ckpt/v1.3/c_ep090.pt --eval-data work-c/pairs_holdout.npz --n 300 --close 2 --out work-c/eval_v130_unseen_c2.json"
 }

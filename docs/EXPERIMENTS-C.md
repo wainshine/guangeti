@@ -511,6 +511,13 @@ C 线同口径为 8.3%；REPORT 原写 2.9% 只数了 `gan_fallback.json`（602�
 
 **状态**：探索实验，未进入 v1.3/v1.2.1 发布链；产物在 `work-c-big/`，报告 `work-c-big/REPORT.md`。
 
+**C10 训练状态**：`21_train_gan.py` 的 `--val-data` 已改为按新 `val_chars` 重算 `tr`（污染修复），但
+`work-c-big/ckpt/cbig_ep100.pt` **仍是旧训练产物，未重训**；报告中的 unseen 47 字是对旧 checkpoint 的复评，
+不是新训练结果。
+
+**C11 面板状态**：旧 `report/panel_big_vs_c.png` 为 MPS 生成，已作废；`104_eval_big_c.py` 已改 CPU，
+但 CPU 面板尚未重生成。
+
 **视觉面板更正（2026-11-13）**：`work-c-big/report/panel_big_vs_c.png` 由旧版
 `104_eval_big_c.py` 用 MPS 生成，与 CPU 发货字形不一致；该面板作废。脚本已改 CPU，
 需重跑后再作为判据 2 的证据。

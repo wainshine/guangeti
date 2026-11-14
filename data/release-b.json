@@ -39,5 +39,7 @@
   "cmd": "python3 scripts/65_eval_b.py --gan work-b/ckpt/b_ep080.pt --n 629 --thr -0.10 --close 7",
   "out": "work-b/eval_v124_release.json",
   "measured": "2026-11-13"
- }
+ },
+ "artifacts_built_at": "2026-11-13",
+ "date_semantics": "release_date = 签核/定版日（版本号确定、发布说明签署之日）；artifacts_built_at = 分发包最后一次构建日（release-b/ 与 zip 的打包日，由 64_package_b → zip 决定）。字体字节在 2026-11-14 重新构建验证与包内一致（aa19d6d2… / 7d10e460…），不改变 artifacts_built_at。"
 }

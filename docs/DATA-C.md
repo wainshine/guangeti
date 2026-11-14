@@ -220,6 +220,7 @@ v1.2.1 的校验和仍保留在 §5，属历史版本，不是当前 `build/`。
 ## 5.2 work-c-big（大字实验，非发布链）
 
 `work-c-big/` 是 C/E32 的大字字头实验工作区，**不属于 v1.2.1/v1.3.0 发布链**，也未纳入 `release-c/`。
+体量：`du` 5.5 GB（apparent 5.93 GB，75 文件）；不是 10.9 GB。
 
 主要产物：
 
@@ -234,3 +235,30 @@ work-c-big/report/             大字 vs C 面板、unseen 复跑
 
 注意：`pairs_clean.npz` 是页留出，不是字级 unseen；C/E32 的 109 字面板含 62 个训练同字。
 被审计确认的污染与回退口径更正见 `docs/EXPERIMENTS-C.md` C/E32。
+
+## 5.3 C1/C2/C5 证据口径（2026-11-14）
+
+**C1 300 字 unseen**：可复跑产物为 `work-c/eval_v130_unseen_c2.json`（c_ep090，n=300，`--close 2`）：
+Dice **0.470** / chamfer **6.38** / broken **8.3%**，`_floor_same_char` n=800 chamfer 6.61。
+`release-c.json` 旧值 0.4666 与旧产物 `eval_v121_ep090_unseen.json` 的 0.469/6.26/7.0
+在当前 `pairs_holdout` 上都不能精确复现；以本次可复跑产物为准。
+
+**C2 clean 0.471/6.19/12.0%**：来源是 `work-c/eval_v121_ep090.json`（c_ep090，n=200），
+属 v1.2.1 继承值；v1.3.0 没有重测。`release-c.json` 的 `clean_n=3210` 是 `pairs_clean.npz`
+数据集规模，不是评估样本量；已加 `clean_eval_n=200` 与 `clean_eval_source`。
+
+**C5 未记录生成运行**：
+
+```
+初始日志 work-c/logs-v1.3/gen_v13_ep90.log
+  2026-11-02 01:36:02；15,715 requested；fallback 836
+最终 work-c/generated.jsonl
+  2026-11-02 08:38:22；15,735 行；gen 14,422 + base 1,313
+work-c/gan_fallback.json
+  2026-11-02 08:38:15；17 项
+```
+
+结论：**确认存在一次晚于日志的最终生成运行**（08:38，未被 `gen_v13_ep90.log` 记录；
+`finalize_c.sh` 的 77 步骤是候选命令，但没有对应日志）。15,715→15,735 的 20 行差值与
+“v1.3 清理 20 个全坏格后重生成”一致，但不能仅凭计数把它归因为某个 repair 脚本；
+以后重生成必须在 `work-c/logs-v1.3/` 留完整日志与命令。

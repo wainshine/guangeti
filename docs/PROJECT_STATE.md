@@ -134,7 +134,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | C. 预训练模型 zi2zi-JiT 零样本 | **风格最好**：Dice 0.528 vs 基线 0.309；但结构有幻觉（约 1/4 缺笔/粘连），且权重许可待确认 | `EXPERIMENTS.md` E5–E6 |
 | D. 笔墨滤波（v1.1–v1.2 采用） | 骨架取自文楷、不引入拓扑错误，但只是「加粗的楷体」，无笔锋 | `scripts/10_generate.py --method brush` |
 | E. 带状扫掠 + 斜切端头（v1.3.3–v1.3.5 采用，**v1.5.0 起降为回退方案**） | 拓扑与文楷一致 97%，端帽与笔内动态接近真字 | `scripts/10_generate.py --method ribbon` |
-| F. GAN（5 层 PatchGAN + hinge + 增强，**v1.5.0 采用**） | 干净集 Dice 0.549、chamfer 5.92 | `scripts/10_generate.py --method gan` |
+| F. GAN（5 层 PatchGAN + hinge + 增强，**v1.5.0 采用**） | 干净集 Dice 0.539、chamfer 6.13（n=617；旧记 0.549/5.92 为抽样口径） | `scripts/10_generate.py --method gan` |
 
 **当前发布版用 E**（v1.3.3）。D 是 v1.1–v1.2 的旧方案；C 有幻觉与许可两个未决问题（E14 长训练后 Dice 反而降到 0.397）。
 
@@ -172,7 +172,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 原因是统计口径错误（两组独立样本的比值数组逐元素相除）。下一版可做一次全局标定。
 
 0b. **加训无效（E36）**：M2 配方从 80 轮拉到 150 轮，干净集完全持平
-   （Dice 0.543–0.548 vs 0.549，chamfer 5.87–5.94 vs 5.92）。ep60 见顶后进入平台。
+   （Dice 0.543–0.548 vs 0.539，chamfer 5.87–5.94 vs 6.13；口径见 A3 复现注）。ep60 见顶后进入平台。
    **「欠训」假设作废**；模型侧提升只能换数据、加容量或提分辨率。
 
 0. **B 线（GAN）重新打开**（E23–E29）：最优配置是单实例 + PatchGAN + 15 轮。
@@ -209,7 +209,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 |---|---|
 | 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf` |
 | 合成字构成（90.5% GAN / 9.5% 回退） | `python3 -c "import json,collections;print(collections.Counter(json.loads(l)['src'] for l in open('work/generated.jsonl')))"` |
-| 泛化指标（Dice 0.549 / chamfer 5.92） | `python3 scripts/32_eval_clean.py --gan work/ckpt/m2_ep080.pt` + `python3 scripts/34_struct_score.py` |
+| 泛化指标（Dice 0.539 / chamfer 6.13，n=617） | `python3 scripts/32_eval_clean.py --gan work/ckpt/m2wt_ep090.pt --n 617` + `python3 scripts/43_chamfer_floor.py` |
 | 真字数量 1,675 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数；重跑 `05_select.py` 应得到同样的 1,675 |
 | 每个字来自哪里 | `release/provenance.json`（逐字 real/gen） |
 | 真字样本是否对得上 | `work/cells/<file>.png` 与 `work/masks/<file>.png` 成对存在；`chosen.jsonl` 有 `file/page/col/row` |
@@ -332,7 +332,7 @@ ribbon 回退的 `comp256` 分辨率归一、`21_train_gan` 的 valDice 硬编�
 
 **字形与 v1.5.1 相同**，这一版是研究结论与工具链的更新。
 
-- **E36**：加训到 150 轮与 80 轮完全持平（Dice 0.543–0.548 vs 0.549），「欠训」假设作废；
+- **E36**：加训到 150 轮与 80 轮完全持平（Dice 0.543–0.548；E32 的 0.549 为 n=150 抽样，clean617 全量为 0.539），「欠训」假设作废；
   valDice 在 ep60 见顶后进入平台，"ep80 还在涨"是对末两点的过度解读。
   顺带发现 E32 的 ep20/ep40 两个数值与训练日志不符，已按日志更正。
 - **E37**：推翻"potrace 膨胀"的推测（轮廓/掩膜 = 0.9997），**轮廓层面积补偿不做**；
@@ -359,8 +359,8 @@ ribbon 回退的 `comp256` 分辨率归一、`21_train_gan` 的 valDice 硬编�
 
 - **合成器从「带状扫掠」换成「GAN」**：zi2zi U-Net + **5 层 PatchGAN（≈70×70）** + hinge loss，
   首次启用数据增强（±2° / ±3px / 0.95–1.05），80 轮，检查点 `work/ckpt/m2_ep080.pt`。
-- 干净集（617 个从未训练的字，参照真迹）：Dice **0.414 → 0.549**、骨架 chamfer **8.76 → 5.92 px**
-  （真迹互比地板 5.16 px，仍差 15%）、崩坏率（Dice<0.30）**4.7% → 0.7%**。
+- 干净集（617 个从未训练的字，参照真迹）：Dice **0.414 → 0.539**、骨架 chamfer **8.76 → 6.13 px**
+  崩坏率（Dice<0.30）**4.7% → 0.7%**。同字地板 5.42（n=800，重复字）；与 clean617 字集不同，**不构成“差 15%”**（旧表述已撤回，见 ERRATA E9）。
 - 生成用**廉价守卫**（空 / 墨量 [0.6,1.5] / 连通域差 >3 → 回退 ribbon），全量触发 **9.5%（1,833 字）**，
   偏向复杂字。这不是 E24 那个「字碗数等于文楷」的闸门（那个回退 85%）。
 - 字体级验收：覆盖率 20,992/20,992、字面位置 Δx 0.55% / Δy 0.11% em、15 MB。

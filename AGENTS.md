@@ -47,8 +47,8 @@ CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**；唯
   见 E39/E40；发布口径见 `data/release-a.json`）
 - `build/GuanGeKai-Real.ttf`：仅 1,675 真迹
 - 真字覆盖率 8% 是全局瓶颈。v1.3.x 的合成字骨架取自文楷（结构=文楷结构）；
-  **v1.5.0 起合成字由 GAN 生成**，笔画级结构更接近写本：干净集 Dice 0.414→0.549、
-  骨架 chamfer 8.76→5.92（真迹互比地板 5.16，仍差 15%）。
+  **v1.5.0 起合成字由 GAN 生成**，笔画级结构更接近写本：干净集 Dice 0.414→**0.539**（n=617）、
+  骨架 chamfer 8.76→**6.13**（clean617，n=617）——旧记的 5.92/地板 5.16/“差 15%”已撤回，见下行口径注。
 - 已知偏差：合成字比真迹重约 17%（E34）。拆开是：**5–7% 字集构成**（生僻字本来墨多）+
   **约 5% 来自模型输出的字面偏小**（GAN 包围盒是真迹的 0.949，归一化放大后墨量跟着涨，E37）。
   模型逐字输出本身是准的（0.995）。
@@ -107,8 +107,8 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 
 - `ribbon`（v1.3.5，**已被 v1.5.0 取代**）：512 渲染+矢量化、轮廓简化；当年 88.3% 合成字经风格化。
   待做 —— **转折（横折方角，建议 miter join）**、小字号回归。
-- `zi2zi-GAN`（**v1.5.0 采用**）：单实例 + 5 层 PatchGAN + hinge + 数据增强，80 轮 = 干净集 Dice 0.549 /
-  chamfer 5.92。多实例是拖累（0.520），已被排除。
+- `zi2zi-GAN`（**v1.5.0 采用**）：单实例 + 5 层 PatchGAN + hinge + 数据增强，80 轮 = 干净集 Dice 0.539 /
+  chamfer 6.13（n=617；口径见 E32 补记）。多实例是拖累（0.520），已被排除。
   **泛化只认 `work/pairs_single.npz`（617 个只出现一次的字，从未训练）**：
   `python3 scripts/32_eval_clean.py --gan work/ckpt/m2_ep080.pt`。
 - **闸门不可用（E24）**：现行判据（连通域+字碗全等）在 B 类回退 79/91，其中 **78 字是误回退**，
@@ -117,9 +117,10 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
   **不要再调这个闸门**（E24）。
 - **E29 反转了 E27 的否决策**：E27 用「与文楷拓扑全等」判 GAN 结构崩坏，而那把尺子对 A 线循环
   （E28 实测：vs 真迹时 ribbon/GAN/文楷全是 ~11%，无区分度）。改用**以真迹为参照的分级骨架度量**
-  （`scripts/34_struct_score.py`）后，GAN 的 chamfer 6.68→5.92、崩坏率 5.7%→0.7%。
+  （`scripts/34_struct_score.py`）后，GAN 的 chamfer 6.68→5.92、崩坏率 5.7%→0.7%（此 5.92 是 E29 自己的 150 字样本口径；跨集比较已按 E32 补记作废）。
 - **M2（E32）是转折点**：5 层 hinge 判别器 + 首次数据增强 + 80 轮。
-  真迹互比的同口径地板是 **5.16**，GAN **5.92**——**同一量级但未打平（差 0.77px / 15%，KS p<0.001）**。
+  本地复现口径（2026-11-14，`scripts/43_chamfer_floor.py` + `work/chamfer_floor.json`）：同字地板 **5.42**（n=800，重复字，95% CI 5.28–5.60）；clean617（单次字，未见）GAN **6.13**（n=617）。两者字集不同（重复字 vs 单次字），**不能相除得“15%”**；旧数字 5.16/5.92 未能复现，已撤回该表述。
+  **不要再引用“5.92 / 5.16 / 差 15%”**：它们来自不同字集且不可复现（A3，2026-11-14）。
   **加训到 150 轮已实测（E36）：与 80 轮完全持平**（Dice 0.543–0.548、chamfer 5.87–5.94），
   「欠训」假设被否证，模型在 ep60–80 就到顶。**不要再靠加轮数提升**，余量只在数据/容量/分辨率。
 - `zi2zi-JiT`：上游权重不可用（LICENSE 只覆盖 "Software"）；计划用 MIT 代码 + 自有数据从头训练（`main_jit.py` 已验证可跑）。
@@ -146,7 +147,9 @@ M0 墨量校准（0.5h）→ M1 目标图去模糊（1h）→ M2 5 层 hinge 判
 改文档 / 改代码之后，**必须按这个顺序走完才算发布完成**：
 
 ```bash
-python3 scripts/07_build_real.py --reuse-contours   # 1. 真字子集（无 work/masks 时用缓存）
+python3 scripts/07_build_real.py                     # 1. 真字子集（从 work/masks 重新描摹；发布路径）
+# 注：--reuse-contours 走 work/real_contours.jsonl 缓存，产出 5733ca42…，**不是发布字体**；
+#     发布 Real 为 retrace 路径的 bf278ab1…；两者字形一致（见 ERRATA / 发布说明）。
 python3 scripts/11_build_full.py            # 2. 完整字体
 python3 scripts/13_extend_punct.py --line A --inplace   # 2.5 补 42 个标点/数字/空格（必须在 11 之后、14 之前）
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应打印 real-subset ... OK）
@@ -184,6 +187,9 @@ python3 scripts/97_check_terms.py                            # 7. 术语检查�
 ## 文档约定
 
 - **`README.md` 保留繁体**（面向使用者）；**其余文档一律简体中文**。
+- **B/C 单行例外**：根 `README.md` 的 B/C 版本行与发布说明链接行，B/C 会话可提交**单行 diff**
+  （A review 后合入）；`83_verify_ab_c.py` 的 `ZIPS` 中本线条目同理。除此之外的共享文件改动仍走
+  `audit/OPERATING.md §3` 的登记与三线回归。
 - 三处例外，保持原样不转换：
   1. 书名《四书白文》在简体文档中写作简体；引用原书原名时可保留繁体；
   2. OFL 保留字体名的正式写法 `霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW` 原样引用（DATA §3）；
