@@ -11,8 +11,8 @@
 | ID | 事项 | 状态/建议 |
 |---|---|---|
 | O1 | A 两处修复是否提交 | **完成**：`27eab26` 已含（AGENTS 步 2.5、release-a res 256） |
-| O2 | 共享资产归属原文 | **待所有者原文**（时间/渠道/原话）；确认前按"现状维护 + 事后登记"，不作排他授权，不阻塞 |
-| O3 | 各线自签发布、主会话复核不代签 | B 已确认；A/C 未反对；建议按此执行 |
+| O2 | 共享资产归属原文 | **记录现状**（不是待授权）：所有者 2026-11-14 说明"共享东西由 A 维护"；缺时间/渠道/原话。确认前 A 按"现状维护 + 事后登记"，不作排他授权，不阻塞 |
+| O3 | 各线自签发布、主会话复核不代签 | **待所有者确认**；当前按"各线自签、主会话复核"试运行（B 已确认，A/C 未正式确认） |
 | O4 | zip 是否承诺字节可复现 | 建议不承诺（记录为发布快照） |
 | O5 | 三线是否必须同步发版 | 建议不强制；`main_version` 只是对齐标记 |
 | **O6** | `release_date` / `artifacts_built_at` 语义 | **三线同义**：`release_date` = 签核日；`artifacts_built_at` = 打包日。**同时覆盖 C（C4）**；B2 执行 |
@@ -28,7 +28,7 @@
 | A3 | floor 5.16 产物：脚本 + `work/chamfer_floor.json`（seed 7、800 对、中位/CI/KS/MW）+ E32 命令 | JSON + 命令 + 与 5.16 一致性说明 | 待办 |
 | A4 | 钉死 A golden repro 并修文档：Regular = 11+13 → `e6d8a104`；Real = **retrace** → `bf278ab1`；`--reuse-contours`=`5733ca42` 标注"非发布路径/恢复用"；同步 `AGENTS.md` 步骤 1 措辞；**按新规 A 自跑一次金样交日志** | 命令 + 哈希 + 日志；AGENTS 不再暗示 reuse 是发布路径 | 待办 |
 | A5a | 97 扫描面**只加** `docs/index.html`；**保留**规则，只排除历史目录（`docs/releases/`、`docs/REPORTS/` 继续白名单/不扫）；收紧非历史文档的「44 码位」正则（规则不删） | `--help` 说明；仅 index.html 新命中；历史文件零新增误报 | 待办 |
-| **A5b** | **已接受 drift（原 P0 降级）**：`OFL.txt:8` 的 `Ming-dynasty woodblock print` 不改、不 patch；仅在 `ERRATA` 新增 E8 记录（范围：仓库根/`release*/OFL.txt`/三个已发布 zip，同哈希 `51aae3b7…`；性质：来源描述，不涉及 OFL 条款与版权行）；将来若因其他原因重打包可顺带修正（可选）；**不新增会失败当前已发布包的闸门** | ERRATA E8 一段（A 执行）；发布说明无需改动；不做许可来源 gate 的追溯检查 | 待办（P3，仅 ERRATA） |
+| **A5b** | **已接受 drift**：E8 已由 A 写入 `docs/ERRATA.md`（未提交，`git status = M docs/ERRATA.md`）；**建议 E8 末句从"可选"改为"如重打包则必须顺带修正（改为 manuscript 或删句）"**；不修当前 `OFL.txt`、不 patch；不新增失败当前包的闸门 | E8 提交 + 提交后由主会话建 v3 快照；发布说明无需改动 | **完成（E8 已写，待提交）** |
 | A6a | 指标口径收口：`holes lost` 全量或固定 seed/n；`0.549→0.539` 注明 n=150/617 | 文档口径与落盘一致 | 待办 |
 | A6b | PROJECT_STATE/README 作废口径清理；DATA §4.9/§5 台账 | 审计报告对应 P1 项逐条关闭，主会话复核 | 待办 |
 | A7 | 根 README 的 B/C 版本/链接行维护方式落地（单行例外） | 流程写进 §2 例外 | 待办 |
@@ -38,7 +38,7 @@
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| B1 | E15「中间态无法归因」改为「已解释」：62 的中间态变化来自 `62_build_full_b.py:19 VERSION="1.2.4"`（`bcb74b4`），62 连跑确定性（`446cc896…`） | E15 一句说明 + 两次同哈希记录 | **已解释，文档待改** |
+| B1 | E15「中间态无法归因」改为「已解释」：62 的中间态变化来自 `62_build_full_b.py:19 VERSION="1.2.4"`（`bcb74b4`），62 连跑确定性（`446cc896…`） | E15 一句说明 + 两次同哈希记录；**等 E8 提交、v3 重拍后与 B2/B4/B6 一批做**（避免弄脏快照） | **已解释，文档待改** |
 | B2 | `release_date` / `artifacts_built_at` 语义落地（O6，三线同义） | 两字段写入 DATA-B 或 release-b.json | 待办 |
 | B3 | 澄清「21 个未提交文件」为当时状态；当前 git status 不成立 | 一句更正 | 已关闭（澄清） |
 | B4 | golden repro 两步金样：Regular = `62 --drop-outside-basic` → `13_extend_punct --line B --inplace` → `aa19d6d2`；Real = `57 --reuse-contours --drop-outside-basic` → `7d10e460` | 命令 + 哈希 + 日志；主会话比对 | 待办 |
@@ -73,7 +73,7 @@
 | X5 | 三线事实表 v2 | `audit/facts/2026-11-14.md`（rev v2） | 完成（v2） |
 | X6 | 审计报告状态更新（§9.5/§9.6） | `docs/AUDIT-2026-11-14.md` | 完成（v2） |
 | X7 | 追溯登记 2026-11-14 前共享改动（`21_train_gan`、`100_review`、83 B zip 行等） | 影响面 + 83/97 + A review，登记 CHANGELOG | 待办 |
-| **X8** | 快照重建触发规则：**仅非 audit 提交或发版后重建**；audit 提交不触发 | 每次触发新 `frozen-hashes-*.json` + CHANGELOG；`committed_in` 回填 | **规则已定；v2 已建；后续按规则执行** |
+| **X8** | 快照重建与 `committed_in` 回填：仅非 audit 提交/发版触发；每次新快照必须带 `previous_snapshot.committed_in` = 上一版实际提交号 | **验收**：v2 的 `committed_in` 回填为 `3336143`（已做）；E8 提交后建 v3（`head_at_capture`=E8 提交、`previous_snapshot.committed_in=3336143`、v3 `committed_in=pending`）；CHANGELOG 同步 | **v2 已回填；v3 待 E8 提交** |
 | X9 | 文档数字 vs `release-*.json` 持久对账闸（只读，主会话提案） | 小脚本或检查单；覆盖 README/DATA/AGENTS/PROJECT_STATE 关键数字 | 待办 |
 | **X10** | `83_verify_ab_c.py` 增加 `--no-write`/`--baseline-out` 与真正的 `--help`；`ZIPS` 改读 `data/release-*.json`（A 执行，共享变更协议） | 默认不回写；B 可安全运行；三线回归 + 97 | 待办（P1） |
 | X11 | 主会话闸门写法：只读等价复算（shasum/fontTools/JSON/punct_set），**不运行 83/67/73、不复制 work 目录** | OPERATING §1/§6 | 完成（规则） |

@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 09:44 提交；audit/docs/AUDIT 修订，audit-only）",
  "last_non_audit_commit": "27eab262d525a2e73ca0f945f7454e4845a74264",
  "last_non_audit_subject": "增加主会话（A 两处修复 + audit 初始提交）",
- "committed_in": "pending（本文件提交后由下一次快照或 CHANGELOG 回填；快照自身提交不构成漂移）",
+ "committed_in": "3336143 (audit-only commit 2026-11-14 09:57; backfilled 2026-11-14 10:05; v2 是规则快照，不是最终交付基线)",
  "git_status_at_capture": [],
  "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
  "audit_only_commits_ignored": [
@@ -137,5 +137,8 @@
   "C: C1 0.4666/0.469；C2 clean 来源；C3 删 0.0712；C4 日期+O6；C5 修复运行；C6 金样；C7 验收标准表；C8 体量；C9 weight_bias；C10/C11 C-big 状态",
   "跨线: X2 检查项清单；X7 追溯共享改动；X9 文档数字对账；X10 83 --no-write/--help + ZIPS 读 json",
   "A: A5b(P3) ERRATA E8 登记（OFL 已发布 drift 已接受，不改不 patch）"
- ]
+ ],
+ "delivery_status": "rule-snapshot; final v3 待 docs/ERRATA.md E8 提交后建立",
+ "state_after_capture": "HEAD 3336143（audit-only）+ M docs/ERRATA.md（A 的 E8，未提交）",
+ "schema_note": "本文件不使用旧版 head 键；下游解析以 head_at_capture 为准。v3 将带 previous_snapshot.committed_in=3336143。"
 }

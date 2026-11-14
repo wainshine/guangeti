@@ -143,3 +143,37 @@
   - `OPERATING §6` 改为"已发布 drift 不追溯；仅新构建可做提示性检查"；
   - 将来若因其他原因重打包，可顺带修正（可选，不强制）。
 - 仍待所有者：O3（签核模型）、O6（日期语义）；提交本批 v1.2/v1.2.1 文件。
+
+## 2026-11-14 09:57 CST — 所有者提交 `3336143`（v1.2 文件）
+
+- commit 主题：`更新`；内容：`audit/OPERATING.md`、`audit/TASKS.md`、`audit/facts/2026-11-14.md`、
+  `audit/facts/CHANGELOG.md`、`audit/facts/frozen-hashes-2026-11-14T0950.json`、`docs/AUDIT-2026-11-14.md`。
+- 性质：**audit-only 提交**，不构成基线漂移。v2 快照的 `committed_in` 回填为 `3336143`。
+- 同时：A 已完成 A5b 的 `docs/ERRATA.md` E8（内容见下），但**尚未提交**（工作区 `M docs/ERRATA.md`）。
+
+## 2026-11-14 10:05 CST — v1.2.1 收口修订（三方终审后）
+
+触发：A/B/C 对 v1.2 的终审。修订：
+
+1. **主会话禁跑清单补全**（B 的要求）：除 83/67/73 外，`63_qa_b`、`68_accept_b`、`13_qa`、`80_qa_c`、
+   `84_accept_c`、`71_holes --json`、`12/23/95/98`、`07/11/14` 均会写项目目录，全部列入"不直接跑"；
+   只读白名单：shasum、fontTools 读取、JSON/`provenance` 对账、`punct_set.verify`、git 只读、
+   `97`（只读）、`95 --check`。
+2. **`committed_in` 回填验收**（B/C 的要求）：写进 OPERATING §5 与 X8；v2 实证回填 `3336143`；
+   v3（E8 提交后）必须带 `previous_snapshot.committed_in=3336143`；不允许连续两版 pending。
+3. **O2/O3 措辞**：O2 = "记录现状"（非待授权）；O3 = "待所有者确认，当前试运行"。
+4. **A5b 收口**：E8 已写（未提交）；建议末句"可选"改为"如重打包则必须顺带修正（改 manuscript 或删句）"。
+5. **B1**：等 E8 提交、v3 重拍后与 B2/B4/B6 一批做，避免弄脏快照。
+6. **快照 schema**：v2 增加 `delivery_status`、`state_after_capture`、`schema_note`（无旧版 `head` 键，
+   以 `head_at_capture` 为准），回填 `committed_in=3336143`。
+7. **OFL 判断最终措辞**（C 的要求）：不是许可条款错误，是已分发制品中的**来源描述 drift**；
+   不影响授权与使用，但影响项目内部事实一致性；接受 drift、不 patch，是因为重打包成本高于收益。
+8. 当前工作区：`HEAD 3336143`（audit-only）+ `M docs/ERRATA.md`（E8）；制品哈希未变。
+9. **v3 交付快照待 E8 提交后建立**；在 v3 落盘前，v2 不得作为最终交付基线。
+
+## 待办（截至 2026-11-14 10:05）
+
+- 所有者/A：提交 `docs/ERRATA.md`（E8；建议把"可选"改为"重打包则必须修正"）。
+- 所有者：O3（签核模型）、O6（日期语义，含字段类型 ISO 字符串）确认；提交本批 v1.2.1 文件。
+- 主会话：E8 提交后建 v3（含 `previous_snapshot.committed_in=3336143`）；此后按 X8 规则维护。
+- 三线：A1/A2a/A3/A4 → C1/C2/C3/C6/C7 → B1/B2/B4/B6。

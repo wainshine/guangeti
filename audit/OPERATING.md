@@ -17,10 +17,15 @@
 - 不做 git 写操作（仓库由所有者管理）；
 - **不重构**：不移动/重命名现有文件与目录，不新建 docs 层级；
 - 不替三线写发布说明，不单方面宣布跨线技术规则；
-- **不运行任何会写项目文件的脚本**：`83_verify_ab_c.py`（写 `work-c/`）、`67_verify_a.py` 与
-  `73_selfaudit_b.py`（写 `work-b/`）。注意 `83` **没有实现 --help/--no-write**：传 `--help` 也会执行并写盘
-  （2026-11-14 09:50 主会话误跑一次，内容未变、已登记 CHANGELOG）。闸门只能由各线自跑交输出，
-  主会话用**只读等价复算**（§6）。
+- **不运行任何会写项目目录的脚本**。已知写盘者（不完全列表）：
+  `83`（`work-c/ab_baseline.json`、`verify_ab.json`）、`67`/`73`（`work-b/verify_a_snapshot.json`）、
+  `63_qa_b`（`work-b/qa/`、`holes.json`）、`68_accept_b`（`work-b/accept_b.json`）、
+  `13_qa`（`work/qa/`）、`80_qa_c`（`work-c/qa/`）、`84_accept_c`（`work-c/accept_c.json`）、
+  `71_holes --json`、`12/23/95/98`（`docs/images/` 或 `work/`）、`07/11/14`（`build/`/`release/`）。
+  **主会话只允许只读动作**：`shasum`、`fontTools` 读取、`release-*.json`/`provenance` 读取与逐字对账、
+  `punct_set.verify()`、`git` 只读命令、`97_check_terms.py`（只读）、`95_compare_lines.py --check`（只读）。
+  注意 `83` **没有实现 --help/--no-write**：传 `--help` 也会执行并写盘
+  （2026-11-14 09:50 主会话误跑一次，内容未变、已登记 CHANGELOG）。闸门只能由各线自跑交输出（§6）。
 
 ## 2. 写作用域矩阵
 
@@ -83,7 +88,9 @@
 - `git_status_at_capture`（用 `[]` 表示干净，不使用 null）
 - 未提交修改清单 + 文件哈希；相关制品 SHA-256；采样时间
 - `committed_in`：本快照文件自身所在提交（由所有者提交后由下一次快照/CHANGELOG **回填**；
-  未提交时写 `"pending"`）
+  未提交时写 `"pending"`）。**回填验收**：下一次快照必须把上一版的实际提交号写进
+  `previous_snapshot.committed_in`，并在 CHANGELOG 记录；不允许连续两版都停在 pending。
+  快照 schema 只使用 `head_at_capture`，不设旧版 `head` 键；下游解析以 `head_at_capture` 为准。
 
 **漂移定义**：基线漂移只由 **① 制品哈希变化** 与 **② 非 audit 路径的提交**触发；
 `audit/**` 与 `docs/AUDIT-*` 的提交（如 `6d20782`）**不构成基线漂移**。这样避免
@@ -114,13 +121,18 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- 当前版本：`audit/facts/frozen-hashes-2026-11-14T0950.json`（`head_at_capture = 6d20782`，
-  `last_non_audit_commit = 27eab26`，`committed_in = pending`）。
+- **v2 规则快照**：`audit/facts/frozen-hashes-2026-11-14T0950.json`（`head_at_capture = 6d20782`，
+  `last_non_audit_commit = 27eab26`）。**其实际提交已回填为 `3336143`**（audit-only，2026-11-14 09:57）。
+  v2 只是"v1.2 规则快照"，**不是最终交付基线**。
+- **v3 交付快照**：待 A 的 `docs/ERRATA.md` E8 提交（这是非 audit 提交，会触发重建）后建立；
+  `head_at_capture` = 该提交，`previous_snapshot.committed_in = 3336143`，v3 自身 `committed_in = pending`。
+  在 v3 落盘前，当前工作区的真实状态是：`HEAD 3336143`（audit-only）+ `M docs/ERRATA.md`（E8，待提交）。
 - 历史版本：`frozen-hashes-2026-11-14.json`（v0，过期）、`...T0940.json`（v1，自指过期）——
-  均在 CHANGELOG 标记 superseded，不删除。
+  均标 superseded，不删除。
 - 主会话每次闸门对比当前版本；制品哈希不变且非 audit 提交未出现时视为无漂移。
 - 写盘副作用清单：`83` 写 `work-c/ab_baseline.json`、`work-c/verify_ab.json`（且无 --help/--no-write）；
-  `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件。X10 跟踪 `83 --no-write/--help`。
+  `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件；QA/accept 脚本写各自 `work*/qa/` 与
+  `accept_*.json`（§1 已列入主会话禁跑清单）。X10 跟踪 `83 --no-write/--help`。
 
 ## 8. 任务与汇报
 

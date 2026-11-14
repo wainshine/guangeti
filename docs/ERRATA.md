@@ -96,3 +96,20 @@ sha256(generated_simplified)    9511eed31da56d31…
 **处置**：文件暂留（来源与用途待查，删除不可逆）；`docs/DATA.md` 的该行已改为「保留（待查）」。
 
 **教训**：清理记录必须附一条可复跑的命令（`ls` + `sha256sum`），否则等于没记。
+
+## E8. 已发布包内 `OFL.txt` 的来源描述仍写 woodblock print（已接受 drift）
+
+**范围**：仓库根 `OFL.txt`、`release*/OFL.txt`、以及三个已发布 zip
+（`GuanGeKai-v1.7.2.zip` / `GuanGeKai-B-v1.2.4.zip` / `GuanGeKai-C-v1.3.0.zip`），同哈希 `51aae3b7…`。
+
+**内容**：第 8 行写 "Real (scanned) glyphs ... vectorised from the Ming-dynasty **woodblock print**"，
+与本项目 2026-10-28 的更正（《四书白文》是**明代写本**，非刻本）相反。
+
+**性质**：仅**来源描述**偏差；OFL 1.1 许可正文、许可 URL、版权行（GuanGe Kai / LXGW / Klee）完整，
+**不涉及许可条款、不影响授权与分发**。字体 name 表已在 v1.7.0 起写 `Ming manuscript`，与包内本文件存在措辞不一致。
+
+**裁决**（所有者 2026-11-14）：**不改、不为此单独 patch 重发**。
+改包内文件会使 `SHA256SUMS` 与 zip 哈希变化，成本大于收益。
+
+**将来**：若因其他原因重新打包，可顺带把该句改为 `Ming manuscript`（可选，不强制）。
+新增的许可来源检查只对**新构建**生效，不做追溯阻断。
