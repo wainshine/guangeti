@@ -1,0 +1,8 @@
+{
+ "line": "B",
+ "release_ckpts": [
+  "b_ep080.pt",
+  "b_wt_ep090.pt"
+ ],
+ "note": "B 线发布检查点声明（v1.2.4：主模型 b_ep080 + 硬尾 b_wt_ep090）；31_ckpt_manifest.py --release-file 读取后标 kind=release"
+}

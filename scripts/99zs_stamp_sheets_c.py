@@ -2,8 +2,8 @@
 
 输入  : work-c/preview/geom_rescore_v5fix.json + work-c/pages300 + cells.jsonl
 输出  : work-c/preview/stamp_sheets/{LF,AR}_N.png + stamp_meta_v2.json + stamp_answer_template_v2.csv
-字体  : Songti.ttc **index=1**（index=0 是简体面，繁体专属字静默渲染为空——已踩坑，勿改回）；
-        逐格 ink 断言，字形缺失直接 raise。
+字体  : 仓库内自由字体 NotoSerifSC-Light.otf / SourceHanSansCN-Regular.otf（OFL）；
+        不再使用 macOS Songti/Helvetica。
 语义  : LF=确认章（label≠box，vlm+box 同证）❌=标签错→应用双证字；
         AR=仲裁 ❌=标签错（写 correct_char 或降 GAN/ribbon）；划线=图质量差。
 """
@@ -24,12 +24,12 @@ from collections import Counter
 print(Counter(r['route'] for r in queue))
 outdir = W/'preview/stamp_sheets_v2'  # 永不覆盖：owner 标注过的目录一律不动
 outdir.mkdir(parents=True, exist_ok=True)
-font_lab = ImageFont.truetype('/System/Library/Fonts/Songti.ttc', 30, index=1)
+font_lab = ImageFont.truetype(str(W.parent / 'data' / 'base' / 'NotoSerifSC-Light.otf'), 30)
 def _renders(ff, ch):
     im = Image.new('L', (40, 40), 255)
     ImageDraw.Draw(im).text((5, 2), ch, fill=0, font=ff)
     return sum(1 for p in im.getdata() if p < 128) > 3
-font_sid = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 20)
+font_sid = ImageFont.truetype(str(W.parent / 'data' / 'base' / 'SourceHanSansCN-Regular.otf'), 20)
 TILE, CROP, LBL = 320, 280, 46
 COLS = 3
 def build(kind_name, rows, prefix):

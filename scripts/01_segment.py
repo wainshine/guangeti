@@ -8,6 +8,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+
+# owner rule: <=10 threads / 20 cores.  Set before numpy/cv2 import these libraries.
+for _v in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+    os.environ.setdefault(_v, "1")
 import sys
 import time
 from pathlib import Path
@@ -81,9 +86,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pages", default="")
     ap.add_argument("--dpi", type=int, default=300)
-    ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--workers", type=int, default=8, choices=range(1, 9))
     ap.add_argument("--out", default=str(ROOT / "work"))
     args = ap.parse_args()
+    try:
+        import cv2
+        cv2.setNumThreads(1)          # owner rule: <=10 threads / 20 cores
+    except Exception:
+        pass
 
     out = Path(args.out)
     cells_dir = out / "cells"

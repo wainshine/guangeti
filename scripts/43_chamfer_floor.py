@@ -82,6 +82,11 @@ def main():
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--n", type=int, default=N_PAIRS)
     ap.add_argument("--out", default=str(ROOT / "work" / "chamfer_floor.json"))
+    ap.add_argument("--reset", action="store_true",
+                    help="drop hand-written keys from an existing output file (default: keep them)")
+    ap.add_argument("--clean617", default="", help="pairs_single.npz to measure GAN on unseen singles")
+    ap.add_argument("--gan-ckpt", default=str(ROOT / "work" / "ckpt" / "m2wt_ep090.pt"),
+                    help="checkpoint used with --clean617 / --gan")
     args = ap.parse_args()
 
     v = floor_pairs(args.seed, args.n)
@@ -99,6 +104,35 @@ def main():
                            round(float(np.percentile(boots, 97.5)), 3)],
         "cmd": f"python3 scripts/43_chamfer_floor.py --seed {args.seed} --n {args.n}",
     }
+
+    if args.clean617:
+        import torch
+        from importlib.util import module_from_spec, spec_from_file_location
+        spec = spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
+        m21 = module_from_spec(spec); spec.loader.exec_module(m21)
+        G = m21.Generator()
+        sd = torch.load(args.gan_ckpt, map_location="cpu")
+        G.load_state_dict(sd["G"] if isinstance(sd, dict) and "G" in sd else sd)
+        G.eval()
+        d617 = np.load(ROOT / args.clean617, allow_pickle=True)
+        X6, Y6 = d617["X"], d617["Y"]
+        vals = []
+        for i in range(len(d617["chars"])):
+            a = (X6[i].astype(np.float32) / 127.5 - 1.0)[None].repeat(3, 0)[None]
+            with torch.no_grad():
+                m = G(torch.from_numpy(a).float()).numpy()[0, 0] > -0.05
+            c = chamfer(m, Y6[i] > 0)
+            if c is not None:
+                vals.append(c)
+        v6 = np.array(vals)
+        out["gan_clean617"] = {
+            "ckpt": args.gan_ckpt, "n": int(len(v6)),
+            "median": round(float(np.median(v6)), 3),
+            "mean": round(float(v6.mean()), 3),
+            "cmd": (f"python3 scripts/43_chamfer_floor.py --clean617 {args.clean617} "
+                    f"--gan-ckpt {args.gan_ckpt}"),
+            "note": "unseen single-occurrence chars; floor is from repeated chars, do not divide",
+        }
 
     if args.gan:
         import torch
@@ -131,8 +165,22 @@ def main():
             "ratio_to_floor": round(float(np.median(gv) / np.median(v)), 4),
         }
 
-    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.out).write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
+    # keep hand-written annotations (population_note / ratio_caveat / measured blocks):
+    # a plain rerun used to erase the very caveats that E9 depends on.
+    out_p = Path(args.out)
+    if out_p.exists() and not args.reset:
+        try:
+            old = json.loads(out_p.read_text())
+        except Exception:
+            old = {}
+        for k in ("population_note", "ratio_caveat", "gan_clean617", "gan_in_sample"):
+            if k in old and k not in out:
+                out[k] = old[k]
+        out["preserved_keys"] = sorted(k for k in out if k in
+                                       ("population_note", "ratio_caveat", "gan_clean617", "gan_in_sample"))
+
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+    out_p.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
 

@@ -32,6 +32,10 @@ fails: list[str] = []
 warns: list[str] = []
 
 
+def warn(msg: str) -> None:
+    warns.append(msg)
+
+
 def check(name: str, cond: bool, detail: str = "") -> None:
     print(f"  {'PASS' if cond else 'FAIL'}  {name}{('  ' + detail) if detail else ''}")
     if not cond:
@@ -116,7 +120,13 @@ def main() -> int:
     # next to the fonts; everything else must be identical
     pkg_txt = (rel / "README.md").read_text()
     repo_txt = (ROOT / "README-B.md").read_text().replace("docs/images/", "")
-    check("package README == repo README-B.md (images re-pointed)", pkg_txt == repo_txt)
+    # 包内 README 是发布时的快照（ERRATA E3/E4 已接受仓库文档领先于包）；
+    # 因此这里不再硬判相等——硬判等于"改一句文档就必须重发"，与 O7 的裁决冲突。
+    # 真正的不变量是：包里写着正确的版本号；仓库领先时只告警。
+    check("package README quotes the release version", f"v{_CFG['version']}" in pkg_txt,
+          f"v{_CFG['version']}")
+    if pkg_txt != repo_txt:
+        warn(f"package README lags repo README-B.md（包为发布快照，下次重打包对齐）")
     for f in ("GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf", "specimen-b.png",
               "book-vs-font-b.jpg", "coverage.txt", "OFL.txt", "LICENSE"):
         check(f"package has {f}", (rel / f).exists())
@@ -248,16 +258,31 @@ def main() -> int:
     print("== 8. hygiene ==")
     pyc = list((ROOT / "scripts").glob("__pycache__"))
     check("no __pycache__ committed risk", True, f"{len(pyc)} dir(s), gitignored")
-    check("work-b/ckpt MANIFEST fresh", (wd / "ckpt" / "MANIFEST.json").exists())
-    man = json.loads((wd / "ckpt" / "MANIFEST.json").read_text())
+    # "fresh" 以前只判文件存在（等于没查）。现在逐条把 sha256_16 与磁盘比，
+    # 并强制发布检查点的 kind，否则一次例行清理/覆盖就能悄悄废掉 v1.2.4 的再生能力。
+    man_p = wd / "ckpt" / "MANIFEST.json"
+    check("work-b/ckpt MANIFEST exists", man_p.exists())
+    man = json.loads(man_p.read_text())
     check("manifest lists every .pt", len(man["items"]) == len(list((wd / "ckpt").glob("*.pt"))),
           f"{len(man['items'])}")
-    check("manifest has the release checkpoint",
-          any(i["file"] == "b_ep080.pt" for i in man["items"]))
+    stale = []
+    for it in man["items"]:
+        fp = wd / "ckpt" / it["file"]
+        if not fp.exists():
+            stale.append(f"{it['file']}:missing")
+        elif hashlib.sha256(fp.read_bytes()).hexdigest()[:16] != it.get("sha256_16"):
+            stale.append(f"{it['file']}:sha")
+    check("manifest sha256 matches disk (fresh)", not stale, ",".join(stale[:3]))
+    rel_kinds = {i["file"]: i.get("kind") for i in man["items"]}
+    check("release checkpoints are kind=release",
+          rel_kinds.get("b_ep080.pt") == "release" and rel_kinds.get("b_wt_ep090.pt") == "release",
+          f"{rel_kinds.get('b_ep080.pt')}/{rel_kinds.get('b_wt_ep090.pt')}")
 
     print()
     if args.allow:
         fails[:] = [f for f in fails if f not in args.allow]
+    for w in warns:
+        print("  WARN ", w)
     print(f"RESULT: {'SELF-AUDIT OK' if not fails else 'SELF-AUDIT FOUND ' + str(len(fails)) + ' ISSUE(S)'}")
     for f in fails:
         print("  -", f)

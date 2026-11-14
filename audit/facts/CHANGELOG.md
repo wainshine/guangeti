@@ -436,3 +436,46 @@
 - 主会话复核：`83` 默认只读不再写（work-c mtime 保持 12:19:25）；六 TTF/三 zip 未变；
   三线 SHA 自检 OK；97 OK；DOC NUMBERS OK。
 - **跨线 X7/X9/X10/X2 全部闭环**；全项目任务板无未闭合项（仅 A2b、X10-follow 两个可选）。
+
+## 2026-11-14 15:45 CST — 第 5 代审计对抗性复核与分诊（HEAD a134850）
+
+- 第 5 代审计与 A/B/C 三线回复逐条复核：唯一真 P1 = 生成链线程被 `21_train_gan` 模块级 set 6 覆盖
+  （但“全程 48 线程”不成立，改为“每 worker 首个 chunk 峰值”；A 40 字/块，B/C 10 字/块）。
+- 事实更正：RELEASE-v1.7.2 不在 zip 内（zip 仅 11 文件、无 docs；包内 README 无该句），P1-2/P1-3 降 P2；
+  `codepoints=20992` 与 `codepoints_total=21034` 不矛盾；X9 不是“只对哈希”（真实盲区是漏 DATA.md/前缀/词边界）；
+  C-5 是稻草人；A-漏2 不动作。
+- 接收新增项：A-漏1、B 的 73/release-b/epoch、C 的 ckpt/系统字体/重建/RFN/DATA-C。
+- 新建 `audit/TASKS.md` v2.0（A-P1..A-P10 / B-P1..B-P7 / C-P1..C-P8 / M-P1..M-P6，Phase 1–3）。
+- M-P1/M-P2 完成；M-P3（共享文档）/M-P4（X9 升级）待 Phase 2。未改项目代码/制品；v10 基线不变。
+
+## 2026-11-14 15:55 CST — 第 5 代审计 Phase 1 验收
+
+- 通过：A-P2（31 epoch/原子/告警）、B-P1/B-P2/B-P3/B-P4/B-P6、C-P2/C-P3/C-P5/C-P6；
+  import 测试线程 1；B/C 发布检查点 kind=release；release-b ckpt SHA 一致；制品/97/83/release SHA 未变。
+- 待补：A-P1 的 01/02 cv2/workers、A-P2 缺失 release-file 回退 + C basename 相对路径、B-P5 根 README-B、
+  C-P4 DATA-C 80 轮命令、B-P7/C-P8 回归。
+- 未开始：A-P3…A-P8、M-P3/M-P4。Phase 1 改动未提交；提交后建 v11。
+
+## 2026-11-14 16:05 CST — Phase 1 复验完成
+
+- A-P1/A-P2、B-P1–B-P6、C-P1–C-P6 全部闭环：01/02 cv2+workers、31 不回退/相对路径、B 根 README-B RFN、C 相对路径+DATA-C 两阶段。
+- 复验：import 线程 1；MANIFEST release 正确（A 2/B 2/C 仅 v1.3）；六 TTF/三 zip 未变；97/83/release SHA OK；work-c 未动。
+- Phase 1 改动待提交；提交后建 v11。B-P7/C-P8 待 A-P3/P4。
+
+## 2026-11-14 16:05 CST — B 线交接两点（v11 数据声明文件 / 73 WARN 解析）
+
+- **v11 快照将把 `data/release_ckpts_{a,b,c}.json` 记为 data 声明文件**（路径 + SHA-256）：
+  `release_ckpts_a.json` 已入库；`release_ckpts_b.json` / `release_ckpts_c.json` 为本次新增。
+  理由：`work-b/ckpt/MANIFEST.json` 被 gitignore，`data/` 文件是「哪两个检查点属于发布」的持久证据；
+  即使工作区被清、data/ 保留，也能独立重建 B/C 的 release 标记。
+- **73 输出解析**：`73` 现在先打印 `WARN` 行，最后打印 `RESULT: SELF-AUDIT OK`。
+  发布检查单 F4 已改为**只认 `RESULT:` 行与退出码，允许 `WARN`**；不使用前缀白名单。
+- 注：当前工作区还有 A 已开始的 Phase 2 改动（14/43/71/83 等），v11 等提交后一次性记录，不提前建。
+
+## 2026-11-14 16:10 CST — 第 5 代审计 Phase 2 线侧复验完成
+
+- A-P3–A-P8：83/71/43/14/10/97 全部落地并实测（14 import 不写 release、43 保人工键、71 seed/cmd、
+  83 C 缺失/NO-BASELINE/out-dir baseline）；B-P5–B-P7 完成（根 README-B RFN、DATA-B zip、73 snapshot 16:03）；
+  C-P8 完成（16:07:11 `83 --write`、holes_c 含 seed/cmd）。
+- 门禁：六 TTF/三 zip 未变；release SHA OK；97/DOC NUMBERS OK；work-c 默认只读未再写。
+- 剩余：M-P3/M-P4（主会话）、A-P9（P3）、A-P10（文档签字）。线侧工作已完成，待提交后建 v11。

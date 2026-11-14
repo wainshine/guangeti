@@ -60,7 +60,7 @@
 | F1 | `83_verify_ab_c.py` | 打印 `A/B INTACT` + 三个 `21,034`；zip 基线一致 | **默认只读**；C 线加 `--write` 落盘 `work-c/`；A/B 用默认即可，B 不强制跑 |
 | F2 | `97_check_terms.py` | `TERMS OK` | 白名单/历史遗留不计；已知盲区见报告 |
 | F3 | `95_compare_lines.py --check` | build ↔ release SHA 一致 | 若本轮更新三线图，跑不带 `--check` 的版本并提交图 |
-| F4 | `73_selfaudit_b.py`（B 线） | `SELF-AUDIT OK` | 由 B 自跑（经 67 写 `work-b/`） |
+| F4 | `73_selfaudit_b.py`（B 线） | 只认 `RESULT: SELF-AUDIT OK`（退出码 0）；`WARN` 行允许（如包内 README 滞后），不按前缀白名单解析 | 由 B 自跑（经 67 写 `work-b/`） |
 
 ## G. 文档数字与发布说明
 

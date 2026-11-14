@@ -1,112 +1,122 @@
-# 三线任务板 v1.10（主会话维护，2026-11-14 12:25；全部闭环）
+# 三线任务板 v2.0（第 5 代审计分诊版，2026-11-14 15:45，HEAD a134850）
 
-> 规则：见 `audit/OPERATING.md` v1.2.1。主会话不代写；三线执行并回报；所有者裁定优先级。
-> 本版依据 `beaa524`（三线合并交付，2026-11-14 10:34）的实测核验，逐项更新状态。
-> 状态：`待办` / `进行中` / `待复核` / `完成` / `阻塞` / `已关闭` / `部分完成`。
+> 本版接第 5 代审计（对抗性复核后）。**旧 v1.10 的 A/B/C/X 闭环仅指第 2 代审计范围；第 5 代审计重新打开了若干项，见下。**
+> 规则见 `audit/OPERATING.md` v1.2.2。主会话负责协调/复核；A 为共享脚本 owner；B/C 各线脚本/文档自管。
+> 不重打包、不改制品。脚本改动：A review + C 回归 + 主会话只读复核；文档文字类：主会话直改（2026-11-14 授权）。
 
-## 0. 所有者决策
+## 0. 第 5 代审计裁决（先读）
 
-| ID | 事项 | 状态 |
+1. **P1-1 线程**成立，但描述更正为「每 worker 首个 chunk 峰值」：`gan_chunk` 入口先设 1，`exec_module` 后回到 6；A 的 `10_generate` step=40 字、8 worker（峰值 48），B/C 的 `60/77` step=10 字、6 worker（峰值 36）。仍需修。
+2. **P1-2/P1-3 降为 P2**：`docs/RELEASE-v1.7.2.md` **不在 zip 内**（zip 仅 11 文件，无 `docs/`；包内 README 无该句/表），属仓库文档，不是已分发制品；修文档即可，不重打包。
+3. **P2-3 的“codepoints 冲突”驳回**：`release/stats.json` 的 `codepoints=20992` 与 `codepoints_total=21034` 语义不同；成立的是 `14_package` 模块级副作用/硬编码。
+4. **X9 诊断更正**：`check_doc_numbers.py` 不是“只对哈希”，真实盲区是漏 `docs/DATA.md`、短哈希只查前缀、正则无词边界。
+5. **C 的 C-5 驳回**：第 5 代报告没有把 C1/C2/C5/C6 当未修；不重开。
+6. **A-漏2 不动作**：包内 README 是发布快照，与根 README 不同属预期。
+7. “41 seed 扫描”无落盘产物，只作为未复核线索；0.7% 已被 n=200 的 1.4% 取代。
+
+## 1. A 线（共享脚本 owner + A 线）
+
+| ID | 优先级 | 任务 | 验收 |
+|---|---|---|---|
+| A-P1 | **P1** | `21_train_gan.py:21` 改惰性（import 不设线程）；`10_generate.py` 在 `exec_module` 后重置 1；`01/02` 补线程限制；`10` 的 `--workers` 上限 ≤8 | import 测试 `1→1`；`ps ≤2000%`；83/97 通过；制品不变 |
+| A-P2 | **P1** | `31_ckpt_manifest.py`：`--release-file` 对任意 `--ckpt-dir` 生效、补 `epoch`、读失败告警、原子写 | A 24/24；B/C 用同一脚本重建后 release 项正确 |
+| A-P3 | P2 | `83`：C 字体缺失 fail；SHA256SUMS 缺失 NO-BASELINE 置 fail；`--write --out-dir` 时 baseline 语义一致 | 缺文件/缺基线用例有 FAIL；C 跑 `--write` 回归 |
+| A-P4 | P2 | `71_holes.py` 输出补 `seed/cmd/args`；重出 A 两个 holes 基线 | json 含字段；数字可复跑 |
+| A-P5 | P2 | `43_chamfer_floor.py` 重跑保留人工键；clean617 固化到脚本参数/独立键 | 重跑后 population_note/gan_clean617 不丢 |
+| A-P6 | P2 | `14_package.py` 去模块级 `_fix_charset_records` 副作用、尊重 `--out`、从 cmap 算 codepoints | import 不写 release；`--out` 只写目标 |
+| A-P7 | P2 | `10_generate.py` fallback 去重；`--ckpt` 在 gan 分支的语义明确（或删/或文档） | 同字只记一次；文档与 CLI 一致 |
+| A-P8 | P2 | `97_check_terms.py` docstring/scan_fonts 路径更新 | TERMS OK |
+| A-P9 | P3 | `release-a.json` 补 `artifacts_built_at`（O6） | 与 B/C 同义 ISO 日期 |
+| A-P10 | 签字 | 主会话 M-P3 改完 A 线文档后，A 确认 A 线口径 | 不重复写，只 review |
+
+## 2. B 线
+
+| ID | 优先级 | 任务 | 验收 |
+|---|---|---|---|
+| B-P1 | **P1** | 建 `data/release_ckpts_b.json`（`b_ep080.pt`、`b_wt_ep090.pt`）；用 `31 --ckpt-dir work-b/ckpt --release-file ...` 重跑 | `work-b/ckpt/MANIFEST.json` 两条 `kind=release`；不删 ckpt |
+| B-P2 | **P1** | `data/release-b.json` 补 `checkpoint_sha256` / `checkpoint_hardtail_sha256`（全量） | 与磁盘一致 |
+| B-P3 | P2 | `73_selfaudit_b.py` 严格 fresh：逐条 `sha256_16` 对磁盘 + 发布检查点 `kind=release` | 改一字节能被抓；不改变现有断言 |
+| B-P4 | **P1** | `60_generate_b.py` `_load_gan` 后重置 1；`--workers` 上限 | 首 chunk 后 `torch.get_num_threads()==1` |
+| B-P5 | P2 | `README-B.md:108` RFN → 霞鹜／霞鶩／落霞孤鹜／落霞孤鶩／LXGW | 与 OFL.txt 一致 |
+| B-P6 | P2 | `DATA-B.md:279` zip 名 `v1.1.0` → `v1.2.4` | 链可跑通 |
+| B-P7 | 回归 | 31 重建/83 默认只读/97 | 全部 OK；B 不跑 83 --write |
+
+## 3. C 线
+
+| ID | 优先级 | 任务 | 验收 |
+|---|---|---|---|
+| C-P1 | **P1** | 建 `data/release_ckpts_c.json`（`c_ep090.pt`）；`31 --ckpt-dir work-c/ckpt --release-file ...` 重跑 | `v1.3/c_ep090.pt` `kind=release`；不删 ckpt |
+| C-P2 | **P1** | `77_generate_c.py` `_load_gan` 后重置 1；`--workers` 上限 | 首 chunk 后线程=1 |
+| C-P3 | P2 | `99zo/99zs` 的 Songti/Helvetica 换仓库自由字体（先核对许可）或移除 | 无 `/System/Library`、无专有字体 |
+| C-P4 | P2 | `README-C`/`DATA-C` 重建链 `c_ep030/--epochs 30` → `c_ep090/90`（参数按实际训练命令） | 与 v1.3.0 自述一致 |
+| C-P5 | P2 | `README-C:127` RFN 完整列表 | 与 OFL.txt 一致 |
+| C-P6 | P2 | `DATA-C:135` v1.2.1 → v1.3.0 | 无时代错乱 |
+| C-P7 | 不动作 | C1/C2/C5/C6 旧结论 | 报告未把其当未修；保留 0.470/6.38/8.3%、clean n=200、0.0712 已删 |
+| C-P8 | 回归 | A 改完 83/71 后：`83 --write` + `97`；重出 `holes_c` | `A/B INTACT`、TERMS OK、json 含 seed |
+
+## 4. 主会话
+
+| ID | 状态 | 事项 |
 |---|---|---|
-| O1 | A 两处修复是否提交 | 完成（`27eab26`） |
-| O2 | 共享资产归属 | 记录现状：共享 docs/scripts 由 A 维护（缺原文，不阻塞、非排他授权） |
-| O3 | 各线自签发布、主会话复核不代签 | **已确认（所有者 2026-11-14）** |
-| O4 | zip 是否承诺字节可复现 | 建议不承诺（记录为发布快照） |
-| O5 | 三线是否必须同步发版 | 建议不强制 |
-| O6 | `release_date` / `artifacts_built_at` 语义 | **已确认（所有者 2026-11-14）**：签核日 / 打包日，ISO 日期字符串，三线同义 |
-| O7 | OFL.txt 已发布 drift | 已关闭：不改、不单独 patch；ERRATA E8 登记为已接受 |
+| M-P1 | 完成（本轮） | 更正第 5 代报告事实错误（zip/线程峰值/codepoints/X9 诊断），见 `docs/AUDIT-2026-11-14.md` §9.19 |
+| M-P2 | 完成（本轮） | 重开本任务板；fact/CHANGELOG 记录 |
+| M-P3 | 待办（Phase 2） | 共享文档批量直改：RELEASE-v1.7.2、method、README、DATA、PROJECT_STATE、EXPERIMENTS、GLOSSARY/CONVENTIONS、ERRATA、AGENTS 线程预检；A/B/C 线文档不碰 |
+| M-P4 | 待办（Phase 2） | X9 检查器升级：纳入 `docs/DATA.md`、数值真对账、词边界、重建链必须含 `13_extend_punct` |
+| M-P5 | 待办（Phase 3） | 只读验收（线程/manifest/83/97/X9/制品哈希）；提交后建 v11、回填 v10 |
+| M-P6 | 持续 | 不重打包；任何脚本改动若变制品哈希 → 停，交所有者 |
 
-## 1. A 线（A 会话）
+## 5. 依赖与排期
 
-| ID | 任务 | 验收标准 | 状态 |
-|---|---|---|---|
-| A1 | DATA.md `--res 512`→256 | 已改 L176（历史 ribbon 注释 L182 保留）；重建链仍含过时 `36_fill_fallback`/`generated_gan`（见 A6b） | 完成 |
-| A2a | 31 重建 MANIFEST + `m2wt*` 入册 + `m2wt_ep090` SHA 写 release-a + DATA §6.5.1 | 磁盘 24 / MANIFEST 24 / ckpt SHA 一致 / `kind=release`；声明文件已入库 `data/release_ckpts_a.json`，31 支持 `--release-file`，DATA §6.5.1 已登记（P3 已修复） | 完成 |
-| A2b | 可选：31 加只读 `--check` | 共享脚本变更协议；未做 | 待办（可选） |
-| X10-follow | P3（A 建议，非阻断）：`--write` + 自定义 `--out-dir` 时 baseline 默认仍读 `work-c/ab_baseline.json`；跨目录写盘需同时传 `--baseline`（或未来让 `--write` 自动读 `out_dir/ab_baseline.json`） | 以后有需要再改，不阻塞 | 待办（P3） |
-| A3 | floor 5.16 产物 + 文档口径 | `scripts/43_chamfer_floor.py` + `work/chamfer_floor.json`（floor 5.42，CI 5.28–5.60；clean617 GAN 6.13）；AGENTS/README/PROJECT_STATE/EXPERIMENTS/ERRATA E9 已改 | 完成 |
-| A4 | golden repro 钉路径 + 文档 + **A 自跑金样** | 完成：`work/logs/golden_repro_a_2026-11-14.log`（07 retrace→`bf278ab1`、11→13 extend→`e6d8a104`、13_qa real-subset OK）；build 10:40–10:41 重建后字节一致 | 完成 |
-| A5a | 97 扫描面只加 `docs/index.html` | 97 已加 index.html；index.html 已改「寫本」；97 TERMS OK | 完成 |
-| A5b | E8 登记已发布 OFL drift | E8 已提交（`6bbcf3c`）；末句"可选" | 完成 |
-| A5b-follow | E8 末句改"重打包则必须修正"（所有者建议） | 已改：ERRATA E8「若因其他原因重新打包，**必须**顺带改为 `Ming manuscript`」 | 完成 |
-| A6a | 指标 n 口径收口 | AGENTS C 段 `unseen 0.470`（n=300）；holes n=300 1.9%（4/214）+ n=200 1.4%（2/145，`work/holes_a_n200.json`）；EXPERIMENTS 总表加口径脚注（E32/E36/E39） | 完成 |
-| A6b | PROJECT_STATE/README/DATA §4.9/§5 旧口径清理 | 完成：README 拓扑/程序化/C 指针/去色、已知限制 4.1%；PROJECT_STATE 118/139/211；method.md 4.1%/0.539/6.13/5.42；DATA §4.9 ID0 已修复说明；DATA §5 A/B/C 当前校验和 | 完成 |
-| A6b-follow | DATA §5 排版回归 | 已修：删残留 3 行旧 B v1.0.1 哈希 + 错位 fence，改为统一「release*/SHA256SUMS + DATA-B/C」说明；97 OK | 完成 |
-| A7 | README B/C 单行例外 | 已写入 AGENTS「文档约定」 | 完成 |
+```
+Phase 1（P1，先行）:
+  A-P1 → A-P2（31）；B-P4 / C-P2 可先本地 reset；B-P1/B-P2、C-P1 依赖 A-P2 的 31 能力
+Phase 2（P2）:
+  M-P3 + M-P4 与 A-P3..A-P8、B-P3/B-P5/B-P6、C-P3..C-P6 并行
+Phase 3（收尾）:
+  A-P9、A-P10 签字、B-P7/C-P8 回归、M-P5 v11
+```
 
-## 2. B 线（B 会话）
+## 6. 不动作 / 驳回
 
-| ID | 任务 | 验收标准 | 状态 |
-|---|---|---|---|
-| B1 | E15 中间态哈希说明 | 已随 `5940a6d` 提交（VERSION 1.2.4，62 确定性） | 完成 |
-| B2 | `release_date`/`artifacts_built_at` 语义 | `release-b.json` 增加 `artifacts_built_at=2026-11-13` 与 date_semantics；DATA-B 同步 | 完成 |
-| B3/B5/B7 | 澄清/历史例外/嵌套单一源 | 已关闭 | 已关闭 |
-| B4 | golden repro 两步金样 | `work-b/golden_repro_2026-11-14.log`：Real `7d10e460`、Regular `62→extend→aa19d6d2`，前后制品一致 | 完成（证据在 work-b） |
-| B6 | 63/68/97/73 输出 | 同日志：QA OK、ACCEPTANCE OK、TERMS OK、SELF-AUDIT OK；83 未跑（合规） | 完成 |
-| B8 | DATA-B 仍写「C v1.2.0」 | 已改 `C v1.3.0`（`0e22ade`） | 完成 |
+- 不重打包/不改 zip；P1-2/P1-3 仅仓库文档。
+- “P1-2/P1-3 已随 zip 分发”、“codepoints 冲突”、“C1/C2/C5/C6 未修”均不成立。
+- C-5、A-漏2 不动作；41-seed 无产物不作证据。
+- `release*/README.md` 包内快照不改（会破坏 SHA256SUMS）。
 
-## 3. C 线（C 会话）
+## 7. Phase 1 验收（2026-11-14 15:55，HEAD a134850 + 工作区）
 
-| ID | 任务 | 验收标准 | 状态 |
-|---|---|---|---|
-| C1 | 0.4666/0.469 对齐 | `work-c/eval_v130_unseen_c2.json`：0.470/6.38/8.3%；`release-c.json` 与 RELEASE-C 已更新 | 完成 |
-| C2 | clean 0.471 来源 | 标为 v1.2.1 继承（n=200，`work-c/eval_v121_ep090.json`）；`clean_eval_n/source` 已加 | 完成 |
-| C3 | 删/重算 `fallback_share_of_block` | 0.0712 已删；`fallback_share_of_basic=0.0625`、双口径说明 | 完成 |
-| C4 | 日期归一 | AGENTS C 行已改「发布日 2026-11-02；共享文档登记日 2026-11-12」（`0e22ade`）；release-c/RELEASE-C 已同口径 | 完成 |
-| C5 | 未记录生成运行 | DATA-C 确认 08:38 最终运行（15,715/836 → 15,735/17），并登记以后必须留日志 | 完成 |
-| C6 | golden repro 金样 | `work-c/logs-v1.3/golden_c_v13.log`：Real `6caf9d82`、Regular `765d0848`，与制品一致 | 完成（证据在 work-c） |
-| C7 | 两套验收标准表 | RELEASE-C 新增表（门 1 85.2%、门 2 5/94、门 3/4 无签字），并注明"发布 QA ≠ 四级门" | 完成 |
-| C8 | C-big 体量 | DATA-C 改为 5.5 GB（apparent 5.93） | 完成 |
-| C9 | weight_bias | release-c 改 1.009 + source | 完成 |
-| C10/C11 | C-big 训练/面板状态 | EXPERIMENTS-C 登记（未重训、MPS 面板作废待 CPU 重生成） | 完成 |
-| C12 | README-C 旧值 0.469/0.4666 | 已改 0.470/6.38/8.3%，并保留 v1.2.1 历史行（`0e22ade`） | 完成 |
+**通过**
+- A-P2（31 核心）：`epoch` 字段、`--release-file` 显式告警、原子写（`.tmp` + replace）落地；`31 --help` 无副作用。
+- B-P1/B-P2：`data/release_ckpts_b.json`；`work-b/ckpt/MANIFEST.json` 的 `b_ep080`/`b_wt_ep090` 均 `kind=release, epoch`；
+  `release-b.json` 两个全量 SHA 与磁盘一致。
+- B-P3：`73` 已逐条 `sha256_16` 对比磁盘 + 发布检查点 kind 检查。
+- B-P4：`_load_gan` 后重置 1；`--workers` 1..8；C-P2 同。
+- B-P6、C-P3、C-P5、C-P6：DATA-B zip 名、99 脚本去系统字体（改用仓库 Noto）、README-C RFN、DATA-C:135 已改。
+- **运行时证据**：`exec_module(21_train_gan)` 后 `torch.get_num_threads()==1`（改前为 6）。
+- **制品/门禁**：六 TTF/三 zip 未变；`release*/SHA256SUMS` OK；`97 TERMS OK`；`83` 默认只读 `A/B INTACT`；`work-c` mtime 未变。
 
-## 4. 跨线（主会话）
+**部分完成 / 需补**
+- **A-P1-follow**：`01/02` 只加了 OMP/MKL/OPENBLAS env，**没有 `cv2.setNumThreads(1)`、也没有 `--workers` 上限校验**；补后再验。
+- **A-P2-follow**：①显式 `--release-file` 不存在时，当前代码会回退到默认 `CK/release_ckpts.json`（A 的 work/ckpt），应只告警并置空；②C 的 release 文件用 basename，导致 `v1.2.1/c_ep090.pt` 与 `v1.3/c_ep090.pt` 同时被标 release；需支持相对路径条目（C 用 `v1.3/c_ep090.pt`）。
+- **B-P5**：根 `README-B.md:108` 仍是「霞鶩／霞鶩／…」；B 只在 DATA-B 记了包内缺陷，**根文档未改**。
+- **C-P1**：受上面 basename 问题，`v1.2.1/c_ep090.pt` 被误标 release；A-P2 支持路径后 C 重跑修正。
+- **C-P4**：README-C 已改 90 轮/两阶段；`DATA-C:175-176` 训练命令仍写 `--epochs 80`，只加了注释；需补续训命令或改 90。
+- **B-P7 / C-P8**：回归仍待（B 不跑 `--write`；C 在 A-P3/P4 后跑 `83 --write` + `97` + `holes_c`）。
 
-| ID | 任务 | 验收标准 | 状态 |
-|---|---|---|---|
-| X1 | 外部冻结台账 v10（`head=06fb50d`，`committed_in=b2346b8`） | `audit/facts/frozen-hashes-2026-11-14T1216.json` | 完成 |
-| X2 | 跨线发布检查项清单 | **已定稿（advisory）**：`release-gate-checklist.md` v0 作为默认清单；三线可提异议，不阻塞发布 | 完成 |
-| X3/X4/X11 | 快照/共享变更/主会话只读规则 | 已写入 OPERATING v1.2.1 | 完成 |
-| X5/X6 | 事实台账 v5 / 报告同步 | 已完成 | 完成 |
-| X7 | 追溯登记共享改动 | **已完成**：CHANGELOG 记 97（beaa524/83d01d9）、31（0e22ade/2f523d1）、21_train_gan 与 100_review（83d01d9/ef6e3f8）的影响面与验证；历史改动不回滚 | 完成（主会话） |
-| X8 | 快照重建与 `committed_in` 回填 | v9 `committed_in=f2fc6ed`、v10 `committed_in=b2346b8` 均已回填；纯文档/audit 提交不新建快照 | 完成（v10） |
-| X9 | 文档数字 vs release-*.json 持久对账闸 | **完成（初版）**：只读检查器 `audit/tools/check_doc_numbers.py`（11 份当前文档/2094 行）；直改 README-C「B 真迹 4,078→4,073」，RELEASE-v1.7.2 加口径更正注；复跑 `DOC NUMBERS OK` | 完成 |
-| X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | **代码完成并提交**（`06fb50d`）：默认只读；`--write` 落盘；真 `--help`；zip 读 `data/release-{a,b,c}.json`；写盘移到字集检查后（P1-8）；patch/review 单在 `audit/proposals/`。主会话自测：默认 `A/B INTACT`、`work-c` 未动；`--out-dir /tmp` 正常。**A review 通过（12:2x）；C 回归通过（12:19:25：`A/B INTACT`、`work-c` baseline 已更新、`97 TERMS OK`）** | 完成 |
+**未开始（Phase 2）**：A-P3…A-P8、B-P5 的根文档、M-P3 共享文档、M-P4 X9 升级、A-P9/A-P10。
 
-## 5. 本批合并交付核验结论
+### Phase 1 复验（2026-11-14 16:05，全部补齐）
 
-| 线 | 结论 | 说明 |
-|---|---|---|
-| A | **通过（全闭环）** | A1/A2a/A3/A4/A5a/A5b/A5b-follow/A6a/A6b/A6b-follow/A7 全部完成；A2b 可选未做 |
-| B | **通过（无需重发）** | B2/B4/B6 完成、证据齐、制品未变；仅 DATA-B 一句 P3 |
-| C | **通过** | C1–C12 完成、金样日志齐；C4 日期与 README-C 已改 |
-| 制品 | **无回归** | 六 TTF/三 zip 哈希未变；B/C build 重建后字节一致；A build 未重建 |
-| 门禁 | **通过** | 三线 `SHA256SUMS` 自检 OK；A/B/C MANIFEST 24/14/43；97 TERMS OK |
+- **A**：`01/02` 已补 `cv2.setNumThreads(1)` + `--workers choices(1..8)`；31 已修「显式 release-file 缺失不回退默认」并支持相对路径；A/B/C MANIFEST 均正确（A 2 release、B 2、C 仅 `v1.3/c_ep090.pt`）。运行时 `exec_module(21)` 后线程=1。
+- **B**：根 `README-B.md:108` 已改为完整 RFN；B-P2 ckpt SHA、B-P3 73、B-P4 60 均通过。
+- **C**：`data/release_ckpts_c.json` 用 `v1.3/c_ep090.pt`，C MANIFEST 不再误标 v1.2.1；DATA-C 训练命令已补 80→90 两阶段。
+- **门禁**：六 TTF/三 zip 未变；`release*/SHA256SUMS` OK；`97 TERMS OK`；`83` 默认只读 `A/B INTACT`；`work-c` mtime 未变。
+- **结论**：A-P1/A-P2、B-P1–B-P6、C-P1–C-P6 **完成**。B-P7/C-P8 在 A-P3/P4 后再跑；A-P3…A-P8、A-P9/A-P10、M-P3/M-P4 进入 Phase 2。Phase 1 改动仍待所有者提交；提交后建 v11。
 
-## 6. 已关闭/已裁决（仅列本轮新增）
+### Phase 2 线侧复验（2026-11-14 16:10，全部通过）
 
-| 项 | 结论 |
-|---|---|
-| E9 撤回「5.16/5.92/差 15%」 | 新口径 floor 5.42（n=800）/ clean617 6.13；AGENTS/README/PROJECT_STATE/EXPERIMENTS 已改 |
-| A 步骤 1 reuse/retrace | AGENTS 已改为 retrace 并注明 reuse 非发布路径 |
-| 97 加 `docs/index.html` | 已加且通过；index.html 已改「寫本」 |
-| A MANIFEST 24/24 | 已入册；ckpt SHA 与磁盘一致 |
-| B/C golden 金样 | B/C 日志哈希与发布一致 |
-| 快照 v5 | `beaa524`；v4 `committed_in=56edd05` 已回填 |
-| A4 金样自跑 | `work/logs/golden_repro_a_2026-11-14.log`：`bf278ab1` / `e6d8a104`，13_qa OK |
-| A2a release 标记 | 31 加 `release_ckpts.json` 机制；`m2wt_ep090`/`m2_ep080` `kind=release`（P3：文件在 work/） |
-| C4 日期归一 | AGENTS C 行「发布日 11-02；共享文档登记日 11-12」 |
-| C12 / B8 | README-C 0.470/6.38/8.3%；DATA-B C v1.3.0 |
-| 快照 v6 | `0e22ade`；v5 `committed_in=6858c08` 已回填 |
-| A6a / C 口径 | AGENTS unseen 0.470；holes n200 1.4% artifact；EXPERIMENTS 口径脚注 |
-| release 标记入库 | `data/release_ckpts_a.json` + 31 `--release-file` + DATA §6.5.1；work 清理不再丢 |
-| A6b 大部分 | README/PROJECT_STATE/DATA 旧口径已改（余 4 处见 A6b） |
-| 快照 v7 | `2f523d1`；v6 `committed_in=2f523d1` 已回填 |
-| A6b 四项残余 | README 4.1%、method.md、DATA §4.9 ID0、DATA §5 当前校验和 |
-| 快照 v8 | `bcdeb10`；v7 `committed_in=bcdeb10` 已回填；新发现 DATA §5 排版回归（A6b-follow） |
-| A6b-follow / A5b-follow | DATA §5 排版修复；E8 末句改「必须」 |
-| 快照 v9 | `8b810f3`；v8 `committed_in=8b810f3` 已回填 |
-| X10 83 改造 | 默认只读/`--write`/真 `--help`/zip 读 release json；P1-8 修复；patch+review 单入库 |
-| X9 初版 / X2 / X7 | 检查器 + 两处文档直改；发布检查单 advisory；共享改动登记 |
-| 快照 v10 | `06fb50d`；v9 `committed_in=f2fc6ed` 已回填 |
+- **A-P3–A-P8 完成**：83 的 C 字体缺失 fail / NO-BASELINE fail / `--out-dir` baseline 独立；71 输出含 `font_sha256/n/seed/cmd/args`；43 重跑保留 `population_note/ratio_caveat/gan_clean617/gan_in_sample`（并新增 `preserved_keys`）；14 的 `_fix_charset_records` 已并入 `main`、尊重 `--out`、codepoints 从 cmap 计算（import 测试 release 文件 mtime 未变）；10 fallback 去重 + `--ckpt` 语义；97 docstring 更新。
+- **B-P5/B-P6/B-P7 完成**：根 README-B RFN 已修；DATA-B zip 名 v1.2.4；73 已改并在 16:03 产出 `work-b/verify_a_snapshot.json`。
+- **C-P8 完成**：16:07:11 `83 --write` 更新 `work-c/ab_baseline.json` + `verify_ab.json`；16:07:12 `holes_c` 已含 seed/cmd；83 复跑 `A/B INTACT`；97 OK。
+- **门禁**：六 TTF/三 zip 未变；`release*/SHA256SUMS` OK；`97 TERMS OK`；`DOC NUMBERS OK`；`diff --check`/py_compile 通过；work-c 基线未再被写（默认只读）。
+- **剩余**：M-P3 共享文档、M-P4 X9 升级、A-P9（P3，release-a artifacts_built_at）、A-P10（A 线文档签字）。线侧 Phase 2 已全部完成，待所有者提交；提交后建 v11。

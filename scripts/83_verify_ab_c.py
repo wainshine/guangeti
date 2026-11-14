@@ -98,7 +98,15 @@ def main(argv: list[str] | None = None) -> int:
 
     write = bool(args.write or args.out_dir) and not args.no_write
     out_dir = Path(args.out_dir) if args.out_dir else WORK
-    baseline_path = Path(args.baseline) if args.baseline else WORK / "ab_baseline.json"
+    if args.baseline:
+        baseline_path = Path(args.baseline)
+    elif args.out_dir:
+        # writing elsewhere must not silently compare against (and merge into) work-c/
+        baseline_path = Path(args.out_dir) / "ab_baseline.json"
+        if not baseline_path.exists() and (WORK / "ab_baseline.json").exists():
+            print(f"{'NOTE':11s} --out-dir given: baseline={baseline_path} (work-c baseline not read)")
+    else:
+        baseline_path = WORK / "ab_baseline.json"
 
     ok = True
     issues = []
@@ -116,6 +124,9 @@ def main(argv: list[str] | None = None) -> int:
         status = "OK" if got == want else ("NO-BASELINE" if not want else "DIFF")
         if status == "DIFF":
             issues.append(f"{name} differs from its release checksum")
+            ok = False
+        elif status == "NO-BASELINE":
+            issues.append(f"{name} has NO baseline (release SHA256SUMS missing or lacks the entry)")
             ok = False
         info["fonts"][name] = dict(sha256=got, want=want, status=status,
                                    bytes=p.stat().st_size)
@@ -194,6 +205,10 @@ def main(argv: list[str] | None = None) -> int:
                     ("B", "build/GuanGeKai-B-Regular.ttf"),
                     ("C", "build/GuanGeKai-C-Regular.ttf")):
         if not Path(fp).exists():
+            info["charset"][tag] = {"cmap": 0, "bad": 1, "ok": False, "missing": True}
+            punct_ok = False
+            ok = False
+            print(f"FAIL        {tag} 字体缺失: {fp}")
             continue
         cm = TTFont(fp).getBestCmap()
         bad = punct_set.verify(cm)

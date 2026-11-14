@@ -170,8 +170,8 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
     stamp = [r for r in rows if r['route'] != 'auto' and r['file'] in probe_all]
     stamp.sort(key=lambda r: (r['route'], r['file']))
-    font_lab = ImageFont.truetype('/System/Library/Fonts/Songti.ttc', 30, index=1)
-    font_sid = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 20)
+    font_lab = ImageFont.truetype(str(W.parent / 'data' / 'base' / 'NotoSerifSC-Light.otf'), 30)
+    font_sid = ImageFont.truetype(str(W.parent / 'data' / 'base' / 'SourceHanSansCN-Regular.otf'), 20)
     COLS, TILE, CROP, LBL, per = 3, 320, 280, 46, 24
     meta = []
     for si in range(0, len(stamp), per):

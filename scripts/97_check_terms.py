@@ -24,8 +24,9 @@ real errors (see docs/CONVENTIONS.md §9).
 
 Known legacy (reported, never fails the run)
 --------------------------------------------
-* `build/GuanGeKai*.ttf` name tables still say `woodblock print` — the binaries are
-  frozen at v1.6.5; rebuilding would change hashes (docs/ERRATA.md E2).
+* Font name tables are scanned from `build/GuanGeKai*.ttf`; from v1.7.0 they say
+  `Ming manuscript` (ERRATA E2 is closed for rebuilt fonts). The scan stays so a
+  regression would be caught instead of silently shipped.
 * `release*/README.md`, `release*/specimen.png` are packaged snapshots (ERRATA.md E3/E4).
 
 Exit code 1 when a non-whitelisted, non-legacy hit exists, so it can gate a release.

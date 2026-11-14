@@ -124,7 +124,7 @@ PDF（41 冊 3,538 頁，全部 300 dpi）
 ## 6. 授權與命名
 
 - 字型本體：**SIL Open Font License 1.1**（見 `OFL.txt`）。可自由使用、修改、再分發，
-  衍生字型須沿用 OFL 且**不得使用保留字型名**（霞鶩／霞鶩／落霞孤鶩／LXGW）。
+  衍生字型須沿用 OFL 且**不得使用保留字型名**（霞鶩／霞鹜／落霞孤鶩／落霞孤鹜／LXGW）。
 - 原始碼：MIT（見 `LICENSE`）。
 - 生成字由**霞鶩文楷**（OFL 1.1，含 Reserved Font Name）派生，故本字型必須 OFL，
   且家族名已避開其保留名稱：`GuanGe Kai C`。
@@ -154,12 +154,19 @@ python3 scripts/76_build_real_c.py --close 3 --hole-repair
 python3 scripts/08_make_pairs.py --work work-c --out work-c/pairs/pairs.npz
 python3 scripts/73_fit_width_c.py
 python3 scripts/75_build_clean_c.py
-python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz --out work-c/ckpt/c.pt \
-        --ckpt-dir work-c/ckpt --sample work-c/preview/gan_sample.png \
-        --patchgan --hinge --aug --epochs 30 --batch 16 --lr 2e-4
-python3 scripts/82_eval_c.py --gan work-c/ckpt/c_ep030.pt --n 250 --sweep
+# v1.3 实际为两段：80 轮主训练 + 80→90 续训；日志见 work-c/logs-v1.3/train_v13_90.log
+python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz \
+        --val-data work-c/pairs_holdout.npz --out work-c/ckpt/v1.3/c.pt \
+        --ckpt-dir work-c/ckpt/v1.3 --sample work-c/preview/gan_sample.png \
+        --patchgan --hinge --aug --epochs 80 --batch 16 --lr 2e-4
+python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz \
+        --val-data work-c/pairs_holdout.npz --out work-c/ckpt/v1.3/c.pt \
+        --ckpt-dir work-c/ckpt/v1.3 --resume work-c/ckpt/v1.3/c_ep080.pt \
+        --patchgan --hinge --aug --epochs 90 --batch 16 --lr 1e-4
+# 发布检查点是 v1.3/c_ep090.pt（0.470 / 6.38 / 8.3%）
+python3 scripts/82_eval_c.py --gan work-c/ckpt/v1.3/c_ep090.pt --n 300 --close 2 --sweep
 python3 scripts/77_generate_c.py --method gan --workers 6 --res 512 --simplify 2.0 \
-        --ckpt work-c/ckpt/c_ep030.pt --threshold 0.30 --close 1 --blend 0.8 --struct-guard \
+        --ckpt work-c/ckpt/v1.3/c_ep090.pt --threshold 0.30 --close 1 --blend 0.8 --struct-guard \
         --out work-c/generated_gan.jsonl
 mv work-c/generated_gan.jsonl work-c/generated.jsonl
 python3 scripts/78_fill_fallback_c.py --work work-c

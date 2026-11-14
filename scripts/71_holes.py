@@ -94,8 +94,15 @@ def main() -> int:
     if bad:
         print("  worst:", " ".join(f"{c}({a}/{b_})" for c, a, b_ in bad))
     if args.json:
+        import hashlib as _hl
+        font_sha = _hl.sha256(Path(args.font).read_bytes()).hexdigest()
+        cmd = ("python3 scripts/71_holes.py --font " + str(args.font)
+               + f" --n {args.n} --seed {args.seed}")
         Path(args.json).write_text(json.dumps({
-            "font": args.font, "tested": n_tested, "comparable": len(rows),
+            "font": args.font, "font_sha256": font_sha,
+            "n": args.n, "seed": args.seed,
+            "cmd": cmd, "args": vars(args),
+            "tested": n_tested, "comparable": len(rows),
             "same": len(same), "fewer": len(fewer), "lost": len(lost),
             "lost_chars": "".join(r[0] for r in lost),
             "worse_chars": "".join(r[0] for r in sorted(lost + fewer)),

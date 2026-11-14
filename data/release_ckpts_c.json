@@ -1,0 +1,7 @@
+{
+ "line": "C",
+ "release_ckpts": [
+  "v1.3/c_ep090.pt"
+ ],
+ "note": "C v1.3.0 generation checkpoint; relative path keeps v1.2.1/c_ep090 out of release."
+}

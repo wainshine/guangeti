@@ -18,7 +18,6 @@ from pathlib import Path
 import numpy as np
 import torch
 import os as _os
-torch.set_num_threads(int(_os.environ.get("TORCH_THREADS", "6")))
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
@@ -169,7 +168,23 @@ class Pairs(Dataset):
                 torch.tensor(float(self.w[i])))
 
 
+def _set_threads_for_training() -> None:
+    """Only the training entry point touches intra-op threads.
+
+    This module is also imported by 10_generate / 60_generate_b / 77_generate_c to reuse
+    the Generator class.  A module-level set_num_threads(6) used to override the worker's
+    single thread (X10/A-P1), so the limit is applied here instead of at import time.
+    """
+    torch.set_num_threads(int(_os.environ.get("TORCH_THREADS", "6")))
+    try:
+        import cv2
+        cv2.setNumThreads(1)
+    except Exception:
+        pass
+
+
 def main():
+    _set_threads_for_training()
     ap = argparse.ArgumentParser()
     ap.add_argument("--epochs", type=int, default=200)
     ap.add_argument("--batch", type=int, default=16)

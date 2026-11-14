@@ -98,10 +98,9 @@ def main():
     lines = [f"{sha256(p)}  {p.name}" for p in sorted(out.glob("*")) if p.is_file() and p.name != "SHA256SUMS"]
     (out / "SHA256SUMS").write_text("\n".join(lines) + "\n")
     print(json.dumps(stats, ensure_ascii=False, indent=1))
+    _fix_charset_records(out)
 
 
-if __name__ == "__main__":
-    main()
 
 def _fix_charset_records(out_dir):
     """provenance/stats must agree with the shipped charset (GLOSSARY 字集口径):
@@ -123,8 +122,14 @@ def _fix_charset_records(out_dir):
     stats_p = out_dir / "stats.json"
     if stats_p.exists():
         st = _json.loads(stats_p.read_text())
-        st["codepoints"] = 20992
-        st["codepoints_total"] = punct_set.EXPECTED_CMAP
+        font_p = out_dir / "GuanGeKai-Regular.ttf"
+        if font_p.exists():
+            from fontTools.ttLib import TTFont
+            cmap = TTFont(str(font_p)).getBestCmap()
+            st["codepoints"] = sum(1 for c in cmap if 0x4E00 <= c <= 0x9FFF)
+            st["codepoints_total"] = len(cmap)
+        else:
+            st["codepoints_total"] = punct_set.EXPECTED_CMAP
         stats_p.write_text(_json.dumps(st, ensure_ascii=False, indent=1))
 
     # the manifest must be recomputed after the records above are rewritten,
@@ -138,4 +143,5 @@ def _fix_charset_records(out_dir):
     sums.write_text("\n".join(lines) + "\n")
 
 
-_fix_charset_records(ROOT / "release")
+if __name__ == "__main__":
+    main()

@@ -76,6 +76,11 @@ def gan_chunk(args):
     if _GAN_CACHE is None:
         spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
         m = iu.module_from_spec(spec); spec.loader.exec_module(m)
+        torch.set_num_threads(1)   # importing 21 must not reopen intra-op threads
+        try:
+            _c2.setNumThreads(1)
+        except Exception:
+            pass
         g = m.Generator()
         # default = the release working point (data/release-a.json): the hybrid uses the
         # weighted ep090 as primary and ep080 as the hard-tail fill-in (E40)
@@ -156,6 +161,11 @@ def gated_chunk(args):
     if _GAN_CACHE is None:
         spec = iu.spec_from_file_location("ganlib", ROOT / "scripts" / "21_train_gan.py")
         m = iu.module_from_spec(spec); spec.loader.exec_module(m)
+        torch.set_num_threads(1)   # importing 21 must not reopen intra-op threads
+        try:
+            _c2.setNumThreads(1)
+        except Exception:
+            pass
         g = m.Generator()
         g.load_state_dict(torch.load(ROOT / "work" / "zi2zi_gan.pt", map_location="cpu")["G"])
         g.eval()
@@ -429,7 +439,7 @@ def main():
                     help="primary model binarisation threshold (release: -0.05)")
     ap.add_argument("--hardtail-threshold", type=float, default=-0.45,
                     help="fill-in model threshold, calibrated to match ink (E40)")
-    ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--workers", type=int, default=8, choices=range(1, 9))
     args = ap.parse_args()
     global CAPS, CAP_K, SIMPLIFY
     CAPS = bool(getattr(args, "caps", False))
@@ -469,6 +479,10 @@ def main():
         model.eval()
 
     if args.method == "gan":
+        # --ckpt is honoured for gan too; default is the release primary checkpoint
+        gan_ckpt = Path(args.ckpt) if args.ckpt != str(ROOT / "work" / "style_unet.pt") else \
+            ROOT / "work" / "ckpt" / "m2wt_ep090.pt"
+        os.environ["GAN_CKPT"] = str(gan_ckpt)   # worker chunks read this env var
         import multiprocessing as mp
         S2 = int(args.res)
         ctx = mp.get_context("fork")
@@ -481,11 +495,14 @@ def main():
         with ctx.Pool(args.workers) as pool, open(args.out, "w") as fh:
             for lo, rows in pool.imap_unordered(gan_chunk, tasks):
                 for ch, g, tag, ok in rows:
-                    if not ok:
-                        fb.append(ch)          # recorded, but ribbon contours are still emitted
+                    guard_failed = not ok
                     cs = trace(g.astype(bool), turdsize=4, alphamax=0.4, opttol=0.5)
                     if not cs:
-                        fb.append(ch); continue
+                        if ch not in fb:
+                            fb.append(ch)
+                        continue
+                    if guard_failed and ch not in fb:
+                        fb.append(ch)          # guard failure is recorded once, not per stage
                     em = raster_to_em(cs, S2)
                     em = normalize_to_base(em, ch, blend=1.0, min_scale=0.8, max_scale=1.25)
                     if SIMPLIFY > 0:

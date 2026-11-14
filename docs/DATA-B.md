@@ -186,6 +186,12 @@ c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1
 不对应任何发布说明，文档里不再引用。
 三条线独立编号：A v1.7.2 / B v1.2.4 / C v1.3.0。
 
+**包内 README 的 RFN 列表仍是旧写法（仓库已修，包内待下次重打包对齐）**：
+`release-b/README.md` 写的是 `（霞鶩／霞鶩／落霞孤鶩／LXGW）`——`霞鶩` 重复、缺 `霞鹜` 与 `落霞孤鹜`。
+仓库的 `README-B.md` 已于 2026-11-14 改为完整五项（与 `OFL.txt` 一致）；包内副本是发布快照，
+按 ERRATA E3/E4 的已接受 drift 保留旧文本，**不为一句 typo 重发**（同 O7 裁决），随下一次 B 线发版对齐。
+因包内 `OFL.txt` 的保留名列表本就完整，此项不涉及授权合规。
+
 **日期字段语义（O6，2026-11-14 统一）**：`release_date` = 签核/定版日；`artifacts_built_at` = 分发包
 最后一次构建日（`release-b/` 与 zip 的打包日）。v1.2.4 的两者是 `2026-10-30` / `2026-11-13`：
 版本在 10-30 定版，分包在 11-13 重打；字体字节在 11-14 重建验证与包内一致，不改变 `artifacts_built_at`。
@@ -276,7 +282,7 @@ python3 scripts/66_specimen_b.py
 python3 scripts/69_panel_b.py --gan work-b/ckpt/b_ep080.pt --n 16
 python3 scripts/72_book_vs_font_b.py
 rm -rf release-b && python3 scripts/64_package_b.py
-cd release-b && zip -q -r ../GuanGeKai-B-v1.1.0.zip . && cd ..
+cd release-b && zip -q -r ../GuanGeKai-B-v1.2.4.zip . && cd ..
 
 # 复核
 python3 scripts/71_holes.py --font build/GuanGeKai-B-Regular.ttf --n 300

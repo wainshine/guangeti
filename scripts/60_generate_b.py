@@ -69,6 +69,10 @@ def gan_chunk(args):
     if ht_path and _GAN_HT is None:
         _GAN_HT = _load_gan(ht_path, CFG["gan_res"])
     ht = _GAN_HT if ht_path else None
+    # 21_train_gan.py 在 import 时执行 torch.set_num_threads(TORCH_THREADS or 6)，
+    # 会把本函数开头的 set_num_threads(1) 覆盖掉；加载完必须压回来，否则本 worker
+    # 的第一个 chunk 以 6 线程跑，直接顶破所有者的 10 线程 / 20 核上限。
+    torch.set_num_threads(1)
     bl = importlib.import_module("brush_lib")
     rel = np.load(CFG["rel_width"])
     lo, hi, chars, font_path, S = args
@@ -222,6 +226,8 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
     args = ap.parse_args()
+    if not 1 <= args.workers <= 8:
+        ap.error(f"--workers must be 1..8 (owner's cap: 10 threads / 20 cores); got {args.workers}")
 
     wd = Path(args.work)
     CFG.update(ckpt=args.ckpt, rel_width=args.rel_width, gan_res=args.gan_res,

@@ -51,6 +51,9 @@ def _load_gan(path: str, res: int):
     g = m.Generator()
     g.load_state_dict(torch.load(path, map_location="cpu")["G"])
     g.eval()
+    # 21_train_gan.py sets a module-level TORCH_THREADS default (6) at import.
+    # Re-assert the worker policy after loading it.
+    torch.set_num_threads(1)
     return g
 
 
@@ -250,6 +253,8 @@ def main():
     ap.add_argument("--out-append", action="store_true")
     ap.add_argument("--workers", type=int, default=6)
     args = ap.parse_args()
+    if not 1 <= args.workers <= 8:
+        ap.error(f"--workers must be 1..8 (global owner cap), got {args.workers}")
 
     wd = Path(args.work)
     CFG.update(ckpt=args.ckpt, rel_width=args.rel_width, gan_res=args.gan_res,
