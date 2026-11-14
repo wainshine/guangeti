@@ -241,3 +241,31 @@
 - 抓取时工作区干净；v4 写入后主会话只改 `audit/`（audit-only，不构成漂移）。
 - **执行阶段开始**：A1/A2a/A3/A4 → C1/C2/C3/C6/C7 → B2/B4/B6；主会话只读复核，
   等三线提交/交金样后按 OPERATING §6 出「可发/不可发」复核单。
+
+## 2026-11-14 10:19 CST — 所有者提交 `56edd05`（audit-only：v4 + checklist）
+
+- 内容：v4 快照、`release-gate-checklist.md` v0、audit 修订；**audit-only**，不触发漂移。
+- v4 的 `committed_in` 回填为 `56edd05`（在 v5 中记录）。
+
+## 2026-11-14 10:34 CST — 所有者提交 `beaa524`（A/B/C 三线合并交付）
+
+- 16 文件：AGENTS、README、DATA、PROJECT_STATE、EXPERIMENTS、ERRATA E9、DATA-B/C、RELEASE-C、
+  EXPERIMENTS-C、index.html、`scripts/43_chamfer_floor.py`（新）、`scripts/97_check_terms.py`（A5a）、
+  `data/release-a/b/c.json`。
+- 性质：**非 audit-only** → 触发 v5。
+
+## 2026-11-14 10:36 CST — v5 交付基线 + 合并交付核验
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1035.json`：`head_at_capture = beaa524`、
+  `previous_snapshot.committed_in = 56edd05`、`committed_in = pending`、`delivery_status = delivery-baseline (v5)`；
+  v4 的 `committed_in=56edd05` 已回填。
+- **核验结论**（详见 facts §6.13 / TASKS §5 / 报告 §9.12）：
+  - A：A1/A3/A5a/A7 完成；A2a 部分（MANIFEST 24/24 + SHA 已核，`release` 标记未实现）；
+    A4 文档完成但**自跑金样日志缺失**（A build 未重建）；A6a/A6b 未清。
+  - B：B2/B4/B6 完成；golden 日志 `work-b/golden_repro_2026-11-14.log` 哈希一致、QA/accept/selfaudit 全过；
+    仅 DATA-B「C v1.2.0」一句 P3。
+  - C：C1/C2/C3/C5/C6/C7/C8/C9/C10/C11 完成；golden 日志 `work-c/logs-v1.3/golden_c_v13.log` 哈希一致；
+    C4 待 A 改 AGENTS 日期一行；README-C 旧值待更新（C12）。
+  - 制品：六 TTF/三 zip 哈希未变；B/C build 2026-11-14 重建后字节一致；A build 未重建；三线 SHA 自检 OK；97 OK。
+- 更新 OPERATING §7（v5）、facts v5、TASKS v1.3、报告 §9.12。
+- v5 写入后主会话只改 `audit/`（audit-only，不构成漂移）；下轮三线提交时按 X8 建 v6。
