@@ -131,7 +131,7 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 - **当前交付基线 v12**：`audit/facts/frozen-hashes-2026-11-14T1618.json`
   （`head_at_capture = 43c33df`，2026-11-14 16:13；M-P3/M-P4 文档 + v11 + A-P9 `release-a` 日期证据修正）。
-  `previous_snapshot.committed_in = 43c33df`（v11；v11 自身 committed_in 也是 43c33df）；v12 自身 `committed_in = pending`。
+  `previous_snapshot.committed_in = 43c33df`（v11）；v12 自身 `committed_in = ce8f1af`（2026-11-14 16:17 提交）。
   抓取时 data/脚本/制品均为 HEAD 状态，仅 docs/audit 未提交（不构成基线漂移）。
 - **历史版本**：v11 `...T1608.json`、v10 `...T1216.json`、v9 `...T1148.json`、v8 `...T1126.json`、v7 `...T1103.json`、
   v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、v4（`committed_in = 56edd05`）、

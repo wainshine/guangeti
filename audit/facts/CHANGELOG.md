@@ -510,3 +510,10 @@
 - A-P10：A 对 M-P3 的 A 线文档逐项核对并签字通过。
 - v12 = `frozen-hashes-2026-11-14T1618.json`：head `43c33df`、prev v11=43c33df、`committed_in=pending`；
   release_manifests 的 release-a 按当前文件重新登记。
+
+## 2026-11-14 16:17 CST — v12 入库（ce8f1af），项目收口
+
+- `ce8f1af` 提交 v12 台账 + PROJECT_STATE 快照说明 + audit 收尾；工作区干净。
+- v12 `committed_in=ce8f1af` 已回填；v12 为当前交付基线（release_manifests 中 release-a=9caa01fc… 与当前一致）。
+- 第 5 代审计 Phase1/2 + M-P3/M-P4 + A-P9/A-P10 全部关闭；A/B/C 线侧无待办。
+- 下一次快照 v13 只在脚本/data/制品变更或发版后建立。

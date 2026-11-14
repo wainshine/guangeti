@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 16:13 提交；M-P3/M-P4 文档 + v11 + A-P9 release-a 日期修正）",
  "last_non_audit_commit": "43c33df7078af54171c10a4cdc91d1a4493ef09a",
  "last_non_audit_subject": "更新（文档/v11 + release-a release_date=2026-10-30 证据修正）",
- "committed_in": "pending（v12 自身所在提交；由下一次快照/CHANGELOG 回填）",
+ "committed_in": "ce8f1affca7512e67db6f49e9305be2a3947d0ff (audit/docs commit 2026-11-14 16:17; v12 交付基线)",
  "git_status_at_capture": [
   " M audit/OPERATING.md",
   " M audit/TASKS.md",

@@ -142,4 +142,4 @@ Phase 3（收尾）:
 - **A-P10 签字通过**：A 对 RELEASE-v1.7.2 开篇/复现句/指标行、method、重建链、E30、DATA 游离哈希、ERRATA E10 逐项核过。
 - **v12 已建**：`frozen-hashes-2026-11-14T1618.json`（head `43c33df`、prev v11=43c33df、`committed_in=pending`）；
   `release_manifests` 的 release-a 已按 A-P9 当前文件重新登记。
-- 剩余：提交本批 docs/audit + v12；提交后回填 v12 `committed_in`。B/C 线侧无待办。
+- **v12 已入库（ce8f1af）**，`committed_in` 已回填；本任务板全部闭环，B/C 线侧无待办。
