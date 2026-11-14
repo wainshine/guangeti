@@ -479,3 +479,18 @@
   C-P8 完成（16:07:11 `83 --write`、holes_c 含 seed/cmd）。
 - 门禁：六 TTF/三 zip 未变；release SHA OK；97/DOC NUMBERS OK；work-c 默认只读未再写。
 - 剩余：M-P3/M-P4（主会话）、A-P9（P3）、A-P10（文档签字）。线侧工作已完成，待提交后建 v11。
+
+## 2026-11-14 16:12 CST — v11 交付基线（第 5 代审计 Phase1+2 线侧）
+
+- `1282bdd`（16:08）为 Phase1+2 线侧提交；v11 快照 `frozen-hashes-2026-11-14T1608.json`：
+  `previous_snapshot.committed_in=b2346b8`，`committed_in=pending`。
+- v11 新增 `data_declarations`（`release_ckpts_{a,b,c}.json` SHA-256）与 `release_manifests`；
+  B 交接点已落实：`work-b/ckpt/MANIFEST.json` 被 ignore，`data/release_ckpts_b.json` 是持久证据。
+- 83/71/43/14/10/97、B/C 脚本与声明文件哈希已记录；A-P9（release-a artifacts_built_at）未随本批。
+
+## 2026-11-14 16:30 CST — M-P3 共享文档 / M-P4 X9 完成
+
+- M-P3：RELEASE-v1.7.2、ERRATA E10、method、README、DATA、PROJECT_STATE、EXPERIMENTS、GLOSSARY、CONVENTIONS、AGENTS 批量直改；DATA 游离哈希删除。
+- M-P4：check_doc_numbers 纳入 docs/DATA.md，加数值词边界、裸哈希、重建链 `13_extend_punct` 检查；复跑 DOC NUMBERS OK。
+- 门禁：97 OK；83 默认 A/B INTACT；六 TTF/三 zip/release SHA 未变。
+- 剩余：A-P9（P3）、A-P10（签字）；v11 已建，等提交后回填 committed_in。

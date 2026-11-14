@@ -108,7 +108,6 @@
 ```
 e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac  build/GuanGeKai-Regular.ttf
 bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86  build/GuanGeKai-Real.ttf
-14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b  GuanGeKai-v1.7.2.zip
 ```
 
 B 线（史记本，v1.2.4）：
@@ -188,6 +187,7 @@ mv work/generated_gan.jsonl work/generated.jsonl
 # 旧方法（v1.3.x）：
 # python3 scripts/10_generate.py --method ribbon --workers 6 --res 512 --simplify 2.0
 python3 scripts/11_build_full.py        # 合成完整字体
+python3 scripts/13_extend_punct.py --line A --inplace   # 补 42 标点（必须在 11 之后、14 之前）
 python3 scripts/12_specimen.py          # 样张
 python3 scripts/13_qa.py                # 覆盖率质检
 python3 scripts/14_package.py           # 发布包
@@ -322,4 +322,3 @@ rm -rf data/zi2zi_ds2 data/fonts_target data/ids/Unihan_IRGSources.txt
 > 目前 git 跟踪的文件中最大的只有 `data/ids/ids.txt`（2.1 MB）与两张对照图（各 2 MB）；
 > 字体二进制与发布包均不入库，改由 GitHub Releases 分发（见 README「发布」）。
 > 旧版此处曾建议 `git rm --cached` 一批文件，那些文件已在 2026-10-22 的清理中移出索引，**该命令现已无需执行**。
-14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b  GuanGeKai-v1.7.2.zip

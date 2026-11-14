@@ -23,10 +23,10 @@ cat docs/DATA.md          # 输入/输出清单、许可、校验和
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字形检查
 ```
 
-- 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，15.6 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.1 MB）
-- 发布包：`release/`、`GuanGeKai-v1.5.0.zip`
-- **合成字三层**：1,675 真迹 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ ribbon 回退 799；
-  `release/provenance.json` 为三态 `real` / `gan` / `ribbon_fb`
+- 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，15.7 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.3 MB）
+- 发布包：`release/`、`GuanGeKai-v1.7.2.zip`
+- **合成字构成**：1,675 真迹 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ ribbon 回退 799；
+  `release/provenance.json` 为五态 `real` / `gan_ep90` / `gan_ep80` / `ribbon_fb` / `punct`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
 
@@ -59,7 +59,7 @@ UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
 
 **质量定位**：
 - `GuanGeKai-Real.ttf` 是**可信的写本字形集**，可直接用于正文。
-- `GuanGeKai-Regular.ttf` 的 19,317 个合成字是**近似**：结构正确（来自霞鹜文楷骨架）、笔画重量接近，但**没有真正的墨笔笔锋**。这是当前最大的未解问题（见 §6、§8）。
+- `GuanGeKai-Regular.ttf` 的 19,317 个合成字是**近似**：结构继承自霞鹜文楷骨架，GAN 只改笔形；**不保证结构正确**（E24/E27/E28 已证）。笔画重量接近，但没有真正的墨笔笔锋。
 
 ---
 
@@ -109,6 +109,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | ⑨ 训练 | `09_train*.py` | 见 EXPERIMENTS | 见 §6 |
 | ⑩ 合成 | `10_generate.py` | ~5 min（19,317 字） | — |
 | ⑪ 合字 | `11_build_full.py` | ~3 min | — |
+| ⑪½ 标点 | `13_extend_punct.py --line A --inplace` | 秒 | **必须在 11 之后、14 之前**；漏跑会让 13_qa ABORT（punct） |
 | ⑫–⑭ | `12/13/14_*.py` | 秒~分 | — |
 
 ---
@@ -136,7 +137,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | B. IDS 部件拼字 | **不可行于全量**：19,317 缺字中仅 1,166（6.0%）能完全用真字拼出；拼出的比例也不好 | `EXPERIMENTS.md` E4 |
 | C. 预训练模型 zi2zi-JiT 零样本 | **风格最好**：Dice 0.528 vs 基线 0.309；但结构有幻觉（约 1/4 缺笔/粘连），且权重许可待确认 | `EXPERIMENTS.md` E5–E6 |
 | D. 笔墨滤波（v1.1–v1.2 采用） | 骨架取自文楷、不引入拓扑错误，但只是「加粗的楷体」，无笔锋 | `scripts/10_generate.py --method brush` |
-| E. 带状扫掠 + 斜切端头（v1.3.3–v1.3.5 采用，**v1.5.0 起降为回退方案**） | 拓扑与文楷一致 97%，端帽与笔内动态接近真字 | `scripts/10_generate.py --method ribbon` |
+| E. 带状扫掠 + 斜切端头（v1.3.3–v1.3.5 采用，**v1.5.0 起降为回退方案**） | 端帽与笔内动态接近真字；旧的“拓扑 97%”口径已作废（E28） | `scripts/10_generate.py --method ribbon` |
 | F. GAN（5 层 PatchGAN + hinge + 增强，**v1.5.0 采用**） | 干净集 Dice 0.539、chamfer 6.13（n=617；旧记 0.549/5.92 为抽样口径） | `scripts/10_generate.py --method gan` |
 
 **当前发布版用 GAN**（`zi2zi-GAN`，v1.5.0 起）：真迹 1,675 + GAN 18,518 + ribbon 回退 799。v1.3.3 的 E（ribbon）已降级为回退兜底。
@@ -172,7 +173,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 ② 跨组中位数之比 1.16–1.20；
 ③ 相对文楷真迹 0.75–0.87、合成 0.83–0.94。
 **这不是小字号效应**，是固有墨量差；v1.5.0 曾误报为「12–16px 偏重、16px 起持平」，
-原因是统计口径错误（两组独立样本的比值数组逐元素相除）。下一版可做一次全局标定。
+原因是统计口径错误（两组独立样本的比值数组逐元素相除）。**E35/E37 已证明“全局标定”不可做**：17% 不是可乘常数，轮廓层也无可补对象；只能从模型侧或归一化策略改。
 
 0b. **加训无效（E36）**：M2 配方从 80 轮拉到 150 轮，干净集完全持平
    （Dice 0.543–0.548 vs 0.539，chamfer 5.87–5.94 vs 6.13；口径见 A3 复现注）。ep60 见顶后进入平台。

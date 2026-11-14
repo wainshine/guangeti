@@ -141,16 +141,17 @@ python3 scripts/04_label.py            # 切片 -> 字
 python3 scripts/05_select.py           # 每字挑最優樣本（默認剔除僅出現 1 次的字）
 python3 scripts/06_norm.py             # 字身框歸一化參數
 python3 scripts/07_build_real.py       # 真實字形子集字體
-python3 scripts/10_generate.py --method gan    # 生成缺失字（發布版：GAN + 守衛）
-python3 scripts/36_fill_fallback.py            # 補齊守衛回退的字（帶狀掃掠）
+python3 scripts/10_generate.py --method gan --workers 6 --res 256 --simplify 2.0 \
+        --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45
 python3 scripts/11_build_full.py       # 合成完整字體
+python3 scripts/13_extend_punct.py --line A --inplace   # 補 42 標點/數字/空格（必須在 11 之後、14 之前）
 python3 scripts/12_specimen.py         # 樣張
 python3 scripts/13_qa.py               # 覆蓋率質檢
 python3 scripts/14_package.py          # 發布包
 ```
 
 > **v1.5.0 起發布版依賴訓練**：合成字由 GAN 生成（`--method gan`），
-> 需要檢查點 `work/ckpt/m2_ep080.pt`（380 MB，不入庫；重訓見 `docs/PLAN-v1.5.md`）。
+> 需要主模型 `work/ckpt/m2wt_ep090.pt` + 硬尾 `work/ckpt/m2_ep080.pt`（各約 400 MB，不入庫；重訓見 `docs/PLAN-v1.5.md`）。
 > 沒有檢查點時可退回 `--method ribbon`——畫質較弱（Dice 0.414 vs 0.539），但不需要模型。
 > 複現實驗見 [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)。
 

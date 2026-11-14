@@ -129,18 +129,18 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- **当前交付基线 v10**：`audit/facts/frozen-hashes-2026-11-14T1216.json`
-  （`head_at_capture = 06fb50d`，2026-11-14 12:16；**非 audit-only**：X10 83 改造 + X9 检查器 + 文档修正）。
-  `previous_snapshot.committed_in = f2fc6ed`（v9 的实际提交）；v10 自身 `committed_in = b2346b8`（audit-only 提交，2026-11-14 12:17）。
-  抓取时工作区干净；v10 写入后台账随 `b2346b8` 提交（audit-only，不触发漂移）。**v10 仍是当前交付基线**；纯文档/audit 提交不新建快照。
-- **历史版本**：v9 `...T1148.json`（`committed_in = f2fc6ed`）、v8 `...T1126.json`（`committed_in = 8b810f3`）、
-  v7（`committed_in = bcdeb10`）、v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、
-  v4（`committed_in = 56edd05`）、v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）；
-  均标 superseded，不删除。
-- 主会话每次闸门对比 v10；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
-- 写盘副作用清单：`83` **默认只读**；仅 `--write`/`--out-dir` 才写 `work-c/ab_baseline.json`、`verify_ab.json`；
-  `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件；QA/accept 脚本写各自 `work*/qa/` 与
-  `accept_*.json`（§1 已列入主会话禁跑清单）。X10 已落地（默认只读 + `--help`），待 C 回归。
+- **当前交付基线 v11**：`audit/facts/frozen-hashes-2026-11-14T1608.json`
+  （`head_at_capture = 1282bdd`，2026-11-14 16:08；**非 audit-only**：第 5 代审计 Phase 1+2 线侧）。
+  `previous_snapshot.committed_in = b2346b8`（v10）；v11 自身 `committed_in = pending`。
+  抓取时工作区干净；v11 写入后主会话只改 `audit/` 与文档（docs-only 不新建快照）。
+- **历史版本**：v10 `...T1216.json`、v9 `...T1148.json`、v8 `...T1126.json`、v7 `...T1103.json`、
+  v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、v4（`committed_in = 56edd05`）、
+  v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）；均标 superseded。
+- 主会话每次闸门对比 v11；制品哈希不变且**非 audit** 脚本/数据提交未出现时视为无漂移。
+- 写盘副作用清单：`83` 默认只读；仅 `--write`/`--out-dir` 才写 `work-c/`；`67`/`73` 写 `work-b/`；
+  QA/accept 脚本写各自 `work*/qa/` 与 `accept_*.json`（§1 禁跑清单）。
+- **v11 新增 `data_declarations`**：`data/release_ckpts_{a,b,c}.json` 的 SHA-256 与 `release_manifests`；
+  `work-b/ckpt/MANIFEST.json` 被 gitignore，data 声明文件才是发布检查点的持久证据。
 
 ## 8. 任务与汇报
 

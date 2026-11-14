@@ -26,6 +26,7 @@ CURRENT_DOCS = [
     "README-C.md",
     "docs/PROJECT_STATE.md",
     "docs/method.md",
+    "docs/DATA.md",
     "docs/DATA-B.md",
     "docs/DATA-C.md",
     "docs/RELEASE-v1.7.2.md",
@@ -37,18 +38,20 @@ CURRENT_DOCS = [
 STALE = [
     r"C\s*v1\.2\.0",
     r"B\s*v1\.0\.1",
-    r"0\.549",
-    r"5\.92",
-    r"5\.16",
-    r"0\.4666",
-    r"0\.469(?!\d)",
+    r"(?<![\d.])0\.549(?![\d])",
+    r"(?<![\d.])5\.92(?![\d])",
+    r"(?<![\d.])5\.16(?![\d])",
+    r"(?<![\d.])0\.4666(?![\d])",
+    r"(?<![\d.])0\.469(?![\d])",
     r"\b9\.5%",
     r"\b90\.5%",
     r"\b0\.7%",
     r"4,?078",
     r"21,?036",
     r"44\s*个?码位",
+    r"\b1,?228\b",
 ]
+CHAIN_FILES = ("README.md", "docs/DATA.md", "docs/PROJECT_STATE.md")
 HISTORICAL_MARKERS = (
     "旧", "历史", "當時", "当时", "撤回", "v1.5.0", "v1.6", "v1.2.0", "v1.2.1",
     "v1.2.2", "v1.2.4", "v1.0.1", "v1.1", "E8", "E9", "E24", "E29", "E32",
@@ -120,10 +123,15 @@ def main(argv=None) -> int:
             findings.append(f"MISSING {rel}")
             continue
         recent: list[str] = []
+        in_code = False
         for i, line in enumerate(p.read_text().splitlines(), 1):
             checked += 1
+            if line.startswith("```"):
+                in_code = not in_code
             hist = any(m in line for m in HISTORICAL_MARKERS) or any(
                 any(m in prev for m in HISTORICAL_MARKERS) for prev in recent[-8:])
+            if not in_code and re.match(r"^[0-9a-f]{64}\s+\S+", line) and not hist:
+                findings.append(f"{rel}:{i}: bare checksum outside code fence :: {line.strip()[:80]}")
             for pat in STALE:
                 if re.search(pat, line) and not hist:
                     if "4,?078" in pat and "→" in line:
@@ -138,6 +146,12 @@ def main(argv=None) -> int:
                         continue  # table explicitly documents shortened hashes
                     findings.append(f"{rel}:{i}: {name} hash prefix but not full hash")
             recent.append(line)
+    # rebuild chains must mention the punct extension step (P0-3)
+    for rel in CHAIN_FILES:
+        text = (ROOT / rel).read_text()
+        if "13_extend_punct" not in text:
+            findings.append(f"{rel}: rebuild chain does not mention 13_extend_punct")
+
     # exact expected values sanity (release json itself)
     assert vals["A.version"] == "1.7.2" and vals["B.version"] == "1.2.4" and vals["C.version"] == "1.3.0"
     assert vals["A.real"] == 1675 and vals["B.real"] == 4073 and vals["C.real"] == 5257

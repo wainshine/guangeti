@@ -120,3 +120,16 @@ Phase 3（收尾）:
 - **C-P8 完成**：16:07:11 `83 --write` 更新 `work-c/ab_baseline.json` + `verify_ab.json`；16:07:12 `holes_c` 已含 seed/cmd；83 复跑 `A/B INTACT`；97 OK。
 - **门禁**：六 TTF/三 zip 未变；`release*/SHA256SUMS` OK；`97 TERMS OK`；`DOC NUMBERS OK`；`diff --check`/py_compile 通过；work-c 基线未再被写（默认只读）。
 - **剩余**：M-P3 共享文档、M-P4 X9 升级、A-P9（P3，release-a artifacts_built_at）、A-P10（A 线文档签字）。线侧 Phase 2 已全部完成，待所有者提交；提交后建 v11。
+
+### v11 已建（2026-11-14 16:12）
+
+- `1282bdd` 已提交 Phase1+2 线侧；v11 = `frozen-hashes-2026-11-14T1608.json`（含 data_declarations）；
+  回填 v10 后 v11 `committed_in=pending`。
+- M-P5 部分完成；剩余 M-P3/M-P4、A-P9、A-P10。
+
+### M-P3 / M-P4 完成（2026-11-14 16:30）
+
+- **M-P3 共享文档直改**：`RELEASE-v1.7.2`（开篇“44→42”、完整复现指向 `release-a.json`、指标行加“已更正”）；`ERRATA` 新增 E10（v1.7.1=21,036/44）；`method`（源 PDF 彩色、potrace 参数、17% 全字号）；`README`/`DATA`/`PROJECT_STATE` 重建链补 `13_extend_punct`、去 `36_fill_fallback`、当前 ckpt；`EXPERIMENTS`（E30 0.67→0.00、E34 全局标定作废、训练轮次补第7–9轮、E37–E40 顺序注）；`GLOSSARY`/`CONVENTIONS` C 线 1,313/8.3%/6.25%；`AGENTS` 线程预检加 `TORCH_THREADS=1`；`DATA:325` 游离哈希删除。
+- **M-P4 X9 升级**：`check_doc_numbers.py` 纳入 `docs/DATA.md`（12 文档/2444 行）、加数值正则词边界、裸 64-hex 不在代码围栏检查、重建链必须含 `13_extend_punct`；复跑 `DOC NUMBERS OK`。
+- **门禁**：`97 TERMS OK`；`83` 默认 `A/B INTACT`；六 TTF/三 zip/release SHA 未变；`diff --check` OK。
+- **剩余**：A-P9（P3，release-a artifacts_built_at）、A-P10（A 线文档签字）；M-P5 等提交后回填 v11。

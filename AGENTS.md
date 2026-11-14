@@ -23,7 +23,7 @@
 - 大文件（PDF、`work/`、`data/models/`）不要加入版本库。
 - **并发上限（所有者明令）**：同时最多 **10 线程 / 20 核**。跑任何多进程脚本前必须做三件事：
   `torch.set_num_threads(1)`、`cv2.setNumThreads(1)`、环境变量
-  `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`；worker 数按 20 核反推
+  `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=TORCH_THREADS=1`；worker 数按 20 核反推
   （单 worker 实测约 2 核，故 `--workers ≤ 8`），**启动后用 `ps` 核对总 CPU ≤ 2000%**。
   2026-10-25 曾用 16 worker 把 32 核吃满，被所有者叫停。
 - **训练检查点（所有者 2026-10-25 定的规则）**：
