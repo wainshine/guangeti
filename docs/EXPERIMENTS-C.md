@@ -509,11 +509,12 @@ generated.jsonl: gen 19,090 + base 1,251
 
 C 线同口径为 8.3%；REPORT 原写 2.9% 只数了 `gan_fallback.json`（602），漏掉 649 个 struct-guard 的 `base` 行。
 
-**状态**：探索实验，未进入 v1.3/v1.2.1 发布链；产物在 `work-c-big/`，报告 `work-c-big/REPORT.md`。
+**状态（2026-11-14 所有者裁决）：失败/归档，不采用。** 651 chosen、109 clean（61 个训练时见过）、
+真正未见仅 47 字，未见集上 chamfer 不占优；不再重训，不再进入 v1.3/v1.4/GAN 路线讨论。
+产物保留在 `work-c-big/` 作历史记录，代码在原位归档、不维护。
 
 **C10 训练状态**：`21_train_gan.py` 的 `--val-data` 已改为按新 `val_chars` 重算 `tr`（污染修复），但
-`work-c-big/ckpt/cbig_ep100.pt` **仍是旧训练产物，未重训**；报告中的 unseen 47 字是对旧 checkpoint 的复评，
-不是新训练结果。
+`work-c-big/ckpt/cbig_ep100.pt` **仍是旧训练产物，未重训**；按失败归档，不再重训。
 
 **C11 面板状态**：旧 `report/panel_big_vs_c.png` 为 MPS 生成，已作废；`104_eval_big_c.py` 已改 CPU，
 但 CPU 面板尚未重生成。
