@@ -10,6 +10,11 @@ Design (agreed 2026-11-14):
   * missing glyphs/crops are drawn as text ("缺字" / "无裁片"), not tofu
   * long meta text auto-shrinks (_draw_fit) so `框=[...]` never bleeds into the next cell
 
+Provenance of the layout idea: the cell composition (product glyph + independent OFL
+reference + source crop + ledger) follows the owner-provenance sheet used by the
+KangXi Kai project (MIT).  This file is an independent implementation for guangeti,
+not a copy of their code; only the idea is shared.
+
 Usage (adapter side):
     from review_sheet import build_sheet, write_tsv
     build_sheet(rows, "GuanGeKai-Regular.ttf", "work/qa/review-{d}/sheet-{n}.png")
