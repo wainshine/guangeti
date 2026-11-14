@@ -136,20 +136,16 @@ p5 0.086% | 中位 0.265% | p95 19.97% | 最大 97.99%
 ## 4. 打包决策：只改仓库，包内不动
 
 改根 `README.md` 会连带 `release/README.md`（打包脚本复制）与 `release/SHA256SUMS`（含 README 一行），
-进而改变 zip 哈希；而 `scripts/83_verify_ab_c.py:31` **硬编码**了 `GuanGeKai-v1.6.5.zip` 的哈希：
-
-```python
-ZIPS = {"GuanGeKai-v1.6.5.zip": "226ef25d43fde048e4b08f930672aa8ac3615c2f4fbe0680eb5520ac52380cf0", ...}
-```
-
-重打包 → 83 报错 → C 线发版闸门失败。
+进而改变 zip 哈希。**2026-11-14 起**，`scripts/83_verify_ab_c.py` 的 zip 基线改为从
+`data/release-{a,b,c}.json` 读取（`zip` + `zip_sha256`），不再写死在脚本里；重打包后更新对应 json 即可。
+脚本默认只读，C 线用 `--write` 落盘 `work-c/` 基线。
 
 **决定（三线统一）**：
 
 1. 只改**仓库内**文档，`release*/` 与三个 zip **不动**；
 2. `docs/DATA.md` 与 `docs/DATA-B/C.md` 各加一行：「包内 README 停留在发布时的措辞（『刻本』），
    仓库文档已更正为『写本』，属已知 drift，不重新发版」；
-3. `83_verify_ab_c.py` 的 `ZIPS` 加注释：zip 哈希是发布时的快照，不随文档变动；
+3. `83_verify_ab_c.py` 的 zip 基线从 `data/release-{a,b,c}.json` 读取：zip 哈希是发布时的快照，不随文档变动；
    **`release*/specimen.png`（图上印着「明代《四書白文》刻本」）同属快照**，一并登记 drift；
 4. 三个包的 README 与仓库 README 从此**不再要求逐字节一致**（`AGENTS.md` 踩坑第 1 条的例外）。
 

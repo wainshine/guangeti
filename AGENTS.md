@@ -83,7 +83,7 @@ CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**；唯
   生成工作点 **thr +0.30 / close 1 / blend 0.8 / --struct-guard**。
 - 共用脚本（`05_select`/`06_norm`/`08_make_pairs`）的 C 兼容改动已用 A 数据复跑验证：
   chosen 1,675 逐项一致、norm 与 HEAD 版一致、pairs 逐元素一致。
-  **发版前必须跑 `python3 scripts/83_verify_ab_c.py`，必须打印 `A/B INTACT`。**
+  **发版前必须跑 `python3 scripts/83_verify_ab_c.py --write`（C 线落盘基线；A/B 默认只读），必须打印 `A/B INTACT`。**
 - 已知缺陷：`园`、`四` 的「囗」按写本风格开口，拓扑上无闭合孔（已从 C 线白名单移除并登记）。
 
 ## 最短验证命令
@@ -187,8 +187,9 @@ python3 scripts/97_check_terms.py                            # 7. 术语检查�
 
 - **`README.md` 保留繁体**（面向使用者）；**其余文档一律简体中文**。
 - **B/C 单行例外**：根 `README.md` 的 B/C 版本行与发布说明链接行，B/C 会话可提交**单行 diff**
-  （A review 后合入）；`83_verify_ab_c.py` 的 `ZIPS` 中本线条目同理。除此之外的共享文件改动仍走
-  `audit/OPERATING.md §3` 的登记与三线回归。
+  （A review 后合入）。`83_verify_ab_c.py` 的 zip 基线已改为读 `data/release-{a,b,c}.json`，
+  各线更新自己的 json，不再有 ZIPS 单行例外。除此之外的共享文件改动仍走 `audit/OPERATING.md §3`
+  的登记与三线回归。
 - 三处例外，保持原样不转换：
   1. 书名《四书白文》在简体文档中写作简体；引用原书原名时可保留繁体；
   2. OFL 保留字体名的正式写法 `霞鹜/霞鶩/落霞孤鹜/落霞孤鶩/LXGW` 原样引用（DATA §3）；

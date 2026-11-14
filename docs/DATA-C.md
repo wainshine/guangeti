@@ -190,7 +190,7 @@ python3 scripts/80_qa_c.py        # C 线默认 --max-lost-frac 0.18、白名单
 python3 scripts/71_holes.py --font build/GuanGeKai-C-Regular.ttf --n 300 --json work-c/holes_c.json
 python3 scripts/84_accept_c.py
 python3 scripts/81_package_c.py             # 先校验 build_manifest 的哈希，再打包
-python3 scripts/83_verify_ab_c.py
+python3 scripts/83_verify_ab_c.py --write
 python3 scripts/97_check_terms.py           # 术语检查
 ```
 

@@ -1,4 +1,4 @@
-# 三线任务板 v1.7（主会话维护，2026-11-14 11:50 核验 `8b810f3` A 线收尾提交）
+# 三线任务板 v1.8（主会话维护，2026-11-14 11:52；A 线闭环 + 跨线收尾分工）
 
 > 规则：见 `audit/OPERATING.md` v1.2.1。主会话不代写；三线执行并回报；所有者裁定优先级。
 > 本版依据 `beaa524`（三线合并交付，2026-11-14 10:34）的实测核验，逐项更新状态。
@@ -65,13 +65,13 @@
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
 | X1 | 外部冻结台账 v9（`head=8b810f3`） | `audit/facts/frozen-hashes-2026-11-14T1148.json` | 完成 |
-| X2 | 跨线发布检查项清单 | `audit/facts/release-gate-checklist.md` v0 已写；待三线 review | 待复核 |
+| X2 | 跨线发布检查项清单 | **已定稿（advisory）**：`release-gate-checklist.md` v0 作为默认清单；三线可提异议，不阻塞发布 | 完成 |
 | X3/X4/X11 | 快照/共享变更/主会话只读规则 | 已写入 OPERATING v1.2.1 | 完成 |
 | X5/X6 | 事实台账 v5 / 报告同步 | 已完成 | 完成 |
-| X7 | 追溯登记共享改动 | 97（A5a）、31（A2a release 标记）、早前 21_train_gan/100_review（C）：登记影响面 + 83/97 + A review | 待办 |
-| X8 | 快照重建与 `committed_in` 回填 | v8 `committed_in=8b810f3` 已回填；v9 已建（`previous_snapshot.committed_in=8b810f3`），v9 自身待回填 | 完成（v9） |
-| X9 | 文档数字 vs release-*.json 持久对账闸 | 小脚本/检查单（可在 checklist 的 G 节先手查） | 待办 |
-| X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | 共享脚本变更；未做 | 待办（P1） |
+| X7 | 追溯登记共享改动 | **已完成**：CHANGELOG 记 97（beaa524/83d01d9）、31（0e22ade/2f523d1）、21_train_gan 与 100_review（83d01d9/ef6e3f8）的影响面与验证；历史改动不回滚 | 完成（主会话） |
+| X8 | 快照重建与 `committed_in` 回填 | v8 `committed_in=8b810f3`、v9 `committed_in=f2fc6ed` 均已回填；纯文档/audit 提交不新建快照 | 完成（v9） |
+| X9 | 文档数字 vs release-*.json 持久对账闸 | **完成（初版）**：只读检查器 `audit/tools/check_doc_numbers.py`（11 份当前文档/2094 行）；直改 README-C「B 真迹 4,078→4,073」，RELEASE-v1.7.2 加口径更正注；复跑 `DOC NUMBERS OK` | 完成 |
+| X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | **已改（owner 2026-11-14 授权 A：主会话直改，A review）**：默认只读；`--write` 落盘；`--help` 真；`ZIPS` 读 `data/release-{a,b,c}.json`；写盘移到字集检查后（P1-8）；patch `audit/proposals/X10-83.patch`。**待 A review + C 跑 `--write` 回归** | 待复核 |
 
 ## 5. 本批合并交付核验结论
 

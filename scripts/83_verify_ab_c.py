@@ -4,20 +4,25 @@ The C line writes only work-c/, build/GuanGeKai-C-*, release-c/ and the *-C.md
 documents.  This script verifies that claim from the artefacts themselves rather than
 from good intentions:
 
-  * byte identity of the four shipped TTFs against release/SHA256SUMS (A v1.6.5)
-    and release-b/SHA256SUMS (B v1.2.1);
+  * byte identity of the four shipped TTFs against release/SHA256SUMS (A) and
+    release-b/SHA256SUMS (B);
   * pipeline invariants that would break if a shared script changed behaviour with
-    default arguments (A chosen 1,675 / B chosen 4,078, both fonts at 20,992);
-  * the release archives named in DATA.md, when present.
+    default arguments (A chosen 1,675 / B chosen 4,073, both fonts at 20,992);
+  * the release archives named in ``data/release-{a,b,c}.json``;
+  * three-line charset rule (Glossary): 20,992 basic + 42 punct = cmap 21,034.
 
-It also snapshots the four TTF hashes into work-c/ab_baseline.json; a later run
-reports "changed since the baseline" separately from "changed since the release",
-which is the difference between "C broke it" and "the owner rebuilt A/B on purpose".
+Safety: writing is **off by default**.  Running the script without flags only reads
+the repository.  The C line persists its baseline with ``--write`` (or
+``--out-dir work-c``); A/B lines run the default read-only mode.
 
-  python3 scripts/83_verify_ab_c.py
+  python3 scripts/83_verify_ab_c.py                    # read-only (default)
+  python3 scripts/83_verify_ab_c.py --write            # C line: snapshot work-c baseline
+  python3 scripts/83_verify_ab_c.py --out-dir /tmp/x   # write elsewhere
+  python3 scripts/83_verify_ab_c.py --baseline /tmp/x/ab_baseline.json  # compare only
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
@@ -28,11 +33,6 @@ WORK = ROOT / "work-c"
 
 A_FONTS = ["GuanGeKai-Regular.ttf", "GuanGeKai-Real.ttf"]
 B_FONTS = ["GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf"]
-# zip hashes are release-time snapshots: they change when a package is rebuilt,
-# which is expected.  Update them in the same commit as the release.
-ZIPS = {"GuanGeKai-v1.7.2.zip": "14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b",
-        "GuanGeKai-B-v1.2.4.zip": "2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46",
-        "GuanGeKai-B-v1.2.2.zip": "d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491"}
 
 
 def sha256(p: Path) -> str:
@@ -54,10 +54,55 @@ def sums(path: Path) -> dict:
     return out
 
 
-def main():
+def release_zips() -> dict:
+    """Read zip name/SHA from the release manifests (single source of truth)."""
+    out = {}
+    specs = (
+        ("data/release-a.json", lambda d: (d.get("artifacts") or {}).get("zip")
+         or d.get("zip") or f"GuanGeKai-v{d.get('version', '')}.zip"),
+        ("data/release-b.json", lambda d: f"GuanGeKai-B-v{d.get('version', '')}.zip"),
+        ("data/release-c.json", lambda d: d.get("zip")
+         or f"GuanGeKai-C-v{d.get('version', '')}.zip"),
+    )
+    for rel, name_fn in specs:
+        p = ROOT / rel
+        if not p.exists():
+            print(f"{'WARN':11s} {rel} not present; zip check skipped")
+            continue
+        d = json.loads(p.read_text())
+        art = d.get("artifacts") or {}
+        name = name_fn(d) or art.get("zip")
+        sha = d.get("zip_sha256") or art.get("zip_sha256")
+        if not name or not sha:
+            print(f"{'WARN':11s} {rel}: no zip/zip_sha256; skipped")
+            continue
+        out[name] = sha
+    return out
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(
+        description="Cross-line gate: A/B fonts + release zips + 3-line charset (20,992 + 42 = 21,034).",
+        epilog="Default is read-only. C line persists the baseline with --write; A/B do not need to write.",
+    )
+    g = ap.add_mutually_exclusive_group()
+    g.add_argument("--write", action="store_true",
+                   help="persist verify_ab.json + ab_baseline.json into work-c/ (C line only)")
+    g.add_argument("--no-write", action="store_true",
+                   help="never write (default; explicit for callers that want to be loud)")
+    ap.add_argument("--out-dir", default="",
+                    help="write results here instead of work-c/ (implies write; e.g. /tmp/83)")
+    ap.add_argument("--baseline", default="",
+                    help="baseline JSON to compare against (default: work-c/ab_baseline.json)")
+    args = ap.parse_args(argv)
+
+    write = bool(args.write or args.out_dir) and not args.no_write
+    out_dir = Path(args.out_dir) if args.out_dir else WORK
+    baseline_path = Path(args.baseline) if args.baseline else WORK / "ab_baseline.json"
+
     ok = True
     issues = []
-    info = {"fonts": {}, "checks": {}}
+    info = {"fonts": {}, "checks": {}, "charset": {}}
 
     sa = sums(ROOT / "release" / "SHA256SUMS")
     sb = sums(ROOT / "release-b" / "SHA256SUMS")
@@ -77,6 +122,7 @@ def main():
         print(f"{status:11s} {name:28s} {got[:16]}  {p.stat().st_size:,} B")
 
     from fontTools.ttLib import TTFont
+
     def coverage(path):
         f = TTFont(str(path))
         cm = f.getBestCmap()
@@ -116,38 +162,33 @@ def main():
     print(f"{'OK' if fam_b == 'GuanGe Kai B' else 'FAIL':11s} B family {fam_b!r}")
     ok &= fam_a == "GuanGe Kai" and fam_b == "GuanGe Kai B"
 
-    for z, want in ZIPS.items():
+    zips = release_zips()
+    for z, want in zips.items():
         p = ROOT / z
         if not p.exists():
             print(f"{'WARN':11s} {z} not present")
             continue
         got = sha256(p)
-        if want:
-            good = got == want
-            ok &= good
-            print(f"{'OK' if good else 'FAIL':11s} {z} {got[:16]}")
-            if not good:
-                issues.append(f"{z} hash {got[:16]} != {want[:16]}")
-        else:
-            print(f"{'INFO':11s} {z} {got[:16]} (no recorded baseline)")
+        good = got == want
+        ok &= good
+        print(f"{'OK' if good else 'FAIL':11s} {z} {got[:16]}")
+        if not good:
+            issues.append(f"{z} hash {got[:16]} != {want[:16]}")
+    if not zips:
+        print(f"{'WARN':11s} no release json -> zip checks skipped")
 
-    base_p = WORK / "ab_baseline.json"
-    base = json.loads(base_p.read_text()) if base_p.exists() else {}
+    # baseline comparison is read-only; updated only when writing at the end
+    base = json.loads(baseline_path.read_text()) if baseline_path.exists() else {}
     changed_since_base = [n for n in info["fonts"]
                           if base.get(n) and base[n] != info["fonts"][n]["sha256"]]
     info["changed_since_baseline"] = changed_since_base
+    info["baseline_used"] = str(baseline_path)
     if changed_since_base:
         print("CHANGED since the previous C-line check:", changed_since_base)
-    info["ok"] = bool(ok)
-    info["issues"] = issues
-    WORK.mkdir(parents=True, exist_ok=True)
-    (WORK / "verify_ab.json").write_text(json.dumps(info, ensure_ascii=False, indent=1))
-    snap = {n: v["sha256"] for n, v in info["fonts"].items()}
-    base.update(snap)
-    base_p.write_text(json.dumps(base, ensure_ascii=False, indent=1))
+
     # ---- 字集口径（GLOSSARY「字集口径」）：三线都必须是基本区 20,992 + 标点 42 = 21,034
     import punct_set
-    from fontTools.ttLib import TTFont
+
     punct_ok = True
     for tag, fp in (("A", "build/GuanGeKai-Regular.ttf"),
                     ("B", "build/GuanGeKai-B-Regular.ttf"),
@@ -156,6 +197,7 @@ def main():
             continue
         cm = TTFont(fp).getBestCmap()
         bad = punct_set.verify(cm)
+        info["charset"][tag] = {"cmap": len(cm), "bad": len(bad), "ok": not bad}
         if bad:
             punct_ok = False
             ok = False
@@ -163,7 +205,23 @@ def main():
         else:
             print(f"OK          {tag} 字集 {len(cm)} = 20,992 + 42")
 
+    info["ok"] = bool(ok)
+    info["issues"] = issues
+    info["write"] = write
     print("\nRESULT:", "A/B INTACT" if ok else "A/B CHANGED — investigate before release")
+
+    # write everything only after all checks, so verify_ab.json cannot disagree with exit code
+    if write:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "verify_ab.json").write_text(
+            json.dumps(info, ensure_ascii=False, indent=1))
+        snap = {n: v["sha256"] for n, v in info["fonts"].items()}
+        base.update(snap)
+        (out_dir / "ab_baseline.json").write_text(
+            json.dumps(base, ensure_ascii=False, indent=1))
+        print(f"WROTE       {out_dir}/verify_ab.json + ab_baseline.json")
+    else:
+        print(f"NO-WRITE    (default; baseline untouched: {baseline_path})")
     return 0 if ok else 1
 
 

@@ -1,4 +1,4 @@
-# 主会话运行规则 v1.2.1（2026-11-14 10:15 修订）
+# 主会话运行规则 v1.2.2（2026-11-14 11:52 修订：文字错误直改 + 纯文档提交不重建快照）
 
 > 本文件是协调层规则，放在 `audit/`，不改变项目现有结构。
 > 修订依据：A/B/C 三线对 v1.1 的对抗性审查（快照自指、已发布 OFL 错误、83 被 B 跑会写 C 工作区、
@@ -15,19 +15,22 @@
 
 不做的：
 
-- 不写项目代码、共享文档、`work*/`、`build/`、`release*/`、`data/`；
+- 不写项目代码、脚本、`work*/`、`build/`、`release*/`、`data/`、制品或 zip；不改共享文档的**实质口径/规则**；
+- **文字性错误直改（所有者 2026-11-14 授权）**：主会话可直接修改文档中的 typo、过期措辞/数字、格式、链接，
+  不再排给 A 等下一轮；每次修正在 `audit/facts/CHANGELOG.md` 记录（文件 + 提交号），git 仍由所有者执行。
+  若不确定是「文字」还是「实质口径」，先登记任务板并问所有者，不擅自定口径。
 - 不做 git 写操作（仓库由所有者管理）；
 - **不重构**：不移动/重命名现有文件与目录，不新建 docs 层级；
 - 不替三线写发布说明，不单方面宣布跨线技术规则；
 - **不运行任何会写项目目录的脚本**。已知写盘者（不完全列表）：
-  `83`（`work-c/ab_baseline.json`、`verify_ab.json`）、`67`/`73`（`work-b/verify_a_snapshot.json`）、
-  `63_qa_b`（`work-b/qa/`、`holes.json`）、`68_accept_b`（`work-b/accept_b.json`）、
-  `13_qa`（`work/qa/`）、`80_qa_c`（`work-c/qa/`）、`84_accept_c`（`work-c/accept_c.json`）、
-  `71_holes --json`、`12/23/95/98`（`docs/images/` 或 `work/`）、`07/11/14`（`build/`/`release/`）。
+  `67`/`73`（`work-b/verify_a_snapshot.json`）、`63_qa_b`（`work-b/qa/`、`holes.json`）、
+  `68_accept_b`（`work-b/accept_b.json`）、`13_qa`（`work/qa/`）、`80_qa_c`（`work-c/qa/`）、
+  `84_accept_c`（`work-c/accept_c.json`）、`71_holes --json`、`12/23/95/98`（`docs/images/` 或 `work/`）、
+  `07/11/14`（`build/`/`release/`）。**`83` 例外**：2026-11-14 起默认只读（`--write`/`--out-dir`
+  才会写 `work-c/` 基线），主会话可跑默认只读；`--write` 只由 C 跑。
   **主会话只允许只读动作**：`shasum`、`fontTools` 读取、`release-*.json`/`provenance` 读取与逐字对账、
-  `punct_set.verify()`、`git` 只读命令、`97_check_terms.py`（只读）、`95_compare_lines.py --check`（只读）。
-  注意 `83` **没有实现 --help/--no-write**：传 `--help` 也会执行并写盘
-  （2026-11-14 09:50 主会话误跑一次，内容未变、已登记 CHANGELOG）。闸门只能由各线自跑交输出（§6）。
+  `punct_set.verify()`、`git` 只读命令、`97_check_terms.py`（只读）、`95_compare_lines.py --check`（只读）、
+  `83_verify_ab_c.py`（默认只读）。闸门输出由各线交（§6）。
 
 ## 2. 写作用域矩阵
 
@@ -37,7 +40,7 @@
 | A 会话 | A 线产物：`work/`、`build/GuanGeKai-Regular.ttf`、`build/GuanGeKai-Real.ttf`、`release/`、`data/release-a.json`、A 的 `RELEASE/README`；**共享 docs**：`AGENTS.md`、`PROJECT_STATE`、`DATA`、`EXPERIMENTS`、`GLOSSARY`、`CONVENTIONS`、`method`、`README`、`PLAN`；**共享脚本**：`scripts/` 中非 `_b`/`_c` 脚本（01–42；17–20 归 A）+ 共享库 | B/C 的 `work*/build/release*/doc/data`；不重构 |
 | B 会话 | `work-b/`、`build/GuanGeKai-B-*.ttf`、`release-b/`、`scripts/*_b.py`、`*-B.md`、`data/release-b.json` | A/C 的同上 |
 | C 会话 | `work-c/`、`work-c-big/`、`build/GuanGeKai-C-*`、`release-c/`、`scripts/*_c.py`、`*-C.md`、`data/release-c.json` | A/B 的同上 |
-| 主会话 | `audit/**`（findings / facts / TASKS / OPERATING）、自己创建的 `docs/AUDIT-*` | 其余全部；只读验证 |
+| 主会话 | `audit/**`（findings / facts / TASKS / OPERATING）、自己创建的 `docs/AUDIT-*`；**文档文字错误直改**（owner 2026-11-14 授权，typo/过期数字/格式/链接，记 CHANGELOG） | 代码/脚本/`data/`/`work*/`/`build/`/`release*/`/制品/zip；实质口径变更；git 写 |
 
 **共享资产归属（暂定，待所有者原文）**：项目 README 与共享文档/脚本目前由 A 维护，这是**现状描述**，
 不是排他授权。所有者原话/时间/渠道尚缺，`TASKS O2` 记为待确认；确认前：
@@ -48,9 +51,9 @@
 **Historical clause**：2026-11-14 前已发生的共享改动（如 `21_train_gan.py`、`100_review.py`、83 的 B zip 行）
 视为既成事实，不回滚；此后按 §3。
 
-**发布元信息单行例外**：根 `README.md` 的 B/C 版本/链接行、83 的 `ZIPS` 中本线条目，允许该线提交
-**单行 diff**，A review；X10 落地后 83 条目改为读 `release-*.json`。此例外不扩大写作用域。
-（B v1.2.4 的 83 条目已在 historical clause 内，无需再 review —— B5 已关闭。）
+**发布元信息单行例外**：根 `README.md` 的 B/C 版本/链接行，允许该线提交**单行 diff**，A review。
+`83` 的 zip 基线自 2026-11-14 起读 `data/release-{a,b,c}.json`（各线更新自己的 json），
+不再有 `ZIPS` 单行例外。此例外不扩大写作用域。
 
 ## 3. 共享资产变更协议
 
@@ -58,7 +61,7 @@
 
 1. **变更前**：在 `audit/TASKS.md` 登记，说明影响面（哪几条线、哪类产物）。
 2. **变更后**：跑三线回归——成品哈希 + 中间产物哈希；跑 `83`、`97`；涉及发布口径的跑对应 QA；
-   **`83` 会写 `work-c/`，由 C（work-c owner）执行，或 A 经 C 同意执行**；B 不跑 83。
+   **`83` 默认只读**；需要落盘基线时由 C 加 `--write`（work-c owner）；B 不跑 83。
 3. **A（共享技术 owner，待原文确认）review** 语义变化；主会话记录证据，不代改。
 4. **已发布哈希停手规则**：共享改动若使任一**已发布制品**哈希变化，由**所有者**决定「重发」或「回滚」。
 5. **回归窗口**：受影响线可在**下一个发版前、且不超过 24 小时**要求回归复跑；未复跑前不进发布签核。
@@ -94,9 +97,11 @@
   `previous_snapshot.committed_in`，并在 CHANGELOG 记录；不允许连续两版都停在 pending。
   快照 schema 只使用 `head_at_capture`，不设旧版 `head` 键；下游解析以 `head_at_capture` 为准。
 
-**漂移定义**：基线漂移只由 **① 制品哈希变化** 与 **② 非 audit 路径的提交**触发；
-`audit/**` 与 `docs/AUDIT-*` 的提交（如 `6d20782`、`3336143`）**不构成基线漂移**。这样避免
-「写台账→提交→台账过期」的循环。快照文件版本化保存，不删除旧版；CHANGELOG 记录每次修订。
+**漂移定义**：基线漂移只由 **① 制品哈希变化**、**② 脚本或 `data/` 变化**、**③ 发版**触发。
+`audit/**`、`docs/AUDIT-*` 与**纯文档修正提交**（README/DATA/method/ERRATA 等的文字、数字、格式修正，
+不改代码/脚本/数据）**不构成基线漂移，不新建 vN 快照**，只在 CHANGELOG 记 `docs_commits`（含提交号）。
+这样避免改一句文字就重建一次台账；当前 v9 继续作为交付基线，直到下一次制品/脚本/data 变化或发版再建 v10。
+快照文件版本化保存，不删除旧版；CHANGELOG 记录每次修订。
 
 ## 6. 发布门禁（主会话只读复核）
 
@@ -108,9 +113,10 @@
 4. `provenance` ↔ `chosen`/`generated` 逐字对账；
 5. 该线 QA + 孔洞（固定 seed/n）+ **该线 accept 脚本**：
    A 无独立 accept；B `68_accept_b`；C `84_accept_c`（字重/包围盒/回退率等硬闸）；self-audit 由该线自跑；
-6. 跨线 `83`/`97`/`95 --check`：由线自跑交输出；**主会话只做只读等价复算**——
+6. 跨线 `83`/`97`/`95 --check`：由线自跑交输出；**主会话只做只读复核**——
    允许的动作仅限 `shasum` 哈希比对、`fontTools` 读取 cmap/name、读 `release-*.json`、
-   `punct_set.verify()`、`provenance` 逐字对账；**不运行 83/67/73，不复制 20 GB work 目录**；
+   `punct_set.verify()`、`provenance` 逐字对账、`83` 默认只读模式；**不运行 67/73 与 `83 --write`，
+   不复制 20 GB work 目录**；
 7. 外部冻结台账比对（§7）；83/67 的自更新基线不作漂移证据；
 8. 文档数字可由 manifest/落盘文件导出；发布说明由该线负责人签核，主会话复核不代签。
 
@@ -125,12 +131,14 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 - **当前交付基线 v9**：`audit/facts/frozen-hashes-2026-11-14T1148.json`
   （`head_at_capture = 8b810f3`，2026-11-14 11:48；**混合提交**：DATA §5 排版修复 + E8 措辞 + v8）。
-  `previous_snapshot.committed_in = 8b810f3`（v8 的实际提交）；v9 自身 `committed_in = pending`。
-  抓取时工作区干净；v9 写入后主会话对 `audit/` 的修订待提交（audit-only，不构成漂移）。
+  `previous_snapshot.committed_in = 8b810f3`（v8 的实际提交）；v9 自身 `committed_in = f2fc6ed`（audit-only 提交，2026-11-14 11:53）。
+  抓取时工作区干净；v9 写入后台账随 `f2fc6ed` 提交（audit-only，不触发漂移）。**v9 仍是当前交付基线**；纯文档/audit 提交不再新建快照。
 - **历史版本**：v8 `...T1126.json`（`committed_in = 8b810f3`）、v7 `...T1103.json`（`committed_in = bcdeb10`）、
   v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、v4（`committed_in = 56edd05`）、
   v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）；均标 superseded，不删除。
 - 主会话每次闸门对比 v9；制品哈希不变且**非 audit** 提交未出现时视为无漂移。
+- **待提交（2026-11-14 12:0x）**：X10 改了 `scripts/83_verify_ab_c.py`（默认只读/`--write`/zip 读 JSON），
+  脚本哈希已变；本次提交后按 §5 建 **v10**（v9 保留为上一版）。
 - 写盘副作用清单：`83` 写 `work-c/ab_baseline.json`、`work-c/verify_ab.json`（且无 --help/--no-write）；
   `67` 写 `work-b/verify_a_snapshot.json`；`73` 经 67 写同一文件；QA/accept 脚本写各自 `work*/qa/` 与
   `accept_*.json`（§1 已列入主会话禁跑清单）。X10 跟踪 `83 --no-write/--help`。

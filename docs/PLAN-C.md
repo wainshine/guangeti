@@ -63,7 +63,7 @@
 | 13 补位 | `78_fill_fallback_c.py` | `work-c/generated.jsonl` | |
 | 14 合字 | `79_build_full_c.py` | `build/GuanGeKai-C-Regular.ttf` | |
 | 15 质检/验收/打包 | `80_qa_c.py`、`84_accept_c.py`、`81_package_c.py` | `release-c/` | 硬闸同 A/B |
-| 16 A/B 校验 | `83_verify_ab_c.py` | `work-c/verify_ab.json` | 发版前必须 `A/B INTACT` |
+| 16 A/B 校验 | `83_verify_ab_c.py --write` | `work-c/verify_ab.json` | 发版前必须 `A/B INTACT` |
 
 ## 5. 标签体系（本线核心）
 
@@ -100,7 +100,7 @@
 - v1.2.0 的 v3c 重切、中缝校验、ep34 微调见 `EXPERIMENTS-C.md` C/E15–C/E30 与 `work-c/logs-v1.2.0/`。
 - 发版前硬闸（2026-10-28 全部通过）：
   - `80_qa_c.py`：覆盖率 20,992；无空/过小/过大字形；真迹子集数量与 `chosen.jsonl` 一致；孔洞审计达标；
-  - `83_verify_ab_c.py`：`A/B INTACT`；
+  - `83_verify_ab_c.py --write`：`A/B INTACT`；
   - `84_accept_c.py`：合成/真迹字重比 1.00±0.10。
 - A/B 同步发版：见 `docs/RELEASE-v1.2.0-C.md`。
 

@@ -354,3 +354,54 @@
 - 剩余仅跨线：X7（97/31/21/100 登记）、X9（文档数字对账）、X10（83 `--no-write/--help` + ZIPS 读 json）、
   X2（checklist review）。
 - 更新 OPERATING §7（v9）、facts v9、TASKS v1.7、报告 §9.16。v9 写入后主会话只改 `audit/`（audit-only）；下轮按 X8 建 v10。
+
+## 2026-11-14 11:52 CST — 所有者授权：文字错误直改；纯文档提交不重建快照；X7 完成
+
+所有者反馈「反复更新太费劲」，决定：
+
+1. **文字性/文档错误由主会话直接改**，不再排 A 等下一轮。范围：typo、过期措辞/数字、格式、链接、CJK 用字；
+   不改代码/脚本/data/制品；每次修正在本 CHANGELOG 记录（文件 + 提交号）；git 仍由所有者执行。
+   已写入 OPERATING v1.2.2 §1/§2。
+2. **纯文档修正提交不重建快照**：基线只由 ①制品哈希变化 ②脚本或 data 变化 ③发版 触发；
+   README/DATA/method/ERRATA 等纯文字/数字/格式修正只记 `docs_commits`，不新建 vN。
+   当前 **v9（`8b810f3`）继续作为交付基线**，直到下次制品/脚本/data 变化或发版再建 v10。
+3. **X7 追溯登记完成**（历史共享改动，不回滚）：
+   - `scripts/97_check_terms.py`：`beaa524`（A5a 加 docs/index.html 扫描）、`83d01d9`（+1 行）；
+     影响：仅术语闸；验证：97 OK、index.html 已改「寫本」；A 为作者。
+   - `scripts/31_ckpt_manifest.py`：`0e22ade`（release kind）、`2f523d1`（--release-file + data 文件）；
+     影响：仅 A 的 MANIFEST；验证：A 24/24、B 14、C 43 不变；97 不受影响；A 为作者。
+   - `scripts/21_train_gan.py`：`83d01d9`（C 的 val-data 重算 tr 修复）、`ef6e3f8`（C-big）；
+     影响：仅 C-big 实验（未重训），不进发布；83/97 不受影响；已登记 EXPERIMENTS-C。
+   - `scripts/100_review.py`：`ef6e3f8`（C 新增）、`83d01d9`（CPU 相关）；影响：仅审阅图/文档生成；不进制成品。
+4. TASKS v1.8：X7 完成；X9（主会话只读检查器 + 直改文字）、X2（主会话定稿 advisory）、
+   X10（主会话出 patch，A 共享 owner review，C 跑 83 回归）进行中。
+
+## 2026-11-14 11:53 CST — 所有者提交 `f2fc6ed`（audit-only：v9 台账）
+
+- 内容：v9 快照 + facts v9 + TASKS v1.7 + 报告 §9.16；**audit-only**，不触发漂移。
+- v9 的 `committed_in` 回填为 `f2fc6ed`（已写入 OPERATING/facts/TASKS 与快照文件）。
+- 依新规则：**v9 保持当前交付基线**，纯文档/audit 提交不再新建 v10；下一次快照只看制品/脚本/data 变化或发版。
+
+## 2026-11-14 12:05 CST — X10 实施：83 改造（所有者授权 A：主会话直改，A review）
+
+- 所有者选择「A」：主会话直接改 `scripts/83_verify_ab_c.py`，A 做共享 owner review，C 跑回归，B 不跑。
+- 改动：真 `--help`/argparse；**默认只读**，`--write`/`--out-dir` 才写；`ZIPS` 读
+  `data/release-{a,b,c}.json`（A 嵌套 `artifacts`、B 推导文件名、C 顶层）；写盘移到字集检查后（修 P1-8）；
+  docstring 纠正。patch 存 `audit/proposals/X10-83.patch`，review 单 `audit/proposals/X10-83-review.md`。
+- 主会话自测：`--help` 不执行；默认 `A/B INTACT` + 三 zip OK + 三行 21034，`work-c/` mtime 未变；
+  `--out-dir /tmp/83test` 正常写；`--write --no-write` 互斥报错。
+- 同步文档：`AGENTS.md`、`README-C.md`、`docs/{DATA-C,PLAN-C,CONVENTIONS}.md`、检查单 F1；
+  **未改** `release-c/README.md`（包内快照，改则 SHA256SUMS 失配）。
+- 待办：A review patch；C 跑 `83 --write` + `97` 回归；B 不跑。脚本已变，提交后需建 v10 快照
+  （当前 HEAD f2fc6ed；工作区含本次改动）。
+
+## 2026-11-14 12:10 CST — X9 初版 + 两处文档数字直改
+
+- 新增只读检查器 `audit/tools/check_doc_numbers.py`（X9）：扫 11 份当前文档（2094 行），
+  检查过期数字/术语（0.549/5.92/5.16/0.4666/9.5%/0.7%/4,078/21,036/44 码位 等，历史行有上下文豁免）
+  与短哈希前缀；不写项目文件。复跑结果：`DOC NUMBERS OK`。
+- 按所有者 2026-11-14「文字错误直改」授权，直接修正两处当前文档：
+  1. `README-C.md` 分工表 B 真迹 `4,078（19.4%）` → `4,073（19.4%）`；
+  2. `docs/RELEASE-v1.7.2.md` 表格前加「口径更正（2026-11-14）」：
+     孔洞 n=200 重测 1.4%（2/145）、Dice/chamfer 以 clean617 0.539/6.13 为准（旧 0.549/5.92 为 n=150 抽样，见 E9）。
+- X2 清单定稿为 advisory；X10 待 A review + C 回归；本次提交后建 v10（83 脚本哈希已变）。
