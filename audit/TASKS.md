@@ -1,91 +1,98 @@
-# 三线任务板 v1.1（主会话维护，2026-11-14 09:40 修订）
+# 三线任务板 v1.2（主会话维护，2026-11-14 09:52 修订）
 
-> 规则：见 `audit/OPERATING.md` v1.1。主会话不代写；三线执行并回报；所有者裁定优先级。
-> 修订依据：A/B/C 三线对 v1.0 的审查（快照已随所有者提交 `27eab26` 更新；B golden repro 需补标点；
-> `31 --check-release` 不存在；A5 会误伤 97 历史白名单；83/README 所有权会阻塞 B/C；主会话跑闸门会写项目文件）。
+> 规则：见 `audit/OPERATING.md` v1.2。主会话不代写；三线执行并回报；所有者裁定优先级。
+> 修订依据：三线对 v1.1 的审查（快照自指、已发布 OFL 错误、83 跨线写、门禁漏 accept、`/tmp` 通道、
+> 共享归属原文、B1/X8 状态矛盾等）。
 > 状态：`待办` / `进行中` / `待复核` / `完成` / `阻塞` / `已关闭`。
-> 回报格式：命令 + 输出摘要 + 产物哈希 + 快照（HEAD / git status）。
+> 回报格式：命令 + 输出摘要 + 产物哈希 + 快照（`head_at_capture` / status）。
 
 ## 0. 所有者决策
 
 | ID | 事项 | 状态/建议 |
 |---|---|---|
-| O1 | A 两处修复是否提交 | **已关闭**：所有者已提交 `27eab26`（AGENTS 步 2.5、release-a res 256；工作区干净） |
-| O2 | 共享资产 owner 正式化 | **降级为现状记录**：按所有者 2026-11-14 说明「共享东西由 A 维护」执行，主会话不接管；不阻塞 |
-| O3 | 各线自签发布、主会话复核不代签 | 待所有者确认一句 |
-| O4 | zip 是否承诺字节可复现 | 建议不承诺（记录为发布快照）；如需，另立确定性打包任务 |
+| O1 | A 两处修复是否提交 | **完成**：`27eab26` 已含（AGENTS 步 2.5、release-a res 256） |
+| O2 | 共享资产归属原文 | **待所有者原文**（时间/渠道/原话）；确认前按"现状维护 + 事后登记"，不作排他授权，不阻塞 |
+| O3 | 各线自签发布、主会话复核不代签 | B 已确认；A/C 未反对；建议按此执行 |
+| O4 | zip 是否承诺字节可复现 | 建议不承诺（记录为发布快照） |
 | O5 | 三线是否必须同步发版 | 建议不强制；`main_version` 只是对齐标记 |
-| O6 | `release_date` 语义 | 建议统一为：`release_date` = 签核日；`artifacts_built_at` = 打包日（B2 执行） |
+| **O6** | `release_date` / `artifacts_built_at` 语义 | **三线同义**：`release_date` = 签核日；`artifacts_built_at` = 打包日。**同时覆盖 C（C4）**；B2 执行 |
+| **O7** | 已发布包内 `OFL.txt` 的 "woodblock print" 如何修 | **已裁决（所有者 2026-11-14）：不改、不单独 patch 重发**。理由：不是许可条款/原则性错误，只是来源描述的轻微事实偏差；重打包成本高。处理：ERRATA E8 登记为已接受 drift；将来若因其他原因重打包，可顺带修正（可选） |
 
-## 1. A 线（A 会话；共享技术 owner）
+## 1. A 线（A 会话；共享技术 owner 现状）
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| A1 | `docs/DATA.md:176/181` 的 `--res 512` 改为 256（与已提交的 `release-a.json` 对齐） | `grep -n 'res 512' docs/DATA.md` 无输出（历史 ribbon 注释行如保留须标注"旧方法"） | 待办 |
-| A2a | 跑 `31_ckpt_manifest.py`（无代码改动）；`m2wt_*` 4 个入册；`m2wt_ep090` SHA-256 写进 `release-a.json`；补 `DATA §6.5.1` | MANIFEST **24/24**；`release-a.json` 含 ckpt sha256；`DATA §6.5.1` 有 m2wt 行 | 待办 |
-| A2b | （可选，共享脚本）给 `31_ckpt_manifest.py` 加只读 `--check`（不是不存在的 `--check-release`） | 变更前登记影响面；跑三线回归 + 83/97；A 核准 | 待办 |
-| A3 | floor 5.16 产物：A 线地板脚本 + `work/chamfer_floor.json`（seed 7、800 对、中位/CI/KS/MW）+ EXPERIMENTS E32 命令 | JSON + 命令 + 与 5.16 的一致性说明 | 待办 |
-| A4 | 钉死 A golden repro 并修文档：Regular = 11+13 → `e6d8a104`；Real = **retrace** → `bf278ab1`；`--reuse-contours`=`5733ca42` 标注为"非发布路径/恢复用"；同步 `AGENTS.md` 步骤 1 的措辞 | 两条命令 + 哈希进 A 发布清单；AGENTS 不再暗示 reuse 是发布路径 | 待办 |
-| A5a | 97 扫描面**只加** `docs/index.html`；收紧非历史文档的「44 码位」正则；`docs/releases/`、`docs/REPORTS/` 继续白名单/不扫（历史不改写） | `--help` 说明 + 仅 index.html 新命中；历史文件零新增误报 | 待办 |
-| A5b | 发布闸另加**法律来源声明**检查（不是术语闸）：`OFL.txt`/`LICENSE`/包内 README 不得再写 `woodblock print` /「刻本」描述《四书白文》 | 独立只读脚本或发布检查单一行；OFL.txt 措辞修正或 ERRATA 登记 | 待办 |
-| A6 | 文档口径收口（随下次发版）：`holes lost` 全量或固定 seed/n；`0.549→0.539` 注明 n；PROJECT_STATE/README 作废口径；DATA §4.9/§5 台账 | 审计报告对应 P1 项逐条关闭，主会话复核 | 待办 |
-| A7 | 根 README 的 B/C 版本/链接行：建立「B/C 提交单行 diff + A review」的落地方式（不阻塞 B/C） | 流程写进 §2 例外或 README 维护约定 | 待办 |
-| A8 | `67_verify_a.py` 的快照写 `work-b/verify_a_snapshot.json`：现状登记为例外；如需改路径，按 §3 处理（可选） | 现状已在 OPERATING §7 登记 | 已关闭（现状） |
+| A1 | `docs/DATA.md:176/181` 的 `--res 512` 改为 256（与已提交的 `release-a.json` 对齐） | `grep -n 'res 512' docs/DATA.md` 无输出（历史 ribbon 注释如需保留须标"旧方法"） | 待办 |
+| A2a | 跑 `31_ckpt_manifest.py`（无代码改动）；`m2wt_*` 入册；`m2wt_ep090` SHA-256 写进 `release-a.json`；补 `DATA §6.5.1` | **磁盘 .pt = 24；MANIFEST items = 24；`m2wt_ep090` 有 release 标记 + SHA-256**（三者都写清） | 待办 |
+| A2b | （可选，共享脚本）给 `31` 加只读 `--check` | 变更前登记；三线回归 + 83/97；A review | 待办 |
+| A3 | floor 5.16 产物：脚本 + `work/chamfer_floor.json`（seed 7、800 对、中位/CI/KS/MW）+ E32 命令 | JSON + 命令 + 与 5.16 一致性说明 | 待办 |
+| A4 | 钉死 A golden repro 并修文档：Regular = 11+13 → `e6d8a104`；Real = **retrace** → `bf278ab1`；`--reuse-contours`=`5733ca42` 标注"非发布路径/恢复用"；同步 `AGENTS.md` 步骤 1 措辞；**按新规 A 自跑一次金样交日志** | 命令 + 哈希 + 日志；AGENTS 不再暗示 reuse 是发布路径 | 待办 |
+| A5a | 97 扫描面**只加** `docs/index.html`；**保留**规则，只排除历史目录（`docs/releases/`、`docs/REPORTS/` 继续白名单/不扫）；收紧非历史文档的「44 码位」正则（规则不删） | `--help` 说明；仅 index.html 新命中；历史文件零新增误报 | 待办 |
+| **A5b** | **已接受 drift（原 P0 降级）**：`OFL.txt:8` 的 `Ming-dynasty woodblock print` 不改、不 patch；仅在 `ERRATA` 新增 E8 记录（范围：仓库根/`release*/OFL.txt`/三个已发布 zip，同哈希 `51aae3b7…`；性质：来源描述，不涉及 OFL 条款与版权行）；将来若因其他原因重打包可顺带修正（可选）；**不新增会失败当前已发布包的闸门** | ERRATA E8 一段（A 执行）；发布说明无需改动；不做许可来源 gate 的追溯检查 | 待办（P3，仅 ERRATA） |
+| A6a | 指标口径收口：`holes lost` 全量或固定 seed/n；`0.549→0.539` 注明 n=150/617 | 文档口径与落盘一致 | 待办 |
+| A6b | PROJECT_STATE/README 作废口径清理；DATA §4.9/§5 台账 | 审计报告对应 P1 项逐条关闭，主会话复核 | 待办 |
+| A7 | 根 README 的 B/C 版本/链接行维护方式落地（单行例外） | 流程写进 §2 例外 | 待办 |
+| A8 | `67` 写 `work-b/verify_a_snapshot.json`：现状登记（B 同意） | 已在 OPERATING §7 | 已关闭 |
 
 ## 2. B 线（B 会话）
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| B1 | E15「中间态无法归因」改为「已解释」：62 的中间态变化来自 `62_build_full_b.py:19 VERSION="1.2.4"`（`git log -S` 指向 `bcb74b4`），非漂移；62 连跑确定性 | E15 一句说明 + 两次同哈希记录（`446cc896…`） | 待办（小） |
-| B2 | `release_date` / `artifacts_built_at` 语义落地（按 O6 建议）；`data/release-b.json` 现 2026-10-30 vs zip 2026-11-13 | 两字段语义写进 DATA-B 或 release-b.json | 待办 |
-| B3 | 澄清「21 个未提交文件」为当时状态；当前 `git status` 不成立 | 文档/评议记录更正一句 | 已关闭（澄清） |
-| B4 | golden repro 两步钉死：Regular = `62 --drop-outside-basic` → `13_extend_punct --line B --inplace` → `aa19d6d2`；Real = `57 --reuse-contours --drop-outside-basic` → `7d10e460` | 命令 + 哈希 + 日志；主会话比对 | 待办 |
-| B5 | 83 中的 B zip 条目：在 X10 落地前可用单行例外（A review）；之后从 `release-b.json` 读取 | 与 A7/X10 同步 | 待办（与 A 协同） |
-| B6 | 63/68/83/97 最近输出交付（供主会话复核；73 会经 67 写 `work-b/`，由 B 自跑） | 输出摘要 + 快照 | 待办 |
+| B1 | E15「中间态无法归因」改为「已解释」：62 的中间态变化来自 `62_build_full_b.py:19 VERSION="1.2.4"`（`bcb74b4`），62 连跑确定性（`446cc896…`） | E15 一句说明 + 两次同哈希记录 | **已解释，文档待改** |
+| B2 | `release_date` / `artifacts_built_at` 语义落地（O6，三线同义） | 两字段写入 DATA-B 或 release-b.json | 待办 |
+| B3 | 澄清「21 个未提交文件」为当时状态；当前 git status 不成立 | 一句更正 | 已关闭（澄清） |
+| B4 | golden repro 两步金样：Regular = `62 --drop-outside-basic` → `13_extend_punct --line B --inplace` → `aa19d6d2`；Real = `57 --reuse-contours --drop-outside-basic` → `7d10e460` | 命令 + 哈希 + 日志；主会话比对 | 待办 |
+| B5 | 83 中 B v1.2.4 zip 条目 | 已在 `27eab26` 前存在（historical clause），无需 review | 已关闭 |
+| B6 | 交付 `63_qa_b` / `68_accept_b` / `97` 最近输出；**83 不跑**（83 写 C 的 `work-c/`；由 C 或 A-with-C-consent 交付） | 三项输出 + 快照 | 待办 |
+| B7 | `release-b.json` 顶层 clean 字段保持"不存在/嵌套单一源"（不复制顶层） | 文档一句 | 已关闭（裁决） |
 
 ## 3. C 线（C 会话）
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
 | C1 | 0.4666 / 0.469 对齐：重跑落盘并改数，或给出 0.4666 的产物 | `release-c.json` 与唯一产物一致；附命令 | 待办 |
-| C2 | clean 0.471/6.19/12.0% 来源：确认 v1.2.1 继承或重测 v1.3.0 | 字段旁注明来源版本；或重测 JSON | 待办 |
-| C3 | 删除/重算 `fallback_share_of_block`（0.0712 = **v1.2.1** 的 1,495/20,992）；只留 8.34%（合成）/6.25%（区块）双口径 | release-c 无 0.0712；JSON diff 可核 | 待办 |
-| C4 | v1.3.0 日期 11-02（release-c/RELEASE）与 `AGENTS.md:62` 11-12 归一 | 两处一致 | 待办 |
-| C5 | 未记录修复运行：用**一组**数字核（主日志 `15,715 / fallback 836` vs 出厂 `15,735 行 / gan_fallback 17 项`）给出确认或否认 | 结论 + 三条证据路径 | 待办 |
-| C6 | golden repro 钉死：Regular = `79_build_full_c`（默认含 42 标点）→ `765d0848`；Real = `76_build_real_c --close 3 --hole-repair` → `6caf9d82` | 命令 + 哈希 + 日志 | 待办 |
-| C7 | RELEASE-C 补「两套验收标准」表：发布 QA（已过）vs 冻结四级门（`AUDIT-2026-10-31.md:442` 门 1=85.2%<90%、`:464-468` 门 2=5/94、`:195-215` 门 3/4 无执行记录、无签字） | 表 + 具体行号 | 待办 |
-| C8 | C-big 体量 10.9 GB → 5.5 GB（apparent 5.93 GB，75 文件） | 文档更正 | 待办 |
-| C9 | `release-c.json weight_bias 0.998` vs `work-c/accept_c.json 实测 1.009`：以实测为准或注明来源 | 字段与产物一致 | 待办 |
-| C10 | C-big 训练污染状态：代码已修（21 的 val-data 重算 tr）、`cbig_ep100` **未重训**；在 DATA-C/EXPERIMENTS-C 登记 | 状态句 + 文件路径 | 待办 |
+| C2 | clean 0.471/6.19/12.0% 来源：确认 v1.2.1 继承或重测 v1.3.0 | 字段注明来源版本；或重测 JSON | 待办 |
+| C3 | 删除/重算 `fallback_share_of_block`（0.0712 = **v1.2.1** 的 1,495/20,992）；只留 8.34%（合成）/6.25%（区块） | release-c 无 0.0712；JSON diff 可核 | 待办 |
+| C4 | 日期 11-02 vs `AGENTS.md:62` 11-12 归一；并按 **O6** 给 `release-c` 补 `release_date`/`artifacts_built_at` 语义 | 两处一致 + 字段语义与 B 相同 | 待办 |
+| C5 | 未记录修复运行：用**一组**数字核（主日志 `15,715 / fallback 836` vs 出厂 `15,735 行 / gan_fallback 17 项`）确认或否认 | 结论 + 三条证据路径 | 待办 |
+| C6 | golden repro：路径已定义（Regular = `79_build_full_c` 内含 42 标点 → `765d0848`；Real = `76_build_real_c --close 3 --hole-repair` → `6caf9d82`）；**金样待自跑** | 命令 + 哈希 + 日志 | 待办（路径已确认，金样待跑） |
+| C7 | RELEASE-C 补「两套验收标准」表：发布 QA vs 冻结四级门（`AUDIT-2026-10-31.md:442`、`:464-468`、`:195-215`） | 表 + 行号 + 无签字说明 | 待办 |
+| C8 | C-big 体量 5.5 GB（apparent 5.93 GB） | 文档更正 | 待办 |
+| C9 | `release-c.json weight_bias 0.998` vs `work-c/accept_c.json 1.009` | 字段与产物一致 | 待办 |
+| C10 | C-big 训练污染：代码已修（21 的 val-data 重算 tr）、`cbig_ep100` 未重训 | 在 DATA-C/EXPERIMENTS-C 登记状态 | 待办 |
 | C11 | C-big 旧 MPS 面板作废、CPU 面板待重生成；`104_eval_big_c.py` 已改 CPU | 登记 + 重生成计划 | 待办 |
 
 ## 4. 跨线（主会话）
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| X1 | 外部冻结台账 v1（HEAD `27eab26`，工作区干净） | `audit/facts/frozen-hashes-2026-11-14T0940.json` | 完成 |
-| X2 | 发布清单 v2：**先写一页跨线「检查项清单」**，各线自行实现；不复用 73 代码（73 是 B 专属） | 清单 + 一条线试跑 | 进行中 |
-| X3 | 状态快照协议（v0 过期教训） | 写入 OPERATING §5；每份复核带快照 | 完成/持续 |
-| X4 | 共享变更协议（含已发布哈希停手规则、3 日回归窗口） | 写入 OPERATING §3 | 完成（规则）/待演练 |
-| X5 | 三线事实表 v1 | `audit/facts/2026-11-14.md`（rev 2） | 完成 |
-| X6 | 审计报告状态更新 | `docs/AUDIT-2026-11-14.md §9`（+09:40 快照注） | 完成 |
-| X7 | 追溯登记 2026-11-14 前共享改动（`21_train_gan.py`、`100_review.py` 由 C 改；B/C 其他改动；含 83 中 B v1.2.4 zip 行） | 影响面 + 83/97 结果 + A 核准，登记在 TASKS/CHANGELOG | 待办 |
-| X8 | 每次所有者提交/发版后重跑快照 | 新 `frozen-hashes-*.json` + CHANGELOG 条目 | 完成（本次）/持续 |
-| X9 | 文档数字 vs `release-*.json` 持久对账闸（只读，主会话提案） | 一小脚本或检查单；覆盖 README/DATA/AGENTS/PROJECT_STATE 关键数字 | 待办 |
-| X10 | `83_verify_ab_c.py` 的 `ZIPS` 改为从 `data/release-*.json` 读取（A 执行，共享脚本变更协议） | 去掉硬编码；B/C 不再等 A 改行；三线回归 + 97 | 待办 |
-| X11 | 主会话闸门写法：83/67/73 由线自跑或 `/tmp` 镜像只读等价复算；禁止直接写仓库 | 写入 OPERATING §1/§6 | 完成（规则） |
+| X1 | 外部冻结台账 v2（`head_at_capture=6d20782`，`last_non_audit_commit=27eab26`） | `audit/facts/frozen-hashes-2026-11-14T0950.json` | 完成（v2） |
+| X2 | 发布清单 v2：**先写跨线检查项清单**，各线自行实现；不复用 73 代码 | 清单 + 一条线试跑 | 进行中 |
+| X3 | 状态快照协议（含"audit 提交不算漂移"、`committed_in` 回填） | OPERATING §5；本板 X8 | 完成（规则） |
+| X4 | 共享变更协议（已发布哈希停手、24h 回归窗口、83 写 C 的归属） | OPERATING §3 | 完成（规则）/待演练 |
+| X5 | 三线事实表 v2 | `audit/facts/2026-11-14.md`（rev v2） | 完成（v2） |
+| X6 | 审计报告状态更新（§9.5/§9.6） | `docs/AUDIT-2026-11-14.md` | 完成（v2） |
+| X7 | 追溯登记 2026-11-14 前共享改动（`21_train_gan`、`100_review`、83 B zip 行等） | 影响面 + 83/97 + A review，登记 CHANGELOG | 待办 |
+| **X8** | 快照重建触发规则：**仅非 audit 提交或发版后重建**；audit 提交不触发 | 每次触发新 `frozen-hashes-*.json` + CHANGELOG；`committed_in` 回填 | **规则已定；v2 已建；后续按规则执行** |
+| X9 | 文档数字 vs `release-*.json` 持久对账闸（只读，主会话提案） | 小脚本或检查单；覆盖 README/DATA/AGENTS/PROJECT_STATE 关键数字 | 待办 |
+| **X10** | `83_verify_ab_c.py` 增加 `--no-write`/`--baseline-out` 与真正的 `--help`；`ZIPS` 改读 `data/release-*.json`（A 执行，共享变更协议） | 默认不回写；B 可安全运行；三线回归 + 97 | 待办（P1） |
+| X11 | 主会话闸门写法：只读等价复算（shasum/fontTools/JSON/punct_set），**不运行 83/67/73、不复制 work 目录** | OPERATING §1/§6 | 完成（规则） |
 
 ## 5. 已关闭/已裁决
 
 | 项 | 结论 |
 |---|---|
-| O1 / 快照过期 | 所有者已提交 `27eab26`；v0 台账作废，v1 已建 |
-| A reuse-contours 哈希差异 | 已解释：A 发布 Real = retrace；cache 路径非发布；剩余工作只是 A4 文档对齐 |
-| B golden repro 只跑 62 | 修正为 62 → 13_extend_punct 两步；B Real 补 `--drop-outside-basic` |
-| 31 `--check-release` | 不存在；A2 拆为 A2a（无代码）/A2b（可选加 `--check`） |
-| A5 扩 97 扫描面 | 收缩：只加 `docs/index.html`；OFL/LICENSE 走独立法律来源检查（A5b）；历史文件继续白名单 |
-| 主会话跑闸门会写项目文件 | 规则修正：不直接跑 83/67/73；线自跑或 /tmp 等价复算 |
-| B1 中间态漂移 | 已解释（62 的 VERSION 1.2.4，`bcb74b4`），非缺陷 |
+| O1 / v0 快照过期 | `27eab26` 已提交；v0 作废 |
+| **v1 快照自指过期** | `6d20782` 是 audit-only 提交，不算漂移；v2 已按 `head_at_capture=6d20782` 重建 |
+| A reuse-contours | 已解释为路径定义；A4 文档对齐 |
+| B golden repro 只跑 62 | 修正为两步 + Real 补 `--drop-outside-basic` |
+| 31 `--check-release` 不存在 | A2 拆分（A2a 无代码 / A2b 可选） |
+| A5 扩 97 | 收缩：只加 index.html；OFL/LICENSE 不纳入术语闸 |
+| **OFL.txt 已发布 drift** | 所有者 2026-11-14 裁决：不改、不 patch；仅 ERRATA E8 登记（A5b，P3）；无许可条款问题 |
+| 主会话跑闸门会写项目文件 | 规则修正；83 无 --help/--no-write，已登记事故与 X10 |
+| B1 中间态漂移 | 已解释（VERSION 1.2.4）；仅 E15 文档待改 |
 | C-big 10.9 GB | 5.5 GB（apparent 5.93 GB） |
 | 7.12% 分母 | v1.2.1 的 1,495/20,992；删 |
-| 83/67 自更新基线 | 已确认；漂移监测改用外部冻结台账 |
+| 83/67 自更新基线 | 外部冻结台账；83 写 C、67 写 B 已知 |
+| B5 / B7 | 已关闭（historical clause / 嵌套单一源） |
+| 主会话误跑 83（见 CHANGELOG 09:50） | work-c 两个缓存被重写、内容未变；制品不变 |
