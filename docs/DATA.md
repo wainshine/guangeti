@@ -97,8 +97,8 @@
 
 - 发布包 `release/README.md` 与 `release/specimen.png` 是 **v1.6.5 发布时的快照**，图上与文内仍写「刻本」； <!-- term-ok -->
   仓库文档已更正为「写本」。**不重新发版**，详见 `docs/ERRATA.md` E3/E4。
-- 已发布字体 `build/GuanGeKai-Regular.ttf` 的 name 表 ID 0 仍为 `Ming woodblock print`； <!-- term-ok -->
-  源字符串已在 `scripts/11_build_full.py` 改为 `Ming manuscript`，**下一版重建时生效**（ERRATA E2）。
+- ~~已发布字体 ID 0 为 `Ming woodblock print`~~ <!-- term-ok --> —— **已修复**：v1.7.0 起重建的字体内 ID 0 为
+  `Ming manuscript`（2026-11-14 实测 `e6d8a104…`）。历史包（v1.6.5 及以前）仍为旧串，见 ERRATA E2。
 
 ## 5. 校验和
 
@@ -108,13 +108,26 @@
 ```
 e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac  build/GuanGeKai-Regular.ttf
 bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86  build/GuanGeKai-Real.ttf
-c28f20404593ab302c84d93b90bdc9b6564d8bd1460ef2f0fcd5b7cb9e0b5db6  GuanGeKai-v1.5.0.zip
-5c4c59fa62e089fd7225fc2c19ee008a8bf08ab30f67034e0bfbe5492d926dfe  GuanGeKai-v1.5.1.zip
-c998d6df4bce9506a94744ce8147908c0336635083c03f50ebc99f03fcbfc3c6  GuanGeKai-v1.5.2.zip
+14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b  GuanGeKai-v1.7.2.zip
+```
 
-B 线（史记本，v1.0.1）：
+B 线（史记本，v1.2.4）：
 
 ```
+aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
+7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a  build/GuanGeKai-B-Real.ttf
+2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip
+```
+
+C 线（永乐大典本，v1.3.0）：
+
+```
+765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48  build/GuanGeKai-C-Regular.ttf
+6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d  build/GuanGeKai-C-Real.ttf
+4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498  GuanGeKai-C-v1.3.0.zip
+```
+
+历史版本（v1.5.0–v1.6.5、B v1.0.1–v1.2.1、C v1.0.x）见对应 `docs/releases/` 与 `docs/DATA-B/C.md`；不再在本文重复。
 b76cfc016e1094c8b3299298b52802abb9f8322495b72b6ba38272f984492cec  build/GuanGeKai-B-Regular.ttf
 79aadc231a3bef0b3ddfc14205448aeb705aae8b53ae00b296bcbb426a3d35be  build/GuanGeKai-B-Real.ttf
 f95b5e7fb736e48ed232d16e9f05baab12920a25eb996924fc6898ba0e1f02f1  GuanGeKai-B-v1.0.1.zip

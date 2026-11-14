@@ -1,4 +1,4 @@
-# 三线任务板 v1.4（主会话维护，2026-11-14 10:52 核验 `0e22ade` 收口提交）
+# 三线任务板 v1.5（主会话维护，2026-11-14 11:06 核验 `2f523d1` 文档收尾提交）
 
 > 规则：见 `audit/OPERATING.md` v1.2.1。主会话不代写；三线执行并回报；所有者裁定优先级。
 > 本版依据 `beaa524`（三线合并交付，2026-11-14 10:34）的实测核验，逐项更新状态。
@@ -21,15 +21,15 @@
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
 | A1 | DATA.md `--res 512`→256 | 已改 L176（历史 ribbon 注释 L182 保留）；重建链仍含过时 `36_fill_fallback`/`generated_gan`（见 A6b） | 完成 |
-| A2a | 31 重建 MANIFEST + `m2wt*` 入册 + `m2wt_ep090` SHA 写 release-a + DATA §6.5.1 | 磁盘 24 / MANIFEST 24 / ckpt SHA 一致 / `m2wt_ep090`+`m2_ep080` 均 `kind=release`（31 已加 `release_ckpts.json` 机制）。**P3**：release 列表在 `work/`（gitignore）、31 的 `CK` 硬编码 A 的 `work/ckpt`、DATA §6.5.1 未登记该文件 | 完成（P3 备注） |
+| A2a | 31 重建 MANIFEST + `m2wt*` 入册 + `m2wt_ep090` SHA 写 release-a + DATA §6.5.1 | 磁盘 24 / MANIFEST 24 / ckpt SHA 一致 / `kind=release`；声明文件已入库 `data/release_ckpts_a.json`，31 支持 `--release-file`，DATA §6.5.1 已登记（P3 已修复） | 完成 |
 | A2b | 可选：31 加只读 `--check` | 共享脚本变更协议；未做 | 待办（可选） |
 | A3 | floor 5.16 产物 + 文档口径 | `scripts/43_chamfer_floor.py` + `work/chamfer_floor.json`（floor 5.42，CI 5.28–5.60；clean617 GAN 6.13）；AGENTS/README/PROJECT_STATE/EXPERIMENTS/ERRATA E9 已改 | 完成 |
 | A4 | golden repro 钉路径 + 文档 + **A 自跑金样** | 完成：`work/logs/golden_repro_a_2026-11-14.log`（07 retrace→`bf278ab1`、11→13 extend→`e6d8a104`、13_qa real-subset OK）；build 10:40–10:41 重建后字节一致 | 完成 |
 | A5a | 97 扫描面只加 `docs/index.html` | 97 已加 index.html；index.html 已改「寫本」；97 TERMS OK | 完成 |
 | A5b | E8 登记已发布 OFL drift | E8 已提交（`6bbcf3c`）；末句"可选" | 完成 |
 | A5b-follow | E8 末句改"重打包则必须修正"（所有者建议） | 一句文档；随 A 的下一个非 audit 提交 | 待办（P3） |
-| A6a | 指标 n 口径收口 | 部分完成：README 0.549→0.539（n=617）、AGENTS holes 注 n=300 基线 1.9% ✓。**残留**：AGENTS C 段仍写 `unseen 0.4666`（C1 已改 0.470）；AGENTS 称 n=200 0.7% 但 `work/holes_a.json` 只有 n=300（0.7 无 artifact）；EXPERIMENTS E36/E39 历史表仍用 0.549/5.92 未标"口径已更正" | 部分完成 |
-| A6b | PROJECT_STATE/README/DATA §4.9/§5 旧口径清理 | 仍在：PROJECT_STATE:118 去色、:139「当前发布版用 E」、:211 90.5%/9.5%；README:15 拓扑 97%/47%、:55 程序化筆墨、:113/:116 C v1.2.0、:162 9.5%、:202 去色；DATA §4.9/§5 旧账；DATA 重建链 36 步 | 待办 |
+| A6a | 指标 n 口径收口 | AGENTS C 段 `unseen 0.470`（n=300）；holes n=300 1.9%（4/214）+ n=200 1.4%（2/145，`work/holes_a_n200.json`）；EXPERIMENTS 总表加口径脚注（E32/E36/E39） | 完成 |
+| A6b | PROJECT_STATE/README/DATA §4.9/§5 旧口径清理 | 大部分完成：README 拓扑/程序化/C 指针/去色已改；PROJECT_STATE 118/139/211 已改；DATA 重建链 36 步已标注旧链；release_ckpts 已文档化。**残余**：README 已知限制仍写「9.5% 觸發守衛」（现 4.1% ribbon）；`docs/method.md §5.0` 仍 9.5%/0.549/5.92/5.16；DATA §5 校验和仍列 v1.5.0–v1.5.2 / B v1.0.1；DATA §4.9 称 build ID0 仍 `Ming woodblock print`（实测已是 `Ming manuscript`） | 部分完成 |
 | A7 | README B/C 单行例外 | 已写入 AGENTS「文档约定」 | 完成 |
 
 ## 2. B 线（B 会话）
@@ -63,12 +63,12 @@
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| X1 | 外部冻结台账 v6（`head=0e22ade`） | `audit/facts/frozen-hashes-2026-11-14T1050.json` | 完成 |
+| X1 | 外部冻结台账 v7（`head=2f523d1`） | `audit/facts/frozen-hashes-2026-11-14T1103.json` | 完成 |
 | X2 | 跨线发布检查项清单 | `audit/facts/release-gate-checklist.md` v0 已写；待三线 review | 待复核 |
 | X3/X4/X11 | 快照/共享变更/主会话只读规则 | 已写入 OPERATING v1.2.1 | 完成 |
 | X5/X6 | 事实台账 v5 / 报告同步 | 已完成 | 完成 |
 | X7 | 追溯登记共享改动 | 97（A5a）、31（A2a release 标记）、早前 21_train_gan/100_review（C）：登记影响面 + 83/97 + A review | 待办 |
-| X8 | 快照重建与 `committed_in` 回填 | v5 `committed_in=6858c08` 已回填；v6 已建（`previous_snapshot.committed_in=6858c08`），v6 自身待回填 | 完成（v6） |
+| X8 | 快照重建与 `committed_in` 回填 | v6 `committed_in=2f523d1` 已回填；v7 已建（`previous_snapshot.committed_in=2f523d1`），v7 自身待回填 | 完成（v7） |
 | X9 | 文档数字 vs release-*.json 持久对账闸 | 小脚本/检查单（可在 checklist 的 G 节先手查） | 待办 |
 | X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | 共享脚本变更；未做 | 待办（P1） |
 
@@ -76,7 +76,7 @@
 
 | 线 | 结论 | 说明 |
 |---|---|---|
-| A | **基本通过** | A1/A2a/A3/A4/A5a/A5b/A7 完成（A4 金样日志、A2a release 标记已补）；余 A6a 残留、A6b 文档旧口径 |
+| A | **基本通过** | A1/A2a/A3/A4/A5a/A5b/A7 完成；A6a 完成；A6b 余 4 处文档残余（README 9.5%、method.md、DATA §5、DATA §4.9） |
 | B | **通过（无需重发）** | B2/B4/B6 完成、证据齐、制品未变；仅 DATA-B 一句 P3 |
 | C | **通过** | C1–C12 完成、金样日志齐；C4 日期与 README-C 已改 |
 | 制品 | **无回归** | 六 TTF/三 zip 哈希未变；B/C build 重建后字节一致；A build 未重建 |
@@ -97,3 +97,7 @@
 | C4 日期归一 | AGENTS C 行「发布日 11-02；共享文档登记日 11-12」 |
 | C12 / B8 | README-C 0.470/6.38/8.3%；DATA-B C v1.3.0 |
 | 快照 v6 | `0e22ade`；v5 `committed_in=6858c08` 已回填 |
+| A6a / C 口径 | AGENTS unseen 0.470；holes n200 1.4% artifact；EXPERIMENTS 口径脚注 |
+| release 标记入库 | `data/release_ckpts_a.json` + 31 `--release-file` + DATA §6.5.1；work 清理不再丢 |
+| A6b 大部分 | README/PROJECT_STATE/DATA 旧口径已改（余 4 处见 A6b） |
+| 快照 v7 | `2f523d1`；v6 `committed_in=2f523d1` 已回填 |

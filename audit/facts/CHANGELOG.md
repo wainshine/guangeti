@@ -296,3 +296,26 @@
   n=200 0.7% 无落盘产物；EXPERIMENTS 历史表未标口径；A6b 旧口径未清。
 - 更新 OPERATING §7（v6）、facts v6、TASKS v1.4、报告 §9.13。
 - v6 写入后主会话只改 `audit/`（audit-only）；下轮三线提交时按 X8 建 v7。
+
+## 2026-11-14 11:03 CST — 所有者提交 `2f523d1`（A6a/A6b + release 标记入库，混合提交）
+
+- 14 文件：`AGENTS.md`、`README.md`、`docs/{PROJECT_STATE,DATA,EXPERIMENTS}.md`、
+  `data/release_ckpts_a.json`（新）、`scripts/31_ckpt_manifest.py`、`audit/*`（v6）。
+- 性质：**混合提交**（非 audit-only 文档/脚本 + audit）→ 触发 v7。
+- 要点：C unseen 改 0.470；holes n=200 1.4% + `work/holes_a_n200.json`；EXPERIMENTS 口径脚注；
+  README/PROJECT_STATE/DATA 旧口径清理；release_ckpts 入库 + `31 --release-file` + DATA §6.5.1 登记。
+
+## 2026-11-14 11:06 CST — v7 交付基线 / 文档收尾复核
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1103.json`：`head_at_capture = 2f523d1`、
+  `previous_snapshot.committed_in = 2f523d1`、`committed_in = pending`、`delivery_status = delivery-baseline (v7)`；
+  v6 的 `committed_in=2f523d1` 已回填。
+- 核验：
+  - A6a 完成（AGENTS C 0.470 / holes 双 n / EXPERIMENTS 脚注）；
+  - A6b 大部分完成（README 拓扑/程序化/C 指针/去色；PROJECT_STATE 118/139/211；DATA 36 步标注）；
+  - release 标记 P3 修复（`data/release_ckpts_a.json` + `31 --release-file` + DATA 登记）；
+  - 制品未变；三线 SHA 自检 OK；97 OK；MANIFEST A 24（release 2 项）。
+- **A6b 残余 4 处**：README 已知限制「9.5% 觸發守衛」（现 4.1% ribbon）；`docs/method.md §5.0` 仍 9.5%/0.549/5.92/5.16；
+  DATA §5 校验和仍列 v1.5.0–v1.5.2 / B v1.0.1；DATA §4.9 称 build ID0 仍 `Ming woodblock print`（实测已是 `Ming manuscript`）。
+- 跨线未做：X7（97/31/21/100 登记）、X9（数字对账）、X10（83 `--no-write`）、X2（checklist review）。
+- 更新 OPERATING §7（v7）、facts v7、TASKS v1.5、报告 §9.14。v7 写入后主会话只改 `audit/`（audit-only）；下轮按 X8 建 v8。
