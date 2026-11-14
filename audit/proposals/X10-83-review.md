@@ -49,3 +49,15 @@ python3 scripts/97_check_terms.py
 ```
 
 B 不需要跑；A/B 若需复核可跑默认（只读）。
+
+## 签署记录
+
+- **A（共享 owner）review：通过（2026-11-14 12:2x）**。A 实测：`--help` 无副作用；默认只读
+  （`work-c/` mtime 未变）；`--out-dir /tmp/83out` 正常；三线 zip 由 release json 驱动；
+  写盘在字集检查之后（P1-8 修复成立）；`--write --no-write` 互斥报错正确。
+  **非阻断建议**：`--write` + 自定义 `--out-dir` 时 baseline 默认仍读 `work-c/ab_baseline.json`；
+  跨目录写盘需同时传 `--baseline`。不要求改 patch 才能合入。
+- **C 回归：通过（2026-11-14 12:19:25）**。`83 --write`：四字体 OK、A/B 计数 OK、
+  三行 `21034 = 20,992 + 42`、`RESULT: A/B INTACT`、`WROTE work-c/verify_ab.json + ab_baseline.json`；
+  `97`：`TERMS OK`。`work-c/ab_baseline.json` 四哈希与制品一致；`verify_ab.json` `ok=true`、`issues=[]`。
+- **结论**：X10 合入完成。A 的建议登记为 `X10-follow`（P3，非阻断）。

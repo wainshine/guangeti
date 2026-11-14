@@ -422,3 +422,17 @@
 - 核验：`83 --help` 只打印；默认 `A/B INTACT` + 三 zip OK + 三行 21034，`work-c/` mtime 未变；
   `--out-dir /tmp` 正常；97 OK；DOC NUMBERS OK；三线 SHA 自检 OK；制品未变。
 - 剩余：**C 跑 `83 --write` + `97` 回归**（B 不跑）；A 对 `audit/proposals/X10-83-review.md` 的 review 记录。
+
+
+## 2026-11-14 12:17–12:19 CST — v10 台账提交（audit-only）+ A review / C 回归通过（X10 闭环）
+
+- `b2346b8`（12:17，audit-only）：v10 快照 + OPERATING/TASKS/facts/报告 §9.17 台账；v10 `committed_in=b2346b8` 已回填。
+- **A（共享 owner）review 通过（12:2x）**：X10 patch 可合入；实测 `--help` 无副作用、默认只读、
+  `--out-dir` 正常、三线 zip 由 release json 驱动、写盘在字集检查后（P1-8 成立）、互斥参数报错正确。
+  非阻断建议：`--write` + 自定义 `--out-dir` 时 baseline 默认读 work-c；登记 `X10-follow`（P3）。
+- **C 回归通过（12:19:25）**：`83 --write` → 四字体 OK、A/B 计数 OK、三行 21034 = 20,992+42、
+  `RESULT: A/B INTACT`、`WROTE work-c/verify_ab.json + ab_baseline.json`；`97` → `TERMS OK`。
+  `work-c/ab_baseline.json` 四哈希与制品一致；`verify_ab.json` `ok=true`、`issues=[]`。
+- 主会话复核：`83` 默认只读不再写（work-c mtime 保持 12:19:25）；六 TTF/三 zip 未变；
+  三线 SHA 自检 OK；97 OK；DOC NUMBERS OK。
+- **跨线 X7/X9/X10/X2 全部闭环**；全项目任务板无未闭合项（仅 A2b、X10-follow 两个可选）。

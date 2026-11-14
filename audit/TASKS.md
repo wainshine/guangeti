@@ -1,4 +1,4 @@
-# 三线任务板 v1.9（主会话维护，2026-11-14 12:18；A/B/C 闭环 + X7/X9/X10/X2 收尾）
+# 三线任务板 v1.10（主会话维护，2026-11-14 12:25；全部闭环）
 
 > 规则：见 `audit/OPERATING.md` v1.2.1。主会话不代写；三线执行并回报；所有者裁定优先级。
 > 本版依据 `beaa524`（三线合并交付，2026-11-14 10:34）的实测核验，逐项更新状态。
@@ -23,6 +23,7 @@
 | A1 | DATA.md `--res 512`→256 | 已改 L176（历史 ribbon 注释 L182 保留）；重建链仍含过时 `36_fill_fallback`/`generated_gan`（见 A6b） | 完成 |
 | A2a | 31 重建 MANIFEST + `m2wt*` 入册 + `m2wt_ep090` SHA 写 release-a + DATA §6.5.1 | 磁盘 24 / MANIFEST 24 / ckpt SHA 一致 / `kind=release`；声明文件已入库 `data/release_ckpts_a.json`，31 支持 `--release-file`，DATA §6.5.1 已登记（P3 已修复） | 完成 |
 | A2b | 可选：31 加只读 `--check` | 共享脚本变更协议；未做 | 待办（可选） |
+| X10-follow | P3（A 建议，非阻断）：`--write` + 自定义 `--out-dir` 时 baseline 默认仍读 `work-c/ab_baseline.json`；跨目录写盘需同时传 `--baseline`（或未来让 `--write` 自动读 `out_dir/ab_baseline.json`） | 以后有需要再改，不阻塞 | 待办（P3） |
 | A3 | floor 5.16 产物 + 文档口径 | `scripts/43_chamfer_floor.py` + `work/chamfer_floor.json`（floor 5.42，CI 5.28–5.60；clean617 GAN 6.13）；AGENTS/README/PROJECT_STATE/EXPERIMENTS/ERRATA E9 已改 | 完成 |
 | A4 | golden repro 钉路径 + 文档 + **A 自跑金样** | 完成：`work/logs/golden_repro_a_2026-11-14.log`（07 retrace→`bf278ab1`、11→13 extend→`e6d8a104`、13_qa real-subset OK）；build 10:40–10:41 重建后字节一致 | 完成 |
 | A5a | 97 扫描面只加 `docs/index.html` | 97 已加 index.html；index.html 已改「寫本」；97 TERMS OK | 完成 |
@@ -64,14 +65,14 @@
 
 | ID | 任务 | 验收标准 | 状态 |
 |---|---|---|---|
-| X1 | 外部冻结台账 v10（`head=06fb50d`） | `audit/facts/frozen-hashes-2026-11-14T1216.json` | 完成 |
+| X1 | 外部冻结台账 v10（`head=06fb50d`，`committed_in=b2346b8`） | `audit/facts/frozen-hashes-2026-11-14T1216.json` | 完成 |
 | X2 | 跨线发布检查项清单 | **已定稿（advisory）**：`release-gate-checklist.md` v0 作为默认清单；三线可提异议，不阻塞发布 | 完成 |
 | X3/X4/X11 | 快照/共享变更/主会话只读规则 | 已写入 OPERATING v1.2.1 | 完成 |
 | X5/X6 | 事实台账 v5 / 报告同步 | 已完成 | 完成 |
 | X7 | 追溯登记共享改动 | **已完成**：CHANGELOG 记 97（beaa524/83d01d9）、31（0e22ade/2f523d1）、21_train_gan 与 100_review（83d01d9/ef6e3f8）的影响面与验证；历史改动不回滚 | 完成（主会话） |
-| X8 | 快照重建与 `committed_in` 回填 | v9 `committed_in=f2fc6ed` 已回填；v10 已建（`previous_snapshot.committed_in=f2fc6ed`），v10 自身待回填；纯文档/audit 提交不新建快照 | 完成（v10） |
+| X8 | 快照重建与 `committed_in` 回填 | v9 `committed_in=f2fc6ed`、v10 `committed_in=b2346b8` 均已回填；纯文档/audit 提交不新建快照 | 完成（v10） |
 | X9 | 文档数字 vs release-*.json 持久对账闸 | **完成（初版）**：只读检查器 `audit/tools/check_doc_numbers.py`（11 份当前文档/2094 行）；直改 README-C「B 真迹 4,078→4,073」，RELEASE-v1.7.2 加口径更正注；复跑 `DOC NUMBERS OK` | 完成 |
-| X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | **代码完成并提交**（`06fb50d`）：默认只读；`--write` 落盘；真 `--help`；zip 读 `data/release-{a,b,c}.json`；写盘移到字集检查后（P1-8）；patch/review 单在 `audit/proposals/`。主会话自测：默认 `A/B INTACT`、`work-c` 未动；`--out-dir /tmp` 正常。**待 C 跑 `83 --write` + `97` 回归；A review 记录** | 待复核（C/A） |
+| X10 | 83 `--no-write`/`--help` + `ZIPS` 读 release json | **代码完成并提交**（`06fb50d`）：默认只读；`--write` 落盘；真 `--help`；zip 读 `data/release-{a,b,c}.json`；写盘移到字集检查后（P1-8）；patch/review 单在 `audit/proposals/`。主会话自测：默认 `A/B INTACT`、`work-c` 未动；`--out-dir /tmp` 正常。**A review 通过（12:2x）；C 回归通过（12:19:25：`A/B INTACT`、`work-c` baseline 已更新、`97 TERMS OK`）** | 完成 |
 
 ## 5. 本批合并交付核验结论
 

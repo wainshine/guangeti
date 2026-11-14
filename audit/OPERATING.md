@@ -131,8 +131,8 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 - **当前交付基线 v10**：`audit/facts/frozen-hashes-2026-11-14T1216.json`
   （`head_at_capture = 06fb50d`，2026-11-14 12:16；**非 audit-only**：X10 83 改造 + X9 检查器 + 文档修正）。
-  `previous_snapshot.committed_in = f2fc6ed`（v9 的实际提交）；v10 自身 `committed_in = pending`。
-  抓取时工作区干净；v10 写入后主会话只改 `audit/`（audit-only，不构成漂移）。
+  `previous_snapshot.committed_in = f2fc6ed`（v9 的实际提交）；v10 自身 `committed_in = b2346b8`（audit-only 提交，2026-11-14 12:17）。
+  抓取时工作区干净；v10 写入后台账随 `b2346b8` 提交（audit-only，不触发漂移）。**v10 仍是当前交付基线**；纯文档/audit 提交不新建快照。
 - **历史版本**：v9 `...T1148.json`（`committed_in = f2fc6ed`）、v8 `...T1126.json`（`committed_in = 8b810f3`）、
   v7（`committed_in = bcdeb10`）、v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、
   v4（`committed_in = 56edd05`）、v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）；
