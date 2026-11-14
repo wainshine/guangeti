@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 10:34 提交；A/B/C 三线合并交付，非 audit-only）",
  "last_non_audit_commit": "beaa524607992036b0d60ceb6b1583d1db2b4596",
  "last_non_audit_subject": "更新（A1/A2a/A3/A5a + B2/B4/B6 + C1/C2/C3/C5-C11 合并；A6b/C4 未完成）",
- "committed_in": "pending（v5 自身所在提交；由下一次快照/CHANGELOG 回填）",
+ "committed_in": "6858c08a3be01e210bd8a528e5c0defc3099cb5a (audit-only commit 2026-11-14 10:39, backfilled 2026-11-14 10:51)",
  "git_status_at_capture": [],
  "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
  "audit_only_commits_ignored": [

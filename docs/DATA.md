@@ -176,7 +176,8 @@ python3 scripts/07_build_real.py        # 真字子集字体
 python3 scripts/10_generate.py --method gan --workers 6 --res 256 --simplify 2.0 \
         --ckpt-hardtail work/ckpt/m2_ep080.pt --threshold -0.05 --hardtail-threshold -0.45 \
         --out work/generated_gan.jsonl
-python3 scripts/36_fill_fallback.py            # 补齐守卫回退的字（ribbon 轮廓）
+# v1.5.0 起回退（ribbon）由 10_generate --ckpt-hardtail + 守卫内联完成；
+# 36_fill_fallback.py 仅用于 v1.5.0 之前的旧链，勿在新链中调用。
 mv work/generated_gan.jsonl work/generated.jsonl
 # 旧方法（v1.3.x）：
 # python3 scripts/10_generate.py --method ribbon --workers 6 --res 512 --simplify 2.0
@@ -215,8 +216,10 @@ python3 scripts/14_package.py           # 发布包
   - 主模型 `work/ckpt/m2wt_ep090.pt`（sha256 `5f5ac04e…`，400.1 MB，mtime 2026-10-26 22:46）
     —— `data/release-a.json > generator.primary_ckpt`；
   - 补位模型 `work/ckpt/m2_ep080.pt` —— `generator.hardtail_ckpt`；
-  - 两者均已入 `MANIFEST.json`（当前 24/24，`31_ckpt_manifest.py` 2026-11-14 重建）；
-    此前的清单已漏登 `m2wt*` 四个文件（第 4 次清单失配），已修复。
+  - 两者均已入 `MANIFEST.json`（当前 24/24，2026-11-14 重建）；此前漏登 `m2wt*` 四个文件（第 4 次失配），已修复；
+  - **声明文件**：`data/release_ckpts_a.json`（入库，A 线专用）。重建清单用
+    `python3 scripts/31_ckpt_manifest.py --release-file data/release_ckpts_a.json`，
+    这样 `kind=release` 不会因清理 `work/` 而丢失；B/C 各用自己的文件或不传。
 
 **当前检查点分布（2026-10-25 19:30 核对）**：
 

@@ -1,0 +1,8 @@
+{
+ "line": "A",
+ "release_ckpts": [
+  "m2wt_ep090.pt",
+  "m2_ep080.pt"
+ ],
+ "note": "发布检查点声明；31_ckpt_manifest.py --release-file 读取后标 kind=release"
+}

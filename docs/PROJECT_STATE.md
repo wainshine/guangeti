@@ -115,7 +115,10 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 
 ## 5. 关键工程决策（以及为什么）
 
-1. **句读圈点原本是红色**，但我们使用的 PDF 已被去色（2026-10-23 实测：全页 `r−g` 最大 9–14，`(r−g)>32` 命中 0 像素），因此按颜色分离无效，改为「厚度 + 连通域」判据：面积 <3000 且距离变换峰值 <2.3 px 的孤立碎片整段剔除（`pageproc.comps`）。这是 v1.1 最重要的修复。若换未去色扫描，`red_mask()` 可直接使用。
+1. **句读圈点原本是红色，源 PDF 也是彩色的**（`get_pixmap` 出来 `r−g` 最大约 103，ERRATA E5）；
+   注意 `work/cells`、`work/masks` 是**单通道灰度**，拿它们测颜色会得出"已去色"的错误结论（早期就是这么误判的）。
+   四书这份红色标记本就很少（正文页 0.1–0.4%，中位 0.27%），颜色分离收益接近 0，
+   因此仍用「厚度 + 连通域」判据：面积 <3000 且距离变换峰值 <2.3 px 的孤立碎片整段剔除（`pageproc.comps`）。
 2. **两遍连通域归属**。撇、捺、点常是独立连通域，按质心归格会把它们判给邻字，导致笔画被截断。第二遍把「与本格外框重叠 >45%」的未分配连通域吸回本格，迭代两次。
 3. **不再对裁剪图重新二值化**。直接保存「本格所有连通域的联集掩膜」（`work/masks/*.png`），邻字碎片物理上进不来。
 4. **字距用全页自相关**（~310 px），每栏再拟合相位与缩放，切分线落在空白带上。
@@ -136,14 +139,14 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | E. 带状扫掠 + 斜切端头（v1.3.3–v1.3.5 采用，**v1.5.0 起降为回退方案**） | 拓扑与文楷一致 97%，端帽与笔内动态接近真字 | `scripts/10_generate.py --method ribbon` |
 | F. GAN（5 层 PatchGAN + hinge + 增强，**v1.5.0 采用**） | 干净集 Dice 0.539、chamfer 6.13（n=617；旧记 0.549/5.92 为抽样口径） | `scripts/10_generate.py --method gan` |
 
-**当前发布版用 E**（v1.3.3）。D 是 v1.1–v1.2 的旧方案；C 有幻觉与许可两个未决问题（E14 长训练后 Dice 反而降到 0.397）。
+**当前发布版用 GAN**（`zi2zi-GAN`，v1.5.0 起）：真迹 1,675 + GAN 18,518 + ribbon 回退 799。v1.3.3 的 E（ribbon）已降级为回退兜底。
 
 ---
 
 ## 7. 已知缺陷清单（按严重度）
 
 ### 7.1 已修复
-- 句读圈点混入字形（v1.1 修复）：原书为红色，本 PDF 已去色，故按厚度/连通域剔除
+- 句读圈点混入字形（v1.1 修复）：原书为红色、源 PDF 也是彩色，但四书红点极少（0.1–0.4%），故按厚度/连通域剔除
 - 撇捺被截断（v1.1 修复）
 - 邻字碎片进入裁剪（v1.1 修复）
 - 坐标翻转 bug：`raster_to_em` 里末点误用 `mx()` 导致整字变条形码（v1.1 修复）
@@ -208,7 +211,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | 要验证的结论 | 方法 |
 |---|---|
 | 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf` |
-| 合成字构成（90.5% GAN / 9.5% 回退） | `python3 -c "import json,collections;print(collections.Counter(json.loads(l)['src'] for l in open('work/generated.jsonl')))"` |
+| 合成字构成（95.9% GAN / 4.1% 回退） | `python3 -c "import json,collections;print(collections.Counter(json.loads(l)['src'] for l in open('work/generated.jsonl')))"` |
 | 泛化指标（Dice 0.539 / chamfer 6.13，n=617） | `python3 scripts/32_eval_clean.py --gan work/ckpt/m2wt_ep090.pt --n 617` + `python3 scripts/43_chamfer_floor.py` |
 | 真字数量 1,675 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数；重跑 `05_select.py` 应得到同样的 1,675 |
 | 每个字来自哪里 | `release/provenance.json`（逐字 real/gen） |

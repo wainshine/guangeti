@@ -12,8 +12,9 @@
 > 四書本（本頁，`GuanGe Kai`）、史記本（`GuanGe Kai B`，見 `README-B.md`）、
 > 永樂大典本（`GuanGe Kai C`，見 `README-C.md`）。三套均為 20,992 字全覆蓋。
 > 本頁以下內容只講 A 線；B、C 的指標與限制見各自的 README。
-> 合成字的筆畫骨架取自霞鶩文楷，結構與其一致（拓撲相同率 97%），但**沒有真正的墨筆筆鋒**；
-> 與寫本真跡的拓撲一致率約 47%，這部分差異繼承自基線字體。品質定位與已知限制見
+> 合成字的筆畫骨架取自霞鶩文楷，因此**結構繼承自基線字體，沒有真正的墨筆筆鋒**；
+> 與寫本真跡的骨架 chamfer 為 **6.13 px**（617 個未見字，n=617），不是「拓撲相同率」。
+> 舊的「拓撲 97% / 47%」口徑已作廢（E28：與文楷比拓撲是循環論證）。品質定位與已知限制見
 > [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，所有實驗與指標見
 > [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)，資料與許可見 [docs/DATA.md](docs/DATA.md)。
 
@@ -52,7 +53,7 @@ CJK 字體：
 | 格式 | TTF（glyf，UPM 1000） |
 | 授權 | SIL Open Font License 1.1 |
 | 真實字形 | **1,675** 字直接取自掃描本（向量化；僅保留書中出現 ≥2 次、可做同字聚類校驗的字） |
-| 生成字形 | **19,317** 字由程序化筆墨合成補齊（缺失字） |
+| 生成字形 | **19,317** 字：zi2zi-GAN 18,518（95.9%）+ ribbon 回退 799（4.1%） |
 
 字體分兩級發布：
 
@@ -110,10 +111,10 @@ GuanGeKai (20,992 字)
 | [docs/RELEASE-v1.7.2.md](docs/RELEASE-v1.7.2.md) | 想了解本版改了什麼的人 | **A v1.7.2**：字集口徑定稿（20,992 + 42 = 21,034）、工作點固化 |
 | [docs/releases/RELEASE-v1.7.0.md](docs/releases/RELEASE-v1.7.0.md) | 考古的人 | v1.7.0：字體元數據與術語更正 |
 | [README-B.md](README-B.md) | B 線本版說明 | **B v1.2.4**：字集口徑 20,992 + 42 = 21,034（v1.2.4 由 B 線重出） |
-| [docs/RELEASE-v1.2.0-C.md](docs/RELEASE-v1.2.0-C.md) | C 線本版說明 | **C v1.2.0**：v3c 全量重切、守衛回退尺寸修復 |
+| [docs/RELEASE-v1.3.0-C.md](docs/RELEASE-v1.3.0-C.md) | C 線本版說明 | **C v1.3.0**：字級未見驗收、回退口徑更正 |
 | [docs/releases/](docs/releases/README.md) | 考古的人 | 已被取代的 17 份發布說明（按線與版本索引） |
 | [README-B.md](README-B.md) | 想用史記本的人 | GuanGe Kai B v1.2.4 |
-| [README-C.md](README-C.md) | 想用永樂大典本的人 | GuanGe Kai C v1.2.0 |
+| [README-C.md](README-C.md) | 想用永樂大典本的人 | GuanGe Kai C v1.3.0 |
 | [docs/PLAN-v1.5.md](docs/PLAN-v1.5.md) | 想知道下一步的人 | 把 GAN 推到可驗收的四個里程碑（M0–M4）與決策點 |
 | [docs/PLAN-v1.4.md](docs/PLAN-v1.4.md) | 考古的人 | **已作廢**：v1.4.0 起三線並行的原始設想 |
 | [docs/REPORTS/](docs/REPORTS/) | 想看實測數據的人 | 每次橫向評測的完整報告（指標表 + 兩個面板） |
@@ -199,9 +200,9 @@ python3 scripts/14_package.py          # 發布包
 
 * **日本宮內廳書陵部（圖書寮數位檔案）** —— 原書藏本與**數位化掃描**（檔號 1000066720000）
 * **書格 shuge.org** —— 將該掃描整理成可下載的 PDF（**掃描並非書格製作**）
-* 說明：本 PDF 已被去色（實測 `r−g` 最大僅 11–14，無紅色像素），原書的**紅色圈點**在我們這份檔案裡
-  已變成深灰，故顏色分離無效，實際用「厚度 + 連通域」判據剔除（`scripts/pageproc.py`）。
-  若使用未去色的掃描，`red_mask()` 仍可直接生效。
+* 說明：源 PDF 是彩色的（`r−g` 最大約 103），原書的**紅色圈點**確實存在；`work/` 下的灰度圖不能拿來測顏色
+  但紅點比例很低（正文頁 0.1–0.4%，中位 0.27%），顏色分離收益接近 0，
+  故改用「厚度 + 連通域」判據剔除（`scripts/pageproc.py`）；`red_mask()` 仍在 `ink_mask()` 內生效。
 
 ### 字體（OFL）
 

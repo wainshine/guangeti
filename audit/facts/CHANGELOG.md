@@ -269,3 +269,30 @@
   - 制品：六 TTF/三 zip 哈希未变；B/C build 2026-11-14 重建后字节一致；A build 未重建；三线 SHA 自检 OK；97 OK。
 - 更新 OPERATING §7（v5）、facts v5、TASKS v1.3、报告 §9.12。
 - v5 写入后主会话只改 `audit/`（audit-only，不构成漂移）；下轮三线提交时按 X8 建 v6。
+
+## 2026-11-14 10:39 CST — 所有者提交 `6858c08`（audit-only：v5 + 核验）
+
+- 内容：v5 快照、TASKS v1.3、facts v5、报告 §9.12；**audit-only**，不触发漂移。
+- v5 的 `committed_in` 回填为 `6858c08`（在 v6 中记录）。
+
+## 2026-11-14 10:48 CST — 所有者提交 `0e22ade`（A4/A2a/C4/C12/B8/A6a 收口）
+
+- 5 文件：`AGENTS.md`（C 日期归一 + holes n=300 基线）、`README-C.md`（unseen 0.470/6.38/8.3%）、
+  `README.md`（Dice 0.549→0.539）、`docs/DATA-B.md`（C v1.3.0）、`scripts/31_ckpt_manifest.py`
+  （`release_ckpts.json` → `kind=release`）。
+- 性质：**非 audit-only** → 触发 v6。
+- A4 金样已在 `work/logs/golden_repro_a_2026-11-14.log`（07 retrace `bf278ab1`、11→13 `e6d8a104`、13_qa OK）；
+  A build 10:40–10:41 重建后字节一致。
+
+## 2026-11-14 10:52 CST — v6 交付基线 / 收口复核
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1050.json`：`head_at_capture = 0e22ade`、
+  `previous_snapshot.committed_in = 6858c08`、`committed_in = pending`、`delivery_status = delivery-baseline (v6)`；
+  v5 的 `committed_in=6858c08` 已回填。
+- 核验：A4/A2a（release 标记）/C4/C12/B8 完成；A6a 部分；A6b 未动；制品六 TTF/三 zip 未变；
+  三线 SHA 自检 OK；97 OK；MANIFEST A 24（`m2wt_ep090`/`m2_ep080` 均 `kind=release`）。
+- 新增 P3/P2 备注：release 标记依赖 `work/ckpt/release_ckpts.json`（gitignore，work 重建会丢；
+  31 的 `CK` 硬编码 A 的 work/ckpt；DATA §6.5.1 未登记该文件）；AGENTS C 段仍写 `unseen 0.4666`（与 0.470 不一致）；
+  n=200 0.7% 无落盘产物；EXPERIMENTS 历史表未标口径；A6b 旧口径未清。
+- 更新 OPERATING §7（v6）、facts v6、TASKS v1.4、报告 §9.13。
+- v6 写入后主会话只改 `audit/`（audit-only）；下轮三线提交时按 X8 建 v7。

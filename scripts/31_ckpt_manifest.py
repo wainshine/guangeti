@@ -18,13 +18,21 @@ _RELEASE: set[str] = set()
 CORE_EPOCHS = {50, 100, 150, 200, 300, 400, 500}
 
 
-RELEASE_LIST = CK / "release_ckpts.json"
+RELEASE_LIST = CK / "release_ckpts.json"   # fallback: per-checkpoint-dir file
 
 
-def _release_names() -> set[str]:
-    """Release checkpoints are declared in a tiny file so the flag survives regeneration."""
+def _release_names(path: Path | None = None) -> set[str]:
+    """Release checkpoints are declared in a small tracked file (default: inside the ckpt dir).
+
+    Pass `--release-file` to point at `data/release_ckpts_<line>.json`; keeping it in `data/`
+    survives any cleanup of `work/`, and B/C simply pass their own file (or none).
+    """
+    src = path or RELEASE_LIST
     try:
-        return {str(x) for x in json.loads(RELEASE_LIST.read_text())}
+        data = json.loads(src.read_text())
+        if isinstance(data, dict):
+            data = data.get("release_ckpts", [])
+        return {str(x) for x in data}
     except Exception:
         return set()
 
@@ -55,7 +63,11 @@ def main():
     ap.add_argument("--ckpt-dir", default=str(CKPT_DIR),
                     help="checkpoint directory (the B line uses work-b/ckpt)")
     ap.add_argument("--out", default="")
+    ap.add_argument("--release-file", default="",
+                    help="JSON with release checkpoint names (list or {release_ckpts:[...]})")
     args = ap.parse_args()
+    global _RELEASE
+    _RELEASE = _release_names(Path(args.release_file) if args.release_file else None)
     ck = Path(args.ckpt_dir)
     out_path = Path(args.out) if args.out else ck / "MANIFEST.json"
     items = []
