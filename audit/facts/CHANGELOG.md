@@ -405,3 +405,20 @@
   2. `docs/RELEASE-v1.7.2.md` 表格前加「口径更正（2026-11-14）」：
      孔洞 n=200 重测 1.4%（2/145）、Dice/chamfer 以 clean617 0.539/6.13 为准（旧 0.549/5.92 为 n=150 抽样，见 E9）。
 - X2 清单定稿为 advisory；X10 待 A review + C 回归；本次提交后建 v10（83 脚本哈希已变）。
+
+## 2026-11-14 12:16 CST — 所有者提交 `06fb50d`（X10 83 改造 + X9 + 文档修正）
+
+- 16 文件：`scripts/83_verify_ab_c.py`、`audit/proposals/*`、`audit/tools/check_doc_numbers.py`、
+  文档引用（AGENTS/README-C/CONVENTIONS/DATA-C/PLAN-C/RELEASE-v1.7.2）+ audit 台账。
+- 性质：**非 audit-only**（脚本变更）→ 触发 v10。
+- X10 代码完成：默认只读、`--write`/`--out-dir`、真 `--help`、zip 读 `data/release-{a,b,c}.json`、
+  写盘移到字集检查后（P1-8）。X9 初版完成；X7/X2 完成。
+
+## 2026-11-14 12:18 CST — v10 交付基线
+
+- 新建 `audit/facts/frozen-hashes-2026-11-14T1216.json`：`head_at_capture = 06fb50d`、
+  `previous_snapshot.committed_in = f2fc6ed`、`committed_in = pending`、`delivery_status = delivery-baseline (v10)；
+  v9 的 `committed_in=f2fc6ed` 已回填；83 新哈希 `14b46c7d…`。
+- 核验：`83 --help` 只打印；默认 `A/B INTACT` + 三 zip OK + 三行 21034，`work-c/` mtime 未变；
+  `--out-dir /tmp` 正常；97 OK；DOC NUMBERS OK；三线 SHA 自检 OK；制品未变。
+- 剩余：**C 跑 `83 --write` + `97` 回归**（B 不跑）；A 对 `audit/proposals/X10-83-review.md` 的 review 记录。

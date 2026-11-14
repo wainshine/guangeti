@@ -7,7 +7,7 @@
  "head_subject": "更新（所有者 2026-11-14 11:48 提交；DATA §5 排版修复 + E8「必须」+ v8）",
  "last_non_audit_commit": "8b810f350550638179bfcba14168b3086557ea6b",
  "last_non_audit_subject": "更新（DATA §5 清理 + E8 重打包必须修正 + v8）",
- "committed_in": "f2fc6ed40c6bee99e94d77c5a2301f73d862e093 (audit-only commit 2026-11-14 11:53; v9 交付基线, 不需新建 v10)",
+ "committed_in": "f2fc6ed40c6bee99e94d77c5a2301f73d862e093 (audit-only commit 2026-11-14 11:53; v9 交付基线)",
  "git_status_at_capture": [],
  "drift_rule": "基线漂移只由 ①制品哈希变化 或 ②非 audit 路径提交触发；audit/** 与 docs/AUDIT-* 的提交（如 6d20782）不算漂移。",
  "audit_only_commits_ignored": [
