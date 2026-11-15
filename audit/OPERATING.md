@@ -3,9 +3,9 @@
 > 本文件是协调层规则，放在 `audit/`，不改变项目现有结构。
 > 修订依据：A/B/C 三线对 v1.1 的对抗性审查（快照自指、已发布 OFL 错误、83 被 B 跑会写 C 工作区、
 > 门禁漏 accept、`/tmp` 通道未定义、共享归属无原文等），以及所有者对收口文件自指问题的终审。
-> **当前交付基线 v3**：`audit/facts/frozen-hashes-2026-11-14T1007.json`
-> （`head_at_capture = 6bbcf3c`，含 `docs/ERRATA.md` E8；`previous_snapshot.committed_in = 3336143`）。
-> v2 `...T0950.json` 为历史规则快照（`committed_in = 3336143`）。
+> **当前交付基线 v13**：`audit/facts/frozen-hashes-2026-11-15T1418.json`
+> （`head_at_capture = b873cbe`；A v1.7.3 / B v1.2.5 / C v1.4.0 候选；`previous_snapshot.committed_in = ce8f1af`）。
+> v12 `...T1618.json` 为前一基线；v2 等更早为历史规则快照。
 > 更正记录：`audit/facts/CHANGELOG.md`。**audit 自身提交不构成基线漂移**（§5）。
 
 ## 1. 主会话定位与边界
@@ -129,17 +129,19 @@ zip：只作为**发布快照记录**；字体字节可复现，zip 在现有工
 
 ## 7. 外部冻结台账
 
-- **当前交付基线 v12**：`audit/facts/frozen-hashes-2026-11-14T1618.json`
-  （`head_at_capture = 43c33df`，2026-11-14 16:13；M-P3/M-P4 文档 + v11 + A-P9 `release-a` 日期证据修正）。
-  `previous_snapshot.committed_in = 43c33df`（v11）；v12 自身 `committed_in = ce8f1af`（2026-11-14 16:17 提交）。
-  抓取时 data/脚本/制品均为 HEAD 状态，仅 docs/audit 未提交（不构成基线漂移）。
-- **历史版本**：v11 `...T1608.json`、v10 `...T1216.json`、v9 `...T1148.json`、v8 `...T1126.json`、v7 `...T1103.json`、
-  v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、v4（`committed_in = 56edd05`）、
-  v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）；均标 superseded。
-- 主会话每次闸门对比 v12；制品/脚本/data 不变且无发版时视为无漂移。
+- **当前交付基线 v13**：`audit/facts/frozen-hashes-2026-11-15T1418.json`
+  （`head_at_capture = b873cbe`，2026-11-15 14:13；A v1.7.3 / B v1.2.5 / C v1.4.0 候选）。
+  `previous_snapshot.committed_in = ce8f1af`（v12）；v13 自身 `committed_in = pending`。
+  抓取时工作区干净；v13 记录三线 6 个 TTF + 3 个 zip + release SHA 自检 + data 声明/发布 JSON。
+- **历史版本**：v12 `...T1618.json`、v11 `...T1608.json`、v10 `...T1216.json`、v9 `...T1148.json`、
+  v8 `...T1126.json`、v7 `...T1103.json`、v6（`committed_in = 2f523d1`）、v5（`committed_in = 6858c08`）、
+  v4（`committed_in = 56edd05`）、v3（`committed_in = 5940a6d`）、v2（`committed_in = 3336143`）、v1/v0（过期）。
+- 主会话每次闸门对比 v13；制品/脚本/data 不变且无发版时视为无漂移。
 - 写盘副作用清单：`83` 默认只读；仅 `--write`/`--out-dir` 才写 `work-c/`；`67`/`73` 写 `work-b/`；
   QA/accept 脚本写各自 `work*/qa/` 与 `accept_*.json`（§1 禁跑清单）。
-- **v12 记录**：`data_declarations`（release_ckpts a/b/c）与 `release_manifests`（release-a 已按 A-P9 重新登记）。
+- **v13 状态**：A/B 可发；C v1.4.0 仅候选/技术预览（unseen 0.469/6.32/9.7%，page800 0.440/6.62/13.9%，
+  不优于 v1.3.0；完整质量门未签）。不重打包的已接受差异：A `provenance` 无 `real_single` 子类、
+  C `stats.json` 无 `codepoints_total`。
 
 ## 8. 任务与汇报
 

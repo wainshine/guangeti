@@ -517,3 +517,13 @@
 - v12 `committed_in=ce8f1af` 已回填；v12 为当前交付基线（release_manifests 中 release-a=9caa01fc… 与当前一致）。
 - 第 5 代审计 Phase1/2 + M-P3/M-P4 + A-P9/A-P10 全部关闭；A/B/C 线侧无待办。
 - 下一次快照 v13 只在脚本/data/制品变更或发版后建立。
+
+## 2026-11-15 14:18 CST — v13 交付基线
+
+- `b873cbe` 干净提交；A v1.7.3 / B v1.2.5 / C v1.4.0 已打包；三 zip 与 release*/ 一致，SHA 自检 OK。
+- v13 快照 `audit/facts/frozen-hashes-2026-11-15T1418.json`：三线 TTF/zip、release 自检、data 声明/发布 JSON；
+  `previous_snapshot.committed_in=ce8f1af`，`committed_in=pending`。
+- C v1.4.0 指标复核不优于 v1.3.0（unseen 0.469/6.32/9.7%；page800 0.440/6.62/13.9%；ribbon 9.05% vs 6.25%）：
+  仅候选/技术预览，v1.3.0 继续稳定；不得宣称质量提升。
+- 不重打包接受差异：A provenance 无 real_single 子类；C release-c/stats 无 codepoints_total。
+- 待所有者 tag/publish；C 不打稳定 tag。
