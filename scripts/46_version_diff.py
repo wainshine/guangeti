@@ -83,6 +83,9 @@ def main() -> None:
     ap.add_argument("new")
     ap.add_argument("--json", required=True)
     ap.add_argument("--max-report", type=int, default=40)
+    ap.add_argument("--allow-changed", default="",
+                    help="file of expected-new codepoints (one char or U+XXXX per line); "
+                         "their big ink/IoU shift is a planned replacement, not damage")
     args = ap.parse_args()
 
     old_p, new_p = Path(args.old), Path(args.new)
@@ -95,7 +98,15 @@ def main() -> None:
     added = sorted(set(cn) - set(co))
     removed = sorted(set(co) - set(cn))
 
+    allow = set()
+    if args.allow_changed:
+        for line in open(args.allow_changed):
+            t = line.strip()
+            if not t:
+                continue
+            allow.add(int(t[2:], 16) if t.upper().startswith("U+") else ord(t[0]))
     changed, damaged, errors = [], [], 0
+    expected_changed, unexpected, expected_ink_shift = [], [], []
     for cp in universe:
         try:
             so, sn = outline_sig(old, cp), outline_sig(new, cp)
@@ -104,11 +115,18 @@ def main() -> None:
             continue
         if so != sn:
             changed.append(cp)
+            (expected_changed if cp in allow else unexpected).append(cp)
             a, b = render(old_p, cp), render(new_p, cp)
             if a is None or b is None or a.sum() == 0:
                 continue
             ink = b.sum() / max(1, a.sum())
             iou = iou_shift(a, b)
+            if cp in allow:
+                if ink < 0.50 or (ink < 0.80 and iou < 0.70):
+                    expected_ink_shift.append({"cp": f"U+{cp:04X}", "char": chr(cp),
+                                               "ink_ratio": round(float(ink), 3),
+                                               "iou": round(float(iou), 3)})
+                continue          # planned GAN -> real replacement: ink drop is expected
             if ink < 0.50 or (ink < 0.80 and iou < 0.70):
                 damaged.append({"cp": f"U+{cp:04X}", "char": chr(cp),
                                 "ink_ratio": round(float(ink), 3), "iou": round(float(iou), 3)})
@@ -121,6 +139,10 @@ def main() -> None:
         "changed": [f"U+{c:04X}" for c in changed[: args.max_report]],
         "added": [f"U+{c:04X}" for c in added[: args.max_report]],
         "removed": [f"U+{c:04X}" for c in removed[: args.max_report]],
+        "n_expected_changed": len(expected_changed),
+        "n_unexpected_changed": len(unexpected),
+        "unexpected": [f"U+{c:04X}" for c in unexpected[: args.max_report]],
+        "expected_ink_shift": expected_ink_shift[: args.max_report],
         "damaged": damaged[: args.max_report],
         "gate_pass": not damaged and errors == 0,
         "script_sha256": sha(Path(__file__)),

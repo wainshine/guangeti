@@ -45,5 +45,20 @@
  "checkpoint_sha256": "c47d22f81360b49d8c5e535929b66d53248ff92fd0a175f475ec7a57af24ec83",
  "checkpoint_hardtail_sha256": "1c3fcc740b786db94cdb8983325430ae597086096e62f099d4b6e5a1753bcafc",
  "next_version": "1.2.5",
- "next_version_note": "工作版本：构建链已推到 1.2.5（删掉按文楷补孔的 --hole-repair），但未打包、未发 zip；release_date/artifacts_built_at 仍指已发布的 v1.2.4。"
+ "next_version_note": "工作版本 v1.2.5（build/ 已构建，未打包、未发 zip）：相对已发布的 v1.2.4 共 420 字变化，0 added / 0 removed，墨量中位 −5.5%。构成：348 字来自删除 --hole-repair（不再按文楷补孔）、74 字来自中缝压缩重采样（净新增 72，6 字与上者重叠）、4 个错字修正（茈/竅/簦/唏）。release-b/ 与 release_date/artifacts_built_at 仍指 v1.2.4；按所有者 2026-11-15 决定，B 不单独打包，等 C v1.4.0 一起收口。",
+ "next_version_diff": {
+  "vs_version": "1.2.4",
+  "changed": 420,
+  "added": 0,
+  "removed": 0,
+  "ink_delta_median": -0.055,
+  "breakdown": {
+   "hole_repair_removed": 348,
+   "resampled": 74,
+   "wrong_char_fix": 4,
+   "overlap": 6
+  },
+  "artifact": "work-b/diff_v124_v125.json",
+  "note": "work-b/version_diff_b_124_125.json 的 348 是「只删 --hole-repair 后」的中间态产物，是 420 的子集"
+ }
 }

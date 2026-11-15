@@ -89,7 +89,7 @@ B 的 clean 629 无第二样本，**不能做同集地板**；不得再写“距
 | **C-Q2** | **所有者已批重训**，但必须 C-Q0 + C-Q1b 之后：清理后 pairs 重训；train = cleaned chosen − char_holdout − page_holdout；val = pairs_holdout 300；页面评估 = pairs_clean 固定页/seed | 高 | checkpoint + **split manifest**（防泄漏）；与 v1.3 同集对照；诊断确认收敛异常不再出现 |
 | **C-Q3** | GAN/ribbon 分层盲审：GAN 按 label_source/常用/生僻/大字分层，每层 50–100；ribbon 1,313 单列；报错字/缺笔/崩坏三率 | 中 | 只写“该样本错误率”，不写“全量质量通过” |
 | **C-Q5** | 页面 holdout 重测：明确用 `pairs_clean` 207 页，n≥800 子样本还是全 3,210、seed；与 v1.3 同集对照 | 中 | 新数字 + 产物 + 对照 |
-| **C-Q4** | 定义 v1.4 质量门：重跑旧门 1/2/3/4，或另立新门（需所有者确认） | 低 | v1.4 的质量门状态，不只是 v1.3 旧门登记 |
+| **C-Q4** | 定义 v1.4.0 质量门：重跑旧门 1/2/3/4，或另立新门（需所有者确认） | 低 | v1.4.0 的质量门状态，不只是 v1.3 旧门登记 |
 | **C-Q6** | 质量卡 + 发布措辞：“技术预览/需质量抽验”，不签“质量已验收” | 低 | 质量卡 |
 | **C-Q7（新）** | review sheet 固定 seed=0、固定 100 字分层；ledger 的 no/tag/char/page/crop 稳定可追溯；另出随机表仅审计 | 低 | 每版同表；可逐字 diff |
 | **C-Q8（新）** | `71_holes` C 版改 source-mask 两栏（真损失 vs 风格）；不用文楷拓扑判缺陷；不删 holes 诊断 | 半天 | 两栏数字 + 固定表 |
@@ -115,7 +115,7 @@ B 的 Real 4,073 中 47.6% 单 OCR 见证，B-Q4 出数前尤其要软表述。
 | A/B 生成后墨量标定、ribbon 算法 | **否**（只重生成受影响字） | 模型不变 |
 | 标签审计（未改标签） | **否** | 只读检查 |
 | B/C 标签实际改变 | **是** | 训练目标变 |
-| C 清理后 pairs 重训 | **是（v1.4 前提）** | Q1b→Q2 |
+| C 清理后 pairs 重训 | **是（v1.4.0 前提）** | Q1b→Q2 |
 | A 尺寸一致性实验 | **是（仅该实验）** | A-Q5 前置满足才做 |
 | A Real 纳入 617（若 A-Q0 通过） | **否** | 617 不进 GAN 训练，只进 Real |
 
@@ -141,7 +141,7 @@ B 的 Real 4,073 中 47.6% 单 OCR 见证，B-Q4 出数前尤其要软表述。
   A-Q6 改为“本版不列扩源”；A-Q1 seed 已做；新增 A-Q0/A-Q1b；A-Q3 ink_gain；A-Q5 前置；A-Q4 E24；阈值缺笔率。
 - B：B-Q5 改 in-sample；B-Q2 定义目标函数/栅格层；B-Q1 ribbon 单列、阈值先测；B-Q4 反转自动第二见证；
   B-Q6 271 singleton；B 无同集地板；Real-only 软表述。
-- C：C-Q1→Q1b→Q2 依赖；split manifest；C-Q1/Q3 分层配额/CI；C-Q5 口径；C-Q4 v1.4 新门。
+- C：C-Q1→Q1b→Q2 依赖；split manifest；C-Q1/Q3 分层配额/CI；C-Q5 口径；C-Q4 v1.4.0 新门。
 - **三线复核后追加**：固定 100 字表（非随机抽样）；版本对版本内容闸/精确轮廓 diff；输入摘要 sidecar + 退出码；
   source-mask 闸只覆盖 real 层；A 不做框线/FCR；B 框线不优先、做缺件/输入绑定/孔洞双口径；
   C 不移植版式、继续用共享 review_sheet，加 C-Q7/C-Q8/C-Q9；D19 不适用于 A/B/C。
