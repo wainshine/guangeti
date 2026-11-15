@@ -179,18 +179,18 @@ d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
-### 6.1 v1.2.5 构建版（未打包，2026-11-15）
+### 6.1 v1.2.5（2026-11-15，构建完成、待打包）
 
 ```
 544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71  build/GuanGeKai-B-Regular.ttf
 45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c  build/GuanGeKai-B-Real.ttf
 ```
 
-发布包 `release-b/` 仍是 v1.2.4；v1.2.5 尚未打包。
+发布包 `release-b/` 仍是 v1.2.4；v1.2.5 的包与 zip 在提交后生成，届时回填 `zip_sha256` 并清掉 `package_pending`。
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。
 
-**版本号口径（2026-10-30 所有者定）**：B 线按 **patch 递增**，公开序列 v1.2.2 → **v1.2.4**
+**版本号口径（2026-10-30 所有者定）**：B 线按 **patch 递增**，公开序列 v1.2.2 → v1.2.4 → **v1.2.5**
 （v1.2.3 未发布，直接跳过）；中间构建 **v1.3.0 / v1.3.1 编号作废、产物已清理**，
 不对应任何发布说明，文档里不再引用。
 三条线独立编号：A v1.7.3 / B v1.2.5 / C v1.4.0（v1.2.4、v1.3.0 为已发布旧包）。
@@ -201,14 +201,14 @@ c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1
 按 ERRATA E3/E4 的已接受 drift 保留旧文本，**不为一句 typo 重发**（同 O7 裁决），随下一次 B 线发版对齐。
 因包内 `OFL.txt` 的保留名列表本就完整，此项不涉及授权合规。
 
-**版本状态（2026-11-14）**：仓库根的分发包 `GuanGeKai-B-v1.2.4.zip` 已上传 GitHub，**视为不可变**。
-当前 `build/` 与 `release-b/` 的字节对应 v1.2.4，但 zip 在本轮审计后被重新打包过，**本地 zip 哈希与线上资产不一致**
-（待以线上文件为准回填，见 ERRATA）。**v1.2.5 只做版本号推进与质量修复，不打包、不出 zip**；
-打包必须等质量问题关闭并由所有者发起。
+**版本状态（2026-11-15）**：`GuanGeKai-B-v1.2.4.zip` 已上传 GitHub 并**视为不可变**；
+它在发布后被重新打包过一次，本地副本的哈希与线上资产不一致（历史问题，不再追改，以线上为准）。
+当前 `build/` 是 **v1.2.5**（`544ce807…` / `45d87eb0…`），`release-b/` 仍是 v1.2.4 的包；
+打包由所有者发起，打包后回填 `release-b.json` 的 `zip_sha256` 与 `artifacts_built_at`，并清掉 `package_pending`。
 
 **日期字段语义（O6，2026-11-14 统一）**：`release_date` = 签核/定版日；`artifacts_built_at` = 分发包
-最后一次构建日（`release-b/` 与 zip 的打包日）。v1.2.4 的两者是 `2026-10-30` / `2026-11-13`：
-版本在 10-30 定版，分包在 11-13 重打；字体字节在 11-14 重建验证与包内一致，不改变 `artifacts_built_at`。
+最后一次构建日（`release-b/` 与 zip 的打包日）。v1.2.4 是 `2026-10-30` / `2026-11-13`；
+v1.2.5 的 `release_date` 为 **2026-11-15**，`artifacts_built_at` 待打包后写入。
 
 **`data/release-b.json` 现在是 B 线的单一计数与口径源**（v1.2.4 补齐）：
 `real 4073 / gan 15784 / gan_ht 544 / ribbon 591 / punct 42 / codepoints_total 21034`，

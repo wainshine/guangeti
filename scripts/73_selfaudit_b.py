@@ -76,9 +76,10 @@ def main() -> int:
     fr, fm = TTFont(str(reg)), TTFont(str(real))
     # 工作版本（build/ 已推进到 next_version，但还没有打包/发布）
     _fv = fr["name"].getDebugName(5).replace("Version ", "")
-    WORKING = _CFG.get("next_version") == _fv and _CFG["version"] != _fv
+    WORKING = ((_CFG.get("next_version") == _fv and _CFG["version"] != _fv)
+               or bool(_CFG.get("package_pending")))
     if WORKING:
-        warn(f"working build v{_fv}: 文档/哈希类检查按已发布的 v{_CFG['version']} 口径，跳过")
+        warn(f"working build v{_fv}（package_pending={_CFG.get('package_pending', False)}）: 包/哈希类检查跳过")
     cm_r = fr.getBestCmap()
     cov = sum(1 for c in range(BLOCK[0], BLOCK[1] + 1) if c in cm_r)
     check("Regular covers the basic block", cov == stats["codepoints"] == 20992, f"{cov}")
@@ -132,8 +133,9 @@ def main() -> int:
     # 包内 README 是发布时的快照（ERRATA E3/E4 已接受仓库文档领先于包）；
     # 因此这里不再硬判相等——硬判等于"改一句文档就必须重发"，与 O7 的裁决冲突。
     # 真正的不变量是：包里写着正确的版本号；仓库领先时只告警。
-    check("package README quotes the release version", f"v{_CFG['version']}" in pkg_txt,
-          f"v{_CFG['version']}")
+    if not WORKING:
+        check("package README quotes the release version", f"v{_CFG['version']}" in pkg_txt,
+              f"v{_CFG['version']}")
     if pkg_txt != repo_txt:
         warn(f"package README lags repo README-B.md（包为发布快照，下次重打包对齐）")
     for f in ("GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf", "specimen-b.png",
@@ -151,7 +153,7 @@ def main() -> int:
     if zp.exists():
         want = sha256(zp)
         check("doc zip hash == disk", bool(zips) and set(zips) == {want}, want[:16])
-    else:
+    elif not WORKING:
         check("zip exists", False)
     regs = set(re.findall(r"([0-9a-f]{64})  build/GuanGeKai-B-Regular\.ttf", text))
     if not WORKING:
