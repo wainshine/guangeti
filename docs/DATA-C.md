@@ -212,11 +212,11 @@ v1.3.0 发布用 **v1.3/c_ep090.pt**（0.470 / 6.38 / 8.3%）；v1.1.0 的 ep30 
 
 ## 5.1 v1.3.0 校验和（历史）
 
-## 5.1.1 v1.4.0 候选（2026-11-15，未打包）
+## 5.1.1 v1.4.0 候选（2026-11-15，已打包）
 
 ```
-8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  work-c/qa/c14/GuanGeKai-C-Regular-v1.4-fixed2.ttf
-d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0  work-c/qa/c14/GuanGeKai-C-Real-v1.4.ttf
+8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  build/GuanGeKai-C-Regular.ttf
+d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0  build/GuanGeKai-C-Real.ttf
 ```
 
 v1.4.0 真迹 **5,250**；C-Q10 Regular damaged 40 / gate false，尚不能发布。
@@ -229,7 +229,7 @@ v1.2.1 的校验和仍保留在 §5，属历史版本，不是当前 `build/`。
 ```
 765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48  build/GuanGeKai-C-Regular.ttf
 6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d  build/GuanGeKai-C-Real.ttf
-4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498  GuanGeKai-C-v1.3.0.zip
+613e34334d2d0a3edee88410dd54e2d5348284732c3820495cbf249cfd6f3554  GuanGeKai-C-v1.4.0.zip
 ```
 
 `release-c/` 当前为 v1.3.0；v1.2.1 的 `release-c` 备份在

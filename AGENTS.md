@@ -71,8 +71,8 @@ CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**；唯
   清理 10 个「简体码位 + 繁体字形」标签，再剔除碎片/错标（罎、讞、串），真迹 5,310→**5,299**（v1.2.0）；`05 --prefer-ab` 把 a_only 从 12.7% 降到 **5.04%**；墨量 gain 1.25（真迹/文楷 0.703，B 0.730）。
   简体码位加**结构守卫**（`--struct-guard`：GAN 输出组件数与文楷差 >2 时回落 ribbon），
   ribbon 占比 1.9%→6.0%（v1.2.0）。清理后从零重训（计划 80 轮，训到 **ep52** 停止；ep20–50 结构指标单调变差）。
-- `release-c/` 仍是 v1.3.0；`data/release-c.json` 已标 1.4.0 但包未重打；
-  v1.4.0 候选字体与 C-Q10 见 `work-c/qa/c14/`、`work-c/qa/version-diff/`；
+- `release-c/` 与 `GuanGeKai-C-v1.4.0.zip` 已按 v1.4.0 打包；C-Q10 通过，完整质量门仍未签；
+  v1.4.0 候选字体见 `build/GuanGeKai-C-*`，C-Q10 见 `work-c/qa/version-diff/`；
   文档 `README-C.md`、`docs/{PLAN,DATA,EXPERIMENTS}-C.md`。
 - **与 A/B 的根本差别：没有对照文本。** 标签靠 **PP-OCRv6 + PP-OCRv5 双见证**
   （全量 1,297,735 字，双见证一致率 **93.0%**；含单见证 90.3%），冲突（约 9%）丢弃；干净集按**页**留出

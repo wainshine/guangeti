@@ -1,6 +1,6 @@
 # GuanGe Kai C v1.4.0（候选说明）
 
-> 状态：**候选，尚未打包，C-Q10 Regular 未通过**。
+> 状态：**已打包候选；C-Q10 Regular 通过；完整质量门仍未签**。
 > 三线版本：A **v1.7.3** / B **v1.2.5** / C **v1.4.0**。
 
 ## 数据
@@ -35,11 +35,10 @@ Real:    changed 0 / removed 7 / gate_pass true
 
 ## 制品
 
-候选字体在：
-
 ```
-work-c/qa/c14/GuanGeKai-C-Regular-v1.4.ttf  fd046a7e…
-work-c/qa/c14/GuanGeKai-C-Real-v1.4.ttf     d534e504…
+build/GuanGeKai-C-Regular.ttf  8132f15f…
+build/GuanGeKai-C-Real.ttf     d534e504…
+GuanGeKai-C-v1.4.0.zip        15726c74…
 ```
 
-`release-c/` 仍是 v1.3.0；v1.4.0 尚未打包。
+`release-c/` 已更新为 v1.4.0；zip：`GuanGeKai-C-v1.4.0.zip`。

@@ -72,7 +72,7 @@ HASH_KEYS = {
     "C Real": ("d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0", "candidate"),
     "A zip": ("14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b", "release-a.json"),
     "B zip": ("2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46", "release-b.json"),
-    "C zip": ("4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498", "release-c.json"),
+    "C zip": ("613e34334d2d0a3edee88410dd54e2d5348284732c3820495cbf249cfd6f3554", "release-c.json"),
 }
 
 

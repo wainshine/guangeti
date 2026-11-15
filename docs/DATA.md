@@ -122,9 +122,9 @@ B 线（史记本，v1.2.5 构建版）：
 C 线（永乐大典本，v1.4.0 候选）：
 
 ```
-8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  work-c/qa/c14/GuanGeKai-C-Regular-v1.4-fixed2.ttf
-d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0  work-c/qa/c14/GuanGeKai-C-Real-v1.4.ttf
-4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498  GuanGeKai-C-v1.3.0.zip（仍是发布包）
+8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  build/GuanGeKai-C-Regular.ttf
+d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0  build/GuanGeKai-C-Real.ttf
+613e34334d2d0a3edee88410dd54e2d5348284732c3820495cbf249cfd6f3554  GuanGeKai-C-v1.4.0.zip
 ```
 
 历史版本（v1.5.0–v1.6.5、B v1.0.1–v1.2.1、C v1.0.x）见对应 `docs/releases/` 与 `docs/DATA-B/C.md`；不再在本文重复。

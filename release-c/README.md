@@ -15,13 +15,13 @@
 
 ## 1. 這是什麼
 
-**版本**：本包為 **GuanGe Kai C v1.3.0**，與 A 線 **GuanGe Kai v1.7.2**、
-B 線 **GuanGe Kai B v1.2.4** 同步發布（同一專案、三個字形來源）。
+**版本**：本包為 **GuanGe Kai C v1.4.0**（候選，已打包；C-Q10 已過，完整質量門未簽），與 A 線 **GuanGe Kai v1.7.3**、
+B 線 **GuanGe Kai B v1.2.5** 同步收口（同一專案、三個字形來源）。
 
-**v1.3.0 變更**：清理 chosen 的 20 個全壞格（5,302 → **5,257** 真跡），`自` 使用完整樣本；
-合成字由 **90 輪 ep090** 生成，v1.3 字體 QA 通過。
-真跡 **5,257** + GAN **14,422** + ribbon **1,313**（生成字的 8.3%）。
-300 字 CPU holdout 位置評分見 `docs/RELEASE-v1.3.0-C.md`；unseen 指標僅作參考。
+**v1.4.0 變更**：清理 11 個已確認壞字，真跡 5,257→**5,250**；用 ep090 重新生成，coverage 20,992；
+真跡 **5,250** + GAN **13,843** + ribbon **1,899**（合成字的 12.1%）。
+unseen **0.469 / 6.32 / 9.7%**（n=300），page800 **0.440 / 6.62 / 13.9%**；
+C-Q10 Regular 初测 139 个 regression，已全部回退到 v1.3.0；复测 changed 15,603 / damaged 0 / gate **true**。仍按候选/技术预览处理。
 
 **v1.2.1 歷史**：真跡 5,302；合成字由從零 90 輪 ep090 生成；
 頁留出 0.471 / 6.19 / 12.0%，按字留出 300 字 0.469 / 6.26 / 7.0%；ribbon 1,495（9.5%）。
@@ -29,12 +29,11 @@ B 線 **GuanGe Kai B v1.2.4** 同步發布（同一專案、三個字形來源�
 **v1.2.0 歷史**：v3d2 全量重切；真跡 5,302；生成模型 ep034（v3c pairs 微調）；
 頁留出 0.457 / 6.36 / 11.7%，300 字 0.597 / 5.44 / 1.3%；ribbon 6.0%。
 
-- `GuanGeKai-C-Regular.ttf`：**20,992 個 CJK 字 + 42 個標點/數字/空格 = 21,034 個碼位**（CJK 基本區 100%）
+- `GuanGeKai-C-Regular.ttf`：**20,992 個 CJK 字 + 42 個標點/數字/空格 = 21,034 個碼位**（CJK 基本區 100%；v1.4.0 候選）
 
   標點與數字取自霞鶩文楷（OFL 1.1），1.00 縮放；拉丁 A–Z / a–z 不補，留給系統回退（文楷拉丁與楷書筆意不合）。
-  ＝ 真跡 **5,257** 字 + GAN 生成 **14,422** 字（其中 1,313 字因守衛不通過或結構守衛，
-  改用「帶狀掃掠」描繪）
-- `GuanGeKai-C-Real.ttf`：只有 **5,257** 個真跡字，全部逐字從掃描本切出、向量化
+  ＝ 真跡 **5,250** 字 + 生成 **15,742** 字（GAN 13,843 + 帶狀掃掠 1,899）
+- `GuanGeKai-C-Real.ttf`：只有 **5,250** 個真跡字，全部逐字從掃描本切出、向量化
 
 真跡字的字形**直接來自寫本**：切字、去噪、potrace 向量化，再歸一到統一字身框。
 生成字由 GAN（zi2zi U-Net + 5 層 PatchGAN + hinge + 數據增強）以霞鶩文楷為骨架、
@@ -63,7 +62,7 @@ B 線 **GuanGe Kai B v1.2.4** 同步發布（同一專案、三個字形來源�
 | 字形來源 | 明代精寫本《四書白文》（舊傳姜立綱，存疑） | 明抄本《史記》（舊傳姜立綱） | **明內府重寫本《永樂大典》** |
 | 性質 | 名家精寫本 | 舊抄本 | **嘉靖內府錄副本（多人分抄）** |
 | 掃描原生解析度 | 300 dpi | 150 dpi | **300 dpi** |
-| 真跡字數 | 1,675（8.0%） | 4,078（19.4%） | **5,257（25.04%）** |
+| 真跡字數 | **2,261（10.8%）** | 4,073（19.4%） | **5,250（25.01%）** |
 | 參考文本 | 有（四書白文） | 有（史記全文） | **無（類書，無錄文可對）** |
 
 三套字的筆性不同：名家精寫本有運筆的方折與牽絲，舊抄本有墨筆的起收，內府錄副本出於多人分抄、
@@ -93,7 +92,7 @@ PDF（41 冊 3,538 頁，全部 300 dpi）
      行級對齊後逐字比較：一致率 **93.0%**（雙見證格之間；含單見證為 90.3%），一致才給標籤；衝突置空
      篆/隸/草頁（222 頁，含「篆」或「隸+書」）整頁排除
   → 選優：每字穩健 medoid；全樣本都壞的字直接丟棄
-  → 真跡：去噪 → potrace 向量化 → 字身框歸一 → 墨量標定（5,257 字）
+  → 真跡：去噪 → potrace 向量化 → 字身框歸一 → 墨量標定（5,250 字）
   → 生成：GAN（30 輪，5 層 PatchGAN + hinge + 數據增強；ep20–30 已進平台）補齊缺字
   → 合字、質檢、打包
 ```
@@ -109,10 +108,10 @@ PDF（41 冊 3,538 頁，全部 300 dpi）
    這是本線與 A/B 最大的差別，也是使用時最需要知道的一點。
    300 格均勻盲審 **20/300 = 6.7%**（Wilson 4.4–10.1%），以並格/空/內容錯位為主；
    **本版未達 ≤5%**，此為已知上限。
-2. **生成字不是真跡。** 15,735 個生成字由模型產生（其中 1,313 個，即 8.3%，
+2. **生成字不是真跡。** 15,742 個生成字由模型產生（其中 1,899 個，即 12.1%，
    因守衛不通過而走帶狀掃掠回退）。需要嚴格字形時請用 `GuanGeKai-C-Real.ttf`。
    合成字與真跡的字重比為 **0.948**（48px）；真跡墨量/文楷 **0.705**（B 線 0.730），已與 B 同級。
-3. **寫本用字只覆蓋 5,257 字（25.04%）。** 剩餘 15,735 字是合成的。
+3. **寫本用字只覆蓋 5,250 字（25.01%）。** 剩餘 15,742 字是合成的。
 4. **篆、隸、草書不收。** 依使用者要求只做楷體；帶篆/隸的「六書」頁整頁排除。
 5. **沒有 hinting。** 小字號依賴系統自動微調。
 6. **異體與簡化碼位**：寫本用字傳統，但 OCR 偶爾給出簡化碼位（如 `飞`、`书`）；
@@ -123,7 +122,7 @@ PDF（41 冊 3,538 頁，全部 300 dpi）
 ## 6. 授權與命名
 
 - 字型本體：**SIL Open Font License 1.1**（見 `OFL.txt`）。可自由使用、修改、再分發，
-  衍生字型須沿用 OFL 且**不得使用保留字型名**（霞鶩／霞鶩／落霞孤鶩／LXGW）。
+  衍生字型須沿用 OFL 且**不得使用保留字型名**（霞鶩／霞鹜／落霞孤鶩／落霞孤鹜／LXGW）。
 - 原始碼：MIT（見 `LICENSE`）。
 - 生成字由**霞鶩文楷**（OFL 1.1，含 Reserved Font Name）派生，故本字型必須 OFL，
   且家族名已避開其保留名稱：`GuanGe Kai C`。
@@ -153,12 +152,19 @@ python3 scripts/76_build_real_c.py --close 3 --hole-repair
 python3 scripts/08_make_pairs.py --work work-c --out work-c/pairs/pairs.npz
 python3 scripts/73_fit_width_c.py
 python3 scripts/75_build_clean_c.py
-python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz --out work-c/ckpt/c.pt \
-        --ckpt-dir work-c/ckpt --sample work-c/preview/gan_sample.png \
-        --patchgan --hinge --aug --epochs 30 --batch 16 --lr 2e-4
-python3 scripts/82_eval_c.py --gan work-c/ckpt/c_ep030.pt --n 250 --sweep
+# v1.3 实际为两段：80 轮主训练 + 80→90 续训；日志见 work-c/logs-v1.3/train_v13_90.log
+python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz \
+        --val-data work-c/pairs_holdout.npz --out work-c/ckpt/v1.3/c.pt \
+        --ckpt-dir work-c/ckpt/v1.3 --sample work-c/preview/gan_sample.png \
+        --patchgan --hinge --aug --epochs 80 --batch 16 --lr 2e-4
+python3 scripts/21_train_gan.py --data work-c/pairs/pairs.npz \
+        --val-data work-c/pairs_holdout.npz --out work-c/ckpt/v1.3/c.pt \
+        --ckpt-dir work-c/ckpt/v1.3 --resume work-c/ckpt/v1.3/c_ep080.pt \
+        --patchgan --hinge --aug --epochs 90 --batch 16 --lr 1e-4
+# 发布检查点是 v1.3/c_ep090.pt（0.470 / 6.38 / 8.3%）
+python3 scripts/82_eval_c.py --gan work-c/ckpt/v1.3/c_ep090.pt --n 300 --close 2 --sweep
 python3 scripts/77_generate_c.py --method gan --workers 6 --res 512 --simplify 2.0 \
-        --ckpt work-c/ckpt/c_ep030.pt --threshold 0.30 --close 1 --blend 0.8 --struct-guard \
+        --ckpt work-c/ckpt/v1.3/c_ep090.pt --threshold 0.30 --close 1 --blend 0.8 --struct-guard \
         --out work-c/generated_gan.jsonl
 mv work-c/generated_gan.jsonl work-c/generated.jsonl
 python3 scripts/78_fill_fallback_c.py --work work-c
@@ -166,7 +172,7 @@ python3 scripts/79_build_full_c.py
 python3 scripts/80_qa_c.py
 python3 scripts/84_accept_c.py
 python3 scripts/81_package_c.py
-python3 scripts/83_verify_ab_c.py
+python3 scripts/83_verify_ab_c.py --write
 ```
 
 全流程與實驗記錄見 [`docs/PLAN-C.md`](docs/PLAN-C.md)、
