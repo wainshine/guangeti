@@ -109,7 +109,7 @@ A 线（四书本，v1.7.3 发布版）：
 ```
 89120d52209446a3b6403871b7376f76dd8008e8223348de9dedf3609ed8eb75  build/GuanGeKai-Regular.ttf
 59b1154d5e0d6b2d92af64bff78b7594ccba325176abf9f6aa40c70352990323  build/GuanGeKai-Real.ttf
-00417099bcee4c4b70cd668cf1e41513c33e12490cb518d392cb6ff2e6fd8526  GuanGeKai-v1.7.3.zip
+ef81446e30e22ec9189333ed1e81db530b12e1ae89c0c3ebdc82a37ec585e96a  GuanGeKai-v1.7.3.zip
 ```
 
 B 线（史记本，v1.2.5）：

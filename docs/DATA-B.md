@@ -210,7 +210,7 @@ fce919e25df2587e3f6f193aa3bafabbb40e21948f6297b161997efe111231d6  GuanGeKai-B-v1
 
 **日期字段语义（O6，2026-11-14 统一）**：`release_date` = 签核/定版日；`artifacts_built_at` = 分发包
 最后一次构建日（`release-b/` 与 zip 的打包日）。v1.2.4 是 `2026-10-30` / `2026-11-13`；
-v1.2.5 的 `release_date` 为 **2026-11-15**，`artifacts_built_at` 待打包后写入。
+v1.2.5 的 `release_date` 与 `artifacts_built_at` 都是 **2026-11-15**（当日构建、当日打包）。
 
 **`data/release-b.json` 现在是 B 线的单一计数与口径源**（v1.2.4 补齐）：
 `real 4073 / gan 15784 / gan_ht 544 / ribbon 591 / punct 42 / codepoints_total 21034`，
@@ -324,7 +324,7 @@ python3 scripts/66_specimen_b.py
 python3 scripts/69_panel_b.py --gan work-b/ckpt/b_ep080.pt --n 16
 python3 scripts/72_book_vs_font_b.py
 rm -rf release-b && python3 scripts/64_package_b.py
-cd release-b && zip -q -r ../GuanGeKai-B-v1.2.4.zip . && cd ..
+cd release-b && zip -q -r ../GuanGeKai-B-v1.2.5.zip . && cd ..
 
 # 复核
 python3 scripts/71_holes.py --font build/GuanGeKai-B-Regular.ttf --n 300

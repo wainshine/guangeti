@@ -3,7 +3,7 @@
 > **一句话**：以明代写本《四书白文》为字形来源，做一套覆盖 CJK 基本区 20,992 字、OFL 1.1 授权的馆阁体字体（GuanGe Kai / 馆阁楷）。
 >
 > **三线现状（2026-11-15 快照）**：A 四书 `GuanGe Kai` **v1.7.3（构建版；2,261 真迹）**；B 史记 `GuanGe Kai B` **v1.2.5（构建版；4,073 真迹）**；
-> **C 永乐大典 `GuanGe Kai C` v1.4.0（候选；5,250 真迹 / 25.01%；C-Q10 Regular 未过）**。
+> **C 永乐大典 `GuanGe Kai C` v1.4.0（候选；5,250 真迹 / 25.01%；C-Q10 Regular 已过，完整质量门未签）**。
 > C 线的状态、实验与数据见 `docs/PLAN-C.md`、`docs/EXPERIMENTS-C.md`、`docs/DATA-C.md`、
 > `README-C.md`；本文以下各节仍只描述 A 线。
 >
@@ -52,7 +52,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 |---|---|---|---|
 | `build/GuanGeKai-Regular.ttf` | 20,992 字（Version 1.7.3） | 16.6 MB | `89120d52209446a3` |
 | `build/GuanGeKai-Real.ttf` | 仅 2,261 真迹 | 4.5 MB | `59b1154d5e0d6b2d` |
-| `GuanGeKai-v1.7.3.zip` | v1.7.3 发布包 | 16.5 MB | `00417099bcee4c4b` |
+| `GuanGeKai-v1.7.3.zip` | v1.7.3 发布包 | 16.5 MB | `ef81446e30e22ec9` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
@@ -214,7 +214,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf` |
 | 合成字构成（95.9% GAN / 4.1% 回退） | `python3 -c "import json,collections;print(collections.Counter(json.loads(l)['src'] for l in open('work/generated.jsonl')))"` |
 | 泛化指标（Dice 0.539 / chamfer 6.13，n=617） | `python3 scripts/32_eval_clean.py --gan work/ckpt/m2wt_ep090.pt --n 617` + `python3 scripts/43_chamfer_floor.py` |
-| 真字数量 2,261 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数；v1.7.3 重跑 `05_select.py` 应得到 2,261 |
+| 真字数量 2,261 | `wc -l work/chosen.jsonl` 仍为 1,675；`release/provenance.json` 的 `"real"` 计数为 2,261（另 586 个 `real_single` 在 `work/qa/real_single.jsonl`）；重跑 `05_select.py` 不加 `--extra-jsonl` 仍是 1,675 |
 | 每个字来自哪里 | `release/provenance.json`（逐字 real/gen） |
 | 真字样本是否对得上 | `work/cells/<file>.png` 与 `work/masks/<file>.png` 成对存在；`chosen.jsonl` 有 `file/page/col/row` |
 | OCR 对齐质量 | `work/align_report.json`（每页匹配率） |

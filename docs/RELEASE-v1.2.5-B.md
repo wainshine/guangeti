@@ -1,6 +1,6 @@
 # GuanGe Kai B v1.2.5
 
-> 状态：**构建已完成，待打包**（`release-b/` 仍是 v1.2.4；打包后本页的 zip 一节回填）。
+> 状态：**已发布**（2026-11-15）。`release-b/` 与 `GuanGeKai-B-v1.2.5.zip` 均按 v1.2.5 生成。
 > 三线版本：A **v1.7.3** / B **v1.2.5** / C **v1.4.0**。
 > 字集口径不变：CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**。
 
@@ -36,7 +36,7 @@
 ```
 build/GuanGeKai-B-Regular.ttf  544ce807…  21,034 码位  Version 1.2.5
 build/GuanGeKai-B-Real.ttf     45d87eb0…   4,073 码位  Version 1.2.5
-GuanGeKai-B-v1.2.5.zip         （打包后回填）
+GuanGeKai-B-v1.2.5.zip         fce919e2…  14 MB（release-b/ 11 个文件，SHA256SUMS 自校验通过）
 ```
 
 ## 4. 门禁
@@ -45,6 +45,7 @@ GuanGeKai-B-v1.2.5.zip         （打包后回填）
 63_qa_b     coverage 20992 / punct 42/42 / QA OK
 68_accept   ACCEPTANCE OK（字体级 weight bias 1.088）
 73          自身 OK；唯一 FAIL 是 A 线快照（A 已升 v1.7.3，预期，用 --allow 跳过）
+83          A/B INTACT（B zip fce919e2… 已入基线）
 97          TERMS OK
 82 版本闸   420 changed / 0 added / 0 removed，与声明集一致
 ```
