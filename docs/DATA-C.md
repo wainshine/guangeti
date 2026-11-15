@@ -132,7 +132,7 @@ LOC 原文，只记录条目 URL 与访问日期（2026-10-27）。若发布前�
 ```
 
 `release-c/SHA256SUMS` 是发布包的逐文件校验和（10 个文件，不含自身）。
-**包内 README**：联合发版时已按当前 `README-C.md` 重打包（A v1.7.2 / B v1.2.4 / C v1.3.0 同步），
+**包内 README**：v1.3.0 发布包按当时的 `README-C.md` 重打包（A v1.7.2 / B v1.2.4 / C v1.3.0）；v1.4.0 尚未打包，
 不再有术语 drift。`specimen-c.png` / `book-vs-font-c.jpg` 的图注本来就是「重寫本」，无旧词。
 体积：Regular **15.20 MB**（15,201,924 B）、Real **4.61 MB**（4,608,864 B）、zip **14.75 MB**（14,751,732 B）。
 
@@ -210,7 +210,18 @@ python3 scripts/97_check_terms.py           # 术语检查
 C 线现状（2026-10-28）：`c.pt` = ep52（训练实际停止轮）、`c_best.pt` = **ep45**（valDice 最佳）、
 v1.3.0 发布用 **v1.3/c_ep090.pt**（0.470 / 6.38 / 8.3%）；v1.1.0 的 ep30 与 v1.2.0 的 ep34 是历史选点，见 EXPERIMENTS-C C/E15；`c_ep030_v100.pt` 是 v1.0.0 模型归档。
 
-## 5.1 v1.3.0 校验和（2026-11-02）
+## 5.1 v1.3.0 校验和（历史）
+
+## 5.1.1 v1.4.0 候选（2026-11-15，未打包）
+
+```
+8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  work-c/qa/c14/GuanGeKai-C-Regular-v1.4-fixed2.ttf
+d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0  work-c/qa/c14/GuanGeKai-C-Real-v1.4.ttf
+```
+
+v1.4.0 真迹 **5,250**；C-Q10 Regular damaged 40 / gate false，尚不能发布。
+
+## 5.1.2 v1.3.0 校验和（2026-11-02）
 
 v1.3.0 清理了 20 个全坏格，真迹 **5,257**；`自` 换回完整样本。
 v1.2.1 的校验和仍保留在 §5，属历史版本，不是当前 `build/`。

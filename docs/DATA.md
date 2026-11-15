@@ -98,32 +98,33 @@
 - 发布包 `release/README.md` 与 `release/specimen.png` 是 **v1.6.5 发布时的快照**，图上与文内仍写「刻本」； <!-- term-ok -->
   仓库文档已更正为「写本」。**不重新发版**，详见 `docs/ERRATA.md` E3/E4。
 - ~~已发布字体 ID 0 为 `Ming woodblock print`~~ <!-- term-ok --> —— **已修复**：v1.7.0 起重建的字体内 ID 0 为
-  `Ming manuscript`（2026-11-14 实测 `e6d8a104…`）。历史包（v1.6.5 及以前）仍为旧串，见 ERRATA E2。
+  `Ming manuscript`（v1.7.3 实测 `89120d52…`）。历史包（v1.6.5 及以前）仍为旧串，见 ERRATA E2。
 
 ## 5. 校验和
 
 > 体积单位为十进制 MB（1 MB = 10⁶ 字节），与 Finder 显示一致。
 
+A 线（四书本，v1.7.3 构建版）：
 
 ```
-e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac  build/GuanGeKai-Regular.ttf
-bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86  build/GuanGeKai-Real.ttf
+89120d52209446a3b6403871b7376f76dd8008e8223348de9dedf3609ed8eb75  build/GuanGeKai-Regular.ttf
+59b1154d5e0d6b2d92af64bff78b7594ccba325176abf9f6aa40c70352990323  build/GuanGeKai-Real.ttf
 ```
 
-B 线（史记本，v1.2.4）：
+B 线（史记本，v1.2.5 构建版）：
 
 ```
-aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
-7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a  build/GuanGeKai-B-Real.ttf
-2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip
+544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71  build/GuanGeKai-B-Regular.ttf
+45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c  build/GuanGeKai-B-Real.ttf
+2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip（仍是发布包）
 ```
 
-C 线（永乐大典本，v1.3.0）：
+C 线（永乐大典本，v1.4.0 候选）：
 
 ```
-765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48  build/GuanGeKai-C-Regular.ttf
-6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d  build/GuanGeKai-C-Real.ttf
-4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498  GuanGeKai-C-v1.3.0.zip
+8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  work-c/qa/c14/GuanGeKai-C-Regular-v1.4-fixed2.ttf
+d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0  work-c/qa/c14/GuanGeKai-C-Real-v1.4.ttf
+4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498  GuanGeKai-C-v1.3.0.zip（仍是发布包）
 ```
 
 历史版本（v1.5.0–v1.6.5、B v1.0.1–v1.2.1、C v1.0.x）见对应 `docs/releases/` 与 `docs/DATA-B/C.md`；不再在本文重复。

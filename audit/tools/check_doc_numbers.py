@@ -32,6 +32,9 @@ CURRENT_DOCS = [
     "docs/RELEASE-v1.7.2.md",
     "docs/RELEASE-v1.2.4-B.md",
     "docs/RELEASE-v1.3.0-C.md",
+    "docs/RELEASE-v1.7.3.md",
+    "docs/RELEASE-v1.2.5-B.md",
+    "docs/RELEASE-v1.4.0-C.md",
 ]
 
 # Stale/superseded tokens.  If the same line carries HISTORICAL_MARKERS it is allowed.
@@ -42,7 +45,6 @@ STALE = [
     r"(?<![\d.])5\.92(?![\d])",
     r"(?<![\d.])5\.16(?![\d])",
     r"(?<![\d.])0\.4666(?![\d])",
-    r"(?<![\d.])0\.469(?![\d])",
     r"\b9\.5%",
     r"\b90\.5%",
     r"\b0\.7%",
@@ -62,12 +64,12 @@ HISTORICAL_MARKERS = (
 
 # Artifact hashes that must be internally consistent when they appear.
 HASH_KEYS = {
-    "A Reg": ("e6d8a104c9bcc284165de2d2c2abc8f0729f23031b33ec062b6de27ce097edac", "release-a.json"),
-    "A Real": ("bf278ab1631bdb0da75a1b1b6b9c8628d7ec8b4792da7ef904c81f71f4dd1c86", "release-a.json"),
-    "B Reg": ("aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d", "release-b.json"),
-    "B Real": ("7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a", "release-b.json"),
-    "C Reg": ("765d08486b75da52e196cbe81570efd29226cea26d4f4198d6acd62dbf440f48", "release-c.json"),
-    "C Real": ("6caf9d82d71ad716eb5cbcf7a8c2947245756141a24b53f061130783752f359d", "release-c.json"),
+    "A Reg": ("89120d52209446a3b6403871b7376f76dd8008e8223348de9dedf3609ed8eb75", "build"),
+    "A Real": ("59b1154d5e0d6b2d92af64bff78b7594ccba325176abf9f6aa40c70352990323", "build"),
+    "B Reg": ("544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71", "build"),
+    "B Real": ("45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c", "build"),
+    "C Reg": ("8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91", "candidate"),
+    "C Real": ("d534e504d6aacb90d3ce07ae4f22d7d2bea4519280c64dde42424f8cf99e60f0", "candidate"),
     "A zip": ("14483141b854056aa887f6e4be37c78053692419dd304a4e3de432be7256835b", "release-a.json"),
     "B zip": ("2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46", "release-b.json"),
     "C zip": ("4b4737758a342e8ddc59ac60615e846c760564faadfb87760f08bf70639f5498", "release-c.json"),
@@ -153,8 +155,19 @@ def main(argv=None) -> int:
             findings.append(f"{rel}: rebuild chain does not mention 13_extend_punct")
 
     # exact expected values sanity (release json itself)
-    assert vals["A.version"] == "1.7.2" and vals["B.version"] == "1.2.4" and vals["C.version"] == "1.3.0"
-    assert vals["A.real"] == 1675 and vals["B.real"] == 4073 and vals["C.real"] == 5257
+    # Current build/version contract (release packages may lag; read the actual fonts).
+    from fontTools.ttLib import TTFont
+    build = {}
+    for line, reg, real in (
+        ("A", ROOT / "build/GuanGeKai-Regular.ttf", ROOT / "build/GuanGeKai-Real.ttf"),
+        ("B", ROOT / "build/GuanGeKai-B-Regular.ttf", ROOT / "build/GuanGeKai-B-Real.ttf"),
+        ("C", ROOT / "work-c/qa/c14/GuanGeKai-C-Regular-v1.4.ttf",
+               ROOT / "work-c/qa/c14/GuanGeKai-C-Real-v1.4.ttf"),
+    ):
+        build[f"{line}.version"] = TTFont(reg)["name"].getDebugName(5).split()[-1]
+        build[f"{line}.real"] = len(TTFont(real).getBestCmap())
+    assert build == {"A.version": "1.7.3", "B.version": "1.2.5", "C.version": "1.4.0",
+                     "A.real": 2261, "B.real": 4073, "C.real": 5250}, build
 
     print(f"checked {len(CURRENT_DOCS)} current docs, {checked} lines")
     if args.verbose:

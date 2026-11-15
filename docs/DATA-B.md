@@ -164,7 +164,7 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
 （本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
 
-## 6. 校验和（v1.2.4）
+## 6. 校验和（v1.2.4 历史；v1.2.5 见下节）
 
 ```
 aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
@@ -179,12 +179,21 @@ d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
+### 6.1 v1.2.5 构建版（未打包，2026-11-15）
+
+```
+544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71  build/GuanGeKai-B-Regular.ttf
+45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c  build/GuanGeKai-B-Real.ttf
+```
+
+发布包 `release-b/` 仍是 v1.2.4；v1.2.5 尚未打包。
+
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。
 
 **版本号口径（2026-10-30 所有者定）**：B 线按 **patch 递增**，公开序列 v1.2.2 → **v1.2.4**
 （v1.2.3 未发布，直接跳过）；中间构建 **v1.3.0 / v1.3.1 编号作废、产物已清理**，
 不对应任何发布说明，文档里不再引用。
-三条线独立编号：A v1.7.2 / B v1.2.4 / C v1.3.0。
+三条线独立编号：A v1.7.3 / B v1.2.5 / C v1.4.0（v1.2.4、v1.3.0 为已发布旧包）。
 
 **包内 README 的 RFN 列表仍是旧写法（仓库已修，包内待下次重打包对齐）**：
 `release-b/README.md` 写的是 `（霞鶩／霞鶩／落霞孤鶩／LXGW）`——`霞鶩` 重复、缺 `霞鹜` 与 `落霞孤鹜`。

@@ -2,12 +2,12 @@
 
 > **一句话**：以明代写本《四书白文》为字形来源，做一套覆盖 CJK 基本区 20,992 字、OFL 1.1 授权的馆阁体字体（GuanGe Kai / 馆阁楷）。
 >
-> **三线现状（2026-11-13 快照）**：A 四书 `GuanGe Kai` **v1.7.2（发布日 2026-10-30）**；B 史记 `GuanGe Kai B` **v1.2.4（发布日 2026-10-30）**；
-> **C 永乐大典 `GuanGe Kai C` v1.3.0（发布日 2026-11-02；5,257 真迹 / 25.04%）**。
+> **三线现状（2026-11-15 快照）**：A 四书 `GuanGe Kai` **v1.7.3（构建版；2,261 真迹）**；B 史记 `GuanGe Kai B` **v1.2.5（构建版；4,073 真迹）**；
+> **C 永乐大典 `GuanGe Kai C` v1.4.0（候选；5,250 真迹 / 25.01%；C-Q10 Regular 未过）**。
 > C 线的状态、实验与数据见 `docs/PLAN-C.md`、`docs/EXPERIMENTS-C.md`、`docs/DATA-C.md`、
 > `README-C.md`；本文以下各节仍只描述 A 线。
 >
-> 最后更新：2026-11-13（三线版本同步）
+> 最后更新：2026-11-15（三线版本同步）
 
 本文档面向接手者与审计者：说明当前进度、哪些结论有证据、哪些仍属推测、已知缺陷与下一步。所有数字都对应具体文件或脚本，复核方法见第 9 节。
 
@@ -23,9 +23,9 @@ cat docs/DATA.md          # 输入/输出清单、许可、校验和
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字形检查
 ```
 
-- 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，15.7 MB）、`build/GuanGeKai-Real.ttf`（1,675 字，3.3 MB）
-- 发布包：`release/`、`GuanGeKai-v1.7.2.zip`
-- **合成字构成**：1,675 真迹 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ ribbon 回退 799；
+- 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，16.6 MB，Version 1.7.3）、`build/GuanGeKai-Real.ttf`（2,261 字，4.5 MB）
+- 发布包：`release/` 仍是 v1.7.2；v1.7.3 构建版尚未打包
+- **合成字构成**：2,261 真迹 + GAN 17,932 + ribbon 回退 799；
   `release/provenance.json` 为五态 `real` / `gan_ep90` / `gan_ep80` / `ribbon_fb` / `punct`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
@@ -50,16 +50,16 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 | 产物 | 内容 | 大小 | SHA-256（前 16） |
 |---|---|---|---|
-| `build/GuanGeKai-Regular.ttf` | 20,992 字（版本 1.7.2） | 15.7 MB | `e6d8a104c9bcc284` |
-| `build/GuanGeKai-Real.ttf` | 仅 1,675 真迹 | 3.3 MB | `bf278ab1631bdb0d` |
-| `GuanGeKai-v1.7.2.zip` | 上述 + OFL + 覆盖表 + 逐字来源（四态）+ 校验和 | 14.0 MB | `14483141b854056a` |
+| `build/GuanGeKai-Regular.ttf` | 20,992 字（Version 1.7.3） | 16.6 MB | `89120d52209446a3` |
+| `build/GuanGeKai-Real.ttf` | 仅 2,261 真迹 | 4.5 MB | `59b1154d5e0d6b2d` |
+| `GuanGeKai-v1.7.2.zip` | 仍是 v1.7.2 发布包，不含 v1.7.3 构建 | 14.0 MB | `14483141b854056a` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
 
 **质量定位**：
 - `GuanGeKai-Real.ttf` 是**可信的写本字形集**，可直接用于正文。
-- `GuanGeKai-Regular.ttf` 的 19,317 个合成字是**近似**：结构继承自霞鹜文楷骨架，GAN 只改笔形；**不保证结构正确**（E24/E27/E28 已证）。笔画重量接近，但没有真正的墨笔笔锋。
+- `GuanGeKai-Regular.ttf` 的 18,731 个合成字是**近似**：结构继承自霞鹜文楷骨架，GAN 只改笔形；**不保证结构正确**（E24/E27/E28 已证）。笔画重量接近，但没有真正的墨笔笔锋。
 
 ---
 
@@ -72,10 +72,10 @@ UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。
 | 切出的单字格 | 54,109 | `work/cells.jsonl` |
 | 与标准文本对齐成功的页 | 358 / 384（rate>0.5），平均匹配率 0.899 | `work/align_report.json` |
 | 唯一字标签 | 2,292 | `work/labeled.jsonl` |
-| 进入字体的真字 | **1,675**（丢弃 617 个仅出现 1 次的字，见 §7.2） | `work/chosen.jsonl` |
-| 合成字 | 19,317 | `work/generated.jsonl` |
+| 进入字体的真字 | **2,261**（含 586 个 real_single） | `work/chosen.jsonl` + v1.7.3 构建 |
+| 合成字 | 18,731 | `work/generated.jsonl` |
 
-真字/合成字比例 ≈ **8% : 92%**。这是本项目所有质量问题的根源。
+真字/合成字比例 ≈ **10.8% : 89.2%**。这是本项目所有质量问题的根源。
 
 ---
 
@@ -107,7 +107,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | ⑦ 真字 | `07_build_real.py` | ~2 min | potrace 质量、轮廓方向 |
 | ⑧ 配对 | `08_make_pairs.py` | ~20 s | 目标必须用 mask，不能用灰度裁剪 |
 | ⑨ 训练 | `09_train*.py` | 见 EXPERIMENTS | 见 §6 |
-| ⑩ 合成 | `10_generate.py` | ~5 min（19,317 字） | — |
+| ⑩ 合成 | `10_generate.py` | ~5 min（18,731 字） | — |
 | ⑪ 合字 | `11_build_full.py` | ~3 min | — |
 | ⑪½ 标点 | `13_extend_punct.py --line A --inplace` | 秒 | **必须在 11 之后、14 之前**；漏跑会让 13_qa ABORT（punct） |
 | ⑫–⑭ | `12/13/14_*.py` | 秒~分 | — |
@@ -134,13 +134,13 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | 路线 | 结论 | 证据 |
 |---|---|---|
 | A. 自训 U-Net（像素级风格迁移） | **失败**：二值化 Dice 0.441，恒等基线 0.431，几乎没学到东西 | `EXPERIMENTS.md` E1–E3 |
-| B. IDS 部件拼字 | **不可行于全量**：19,317 缺字中仅 1,166（6.0%）能完全用真字拼出；拼出的比例也不好 | `EXPERIMENTS.md` E4 |
+| B. IDS 部件拼字 | **不可行于全量**：18,731 缺字中约 6% 能完全用真字拼出；拼出的比例也不好 | `EXPERIMENTS.md` E4 |
 | C. 预训练模型 zi2zi-JiT 零样本 | **风格最好**：Dice 0.528 vs 基线 0.309；但结构有幻觉（约 1/4 缺笔/粘连），且权重许可待确认 | `EXPERIMENTS.md` E5–E6 |
 | D. 笔墨滤波（v1.1–v1.2 采用） | 骨架取自文楷、不引入拓扑错误，但只是「加粗的楷体」，无笔锋 | `scripts/10_generate.py --method brush` |
 | E. 带状扫掠 + 斜切端头（v1.3.3–v1.3.5 采用，**v1.5.0 起降为回退方案**） | 端帽与笔内动态接近真字；旧的“拓扑 97%”口径已作废（E28） | `scripts/10_generate.py --method ribbon` |
 | F. GAN（5 层 PatchGAN + hinge + 增强，**v1.5.0 采用**） | 干净集 Dice 0.539、chamfer 6.13（n=617；旧记 0.549/5.92 为抽样口径） | `scripts/10_generate.py --method gan` |
 
-**当前发布版用 GAN**（`zi2zi-GAN`，v1.5.0 起）：真迹 1,675 + GAN 18,518 + ribbon 回退 799。v1.3.3 的 E（ribbon）已降级为回退兜底。
+**当前构建版用 GAN**（`zi2zi-GAN`，v1.5.0 起）：真迹 **2,261** + GAN **17,932** + ribbon 回退 799。v1.3.3 的 E（ribbon）已降级为回退兜底。
 
 ---
 
@@ -154,7 +154,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 - 轮廓方向：翻转时用多边形近似三次曲线 → 改为 `ReverseContourPen`（v1.1 修复）
 
 ### 7.2 已知但接受
-- **617 个「书中仅出现 1 次」的字被剔除**，改由合成字补。原因：无法交叉校验，实测确有错标（「落」被标成「姓」）。真字因此从 2,292 降到 1,675。
+- **617 个「书中仅出现 1 次」的字复核后，586 个纳入真迹、31 个排除**；真字从 1,675 增至 **2,261**。
 - 极少数真字仍有木刻飞白/纸褶（如「之」），观感像噪点。
 - 合成字无墨笔笔锋，但有斜切端头与逐笔粗细变化；真字与合成字在同一行里粗细仍有差异。
 - ~~合成字整体过重~~：v1.2.0 已修正（见 §17）。
@@ -183,14 +183,14 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
    干净集（617 字，从未训练）上：Dice **0.540 vs ribbon 0.413**、骨架 chamfer **6.68 vs 8.76**、
    交叉点差 **9 vs 13**、崩坏率（Dice<0.30）**0.7% vs 5.7%**。
    **E27 曾以"与文楷拓扑 23/150"否决 GAN，那把尺子对 A 线循环、对真迹无区分度（E28），结论作废。**
-   下一步：全量生成 + 字体级验收（`13_qa`、小字号、与 1,675 真迹混排）。
+   下一步：全量生成 + 字体级验收（`13_qa`、小字号、与 **2,261** 真迹混排）。
 0b. **结构指标口径已修正，但结构本身仍是缺口**（E28）：旧口径「与文楷拓扑全等」作废
    （vs 真迹时 ribbon/GAN/文楷全是 ~11%）。维度化实测：布局级（重心、宽高比）文楷与写本差 1–2%，
    可接受；**笔画级差异明显**——横画角 KS 0.513、字碗数只有 39/120 对得上。
    横画倾角校准已试并证伪（Dice 无收益），原因是 256px 的倾角估计不稳、且绕笔画重心旋转破坏接续。
    **在做出可靠的结构度量之前，不要基于这类人口统计量做形变干预。**
 1. **转折（横折方角）**：带状扫掠目前把转折渲染成圆角，这是与写本最明显的剩余差异。
-2. **换数据源**：找「楷书字典类刻本」，把真字从 1,675 提到万级 <!-- term-ok -->（rhyme-grass 的做法）。
+2. **换数据源**：找「楷书字典类刻本」，把真字从 **2,261** 提到万级 <!-- term-ok -->（rhyme-grass 的做法）。
    这是唯一能根本改变 8% 覆盖率的路线。
 3. ~~笔刷引擎~~ 已完成（E15，v1.3.2 起，v1.3.3 改进）。
 4. ~~zi2zi LoRA 全量重训~~ **已证伪**：E14 用 600 epoch / 18,600 步训练，Dice 从 0.441 降到 0.397。
@@ -214,7 +214,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | 覆盖率 20,992 | `python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf` |
 | 合成字构成（95.9% GAN / 4.1% 回退） | `python3 -c "import json,collections;print(collections.Counter(json.loads(l)['src'] for l in open('work/generated.jsonl')))"` |
 | 泛化指标（Dice 0.539 / chamfer 6.13，n=617） | `python3 scripts/32_eval_clean.py --gan work/ckpt/m2wt_ep090.pt --n 617` + `python3 scripts/43_chamfer_floor.py` |
-| 真字数量 1,675 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数；重跑 `05_select.py` 应得到同样的 1,675 |
+| 真字数量 2,261 | `wc -l work/chosen.jsonl`；`provenance.json` 里 `"real"` 计数；v1.7.3 重跑 `05_select.py` 应得到 2,261 |
 | 每个字来自哪里 | `release/provenance.json`（逐字 real/gen） |
 | 真字样本是否对得上 | `work/cells/<file>.png` 与 `work/masks/<file>.png` 成对存在；`chosen.jsonl` 有 `file/page/col/row` |
 | OCR 对齐质量 | `work/align_report.json`（每页匹配率） |
@@ -266,8 +266,8 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 
 ## 11. 术语
 
-- **真字 / real**：直接从扫描本矢量化的字形（1,675 个）。
-- **合成字 / generated**：用程序或模型生成的缺字（19,317 个）。
+- **真字 / real**：直接从扫描本矢量化的字形（**2,261** 个，含 586 个 `real_single`）。
+- **合成字 / generated**：用程序或模型生成的缺字（**18,731** 个）。
 - **格 / cell**：版面网格中的一个字位；一个 cell 对应一个连通域簇。
 - **槽 / slot**：按字距切出的理论格子，用于定位与缩放。
 - **笔墨滤波**：`10_generate.py --method brush` 使用的形态学方案（横加粗竖、竖减细横、闭运算），v1.1–v1.2 使用。
