@@ -43,6 +43,13 @@ def sha256(p: Path) -> str:
     return h.hexdigest()
 
 
+def _a_real_exp() -> int:
+    rc = ROOT / "work" / "real_contours.jsonl"
+    if rc.exists():
+        return sum(1 for _ in open(rc))
+    return 1675
+
+
 def sums(path: Path) -> dict:
     out = {}
     if not path.exists():
@@ -110,7 +117,12 @@ def main(argv: list[str] | None = None) -> int:
 
     ok = True
     issues = []
-    info = {"fonts": {}, "checks": {}, "charset": {}}
+    import hashlib as _hl
+    info = {"fonts": {}, "checks": {}, "charset": {},
+            "script_sha256": _hl.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "release_json_sha256": {n: (_hl.sha256((ROOT / "data" / f"release-{n}.json").read_bytes()).hexdigest()
+                                       if (ROOT / "data" / f"release-{n}.json").exists() else None)
+                                    for n in ("a", "b", "c")}}
 
     sa = sums(ROOT / "release" / "SHA256SUMS")
     sb = sums(ROOT / "release-b" / "SHA256SUMS")
@@ -147,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
 
     checks = {
         "A coverage": (coverage(ROOT / "build/GuanGeKai-Regular.ttf")[0], 20992),
-        "A real glyphs": (n_real(ROOT / "build/GuanGeKai-Real.ttf"), 1675),
+        "A real glyphs": (n_real(ROOT / "build/GuanGeKai-Real.ttf"), _a_real_exp()),
         "A chosen": (lines(ROOT / "work/chosen.jsonl"), 1675),
         "A provenance real": (sum(1 for v in json.loads(
             (ROOT / "release/provenance.json").read_text()).values() if v == "real"), 1675),
@@ -230,6 +242,11 @@ def main(argv: list[str] | None = None) -> int:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "verify_ab.json").write_text(
             json.dumps(info, ensure_ascii=False, indent=1))
+        (out_dir / "verify_ab.json.sha256").write_text(json.dumps({
+            "script_sha256": info["script_sha256"],
+            "release_json_sha256": info["release_json_sha256"],
+            "fonts": {k: v["sha256"] for k, v in info["fonts"].items()},
+        }, ensure_ascii=False, indent=1) + "\n")
         snap = {n: v["sha256"] for n, v in info["fonts"].items()}
         base.update(snap)
         (out_dir / "ab_baseline.json").write_text(

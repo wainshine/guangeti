@@ -38,6 +38,9 @@ def main() -> None:
     ap.add_argument("--font", default=str(DEFAULT_FONT))
     ap.add_argument("--cols", type=int, default=10)
     ap.add_argument("--per-page", type=int, default=100)
+    ap.add_argument("--singles", action="store_true",
+                    help="treat every char as a single-occurrence candidate (tag=single, meta marks it)")
+    ap.add_argument("--verdict", default="", help="write an empty verdict TSV next to the ledger")
     args = ap.parse_args()
 
     prov = json.load(open(ROOT / "release" / "provenance.json"))
@@ -45,6 +48,8 @@ def main() -> None:
 
     if args.chars:
         chars = [l.strip() for l in open(args.chars) if l.strip()]
+        if args.singles:
+            chars = [c for c in chars if c in cells]
     else:
         by_layer: dict[str, list[str]] = {"real": [], "gan": [], "ribbon": []}
         for ch, layer in prov.items():
@@ -66,7 +71,8 @@ def main() -> None:
             "no": i, "line": "A", "char": ch,
             "crop": f"work/cells/{f}" if f else None,
             "glyph_font": args.font,
-            "meta": [f"p{f.split('_')[0][1:]}" if f else "-", layer,
+            "meta": [f"p{f.split('_')[0][1:]}" if f else "-",
+                     "SINGLE (only 1 sample)" if args.singles else layer,
                      "source cell" if f else "no crop"],
             "tag": layer,
         })
@@ -75,6 +81,12 @@ def main() -> None:
     pngs = rs.build_sheet(rows, args.font, str(out_dir / "sheet-{n}.png"),
                           cols=args.cols, per_page=args.per_page)
     tsv = rs.write_tsv(rows, str(out_dir / "ledger.tsv"))
+    if args.verdict:
+        with open(args.verdict, "w", encoding="utf-8") as fo:
+            fo.write("no\tchar\tcodepoint\tpage\tverdict\tcorrect_char\tnote\n")
+            for r in rows:
+                fo.write(f"{r['no']}\t{r['char']}\tU+{ord(r['char']):04X}\t{r['meta'][0]}\t\t\t\n")
+        print("verdict template:", args.verdict)
     print(f"{len(rows)} rows | {len(pngs)} sheet(s) | {tsv}")
     for p in pngs:
         print(" ", p)

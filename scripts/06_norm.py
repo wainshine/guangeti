@@ -23,15 +23,24 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", default=str(ROOT / "work"),
                     help="working directory (the B line uses work-b)")
+    ap.add_argument("--extra-jsonl", default="",
+                    help="additional labelled rows needing norm params (e.g. verified singles)")
     ap.add_argument("--pitch-floor", type=float, default=200.0,
                     help="guard against absurd pitches; 四書 at 300 dpi is 310, 史記 is 175")
     args = ap.parse_args()
     wd = Path(args.work)
     meta = {json.loads(l)["file"]: json.loads(l) for l in open(wd / "cells.jsonl")}
     chosen = [json.loads(l) for l in open(wd / "chosen.jsonl")]
+    if args.extra_jsonl:
+        chosen += [json.loads(l) for l in open(args.extra_jsonl)]
     out = {}
+    _norm = wd / "norm.json"
+    if _norm.exists():                     # keep existing params; only fill the gaps
+        out = json.loads(_norm.read_text())
     for row in chosen:
         ch = row["label"]
+        if ch in out:
+            continue
         m = meta.get(row["file"])
         if not m or not ch:
             continue

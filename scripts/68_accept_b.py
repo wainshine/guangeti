@@ -194,6 +194,12 @@ def main():
           (100 * res["fallback_share"], cov, BLOCK[1] - BLOCK[0] + 1))
     out = Path(args.out) if args.out else wd / "accept_b.json"
     out.write_text(json.dumps(res, ensure_ascii=False, indent=1))
+    # B-Q10: 绑定测量输入，防止换字体/换 provenance 后静默复用旧结果
+    from bind_b import write_sidecar
+    write_sidecar(out, {"font": args.font,
+                        "provenance": str(wd.parent / "release-b" / "provenance.json"),
+                        "chosen": str(wd / "chosen.jsonl"),
+                        "generated": str(wd / "generated.jsonl")})
     print("->", out)
 
     # --- hard gates (audit 3-21: this script used to report without judging) ---

@@ -151,6 +151,9 @@ def main() -> int:
 
     if args.out:
         Path(args.out).write_text(json.dumps(card, ensure_ascii=False, indent=1))
+        from bind_b import write_sidecar
+        write_sidecar(args.out, {"font": args.font, "chosen": str(wd / "chosen.jsonl"),
+                                 "provenance": str(rel / "provenance.json")})
         print(f"\n-> {args.out}")
     return 0
 

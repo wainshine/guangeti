@@ -6,6 +6,10 @@ with the same character in WenKai (the content font we learn from).  A hole that
 exists in WenKai but not in our font is a defect the five shape metrics cannot
 see: Dice / ink / cap / chamfer are all blind to a filled counter.
 
+DIAGNOSTIC ONLY (ERRATA E11): counter counts depend on the hand and on binarisation
+resolution; open/fused counters are normal for this manuscript.  This script must not
+be used as a release gate or a "quality rate".
+
 Two failure modes are reported separately:
   * `lost`   — WenKai has N>0 holes, we have 0            (fully fused)
   * `fewer`  — we have 0 < holes < WenKai's N            (partly fused)
@@ -42,6 +46,37 @@ def holes_of(mask: np.ndarray) -> int:
     return int(sum(1 for h in hier[0] if h[3] != -1))
 
 
+def holes_clean(mask: np.ndarray, min_area_frac: float = 5e-4) -> int:
+    """Hole count after removing speckle: counters smaller than min_area_frac are noise."""
+    m = mask.astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    keep = np.zeros_like(m)
+    big = max(20, int(min_area_frac * m.size))
+    for j in range(1, n):
+        if st[j, 4] >= big:
+            keep[lab == j] = 1
+    out = cv2.findContours(keep, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    hier = out[-1]
+    if hier is None:
+        return 0
+    min_hole = max(12, int(2e-4 * keep.size))
+    cnt = 0
+    for i, h in enumerate(hier[0]):
+        if h[3] != -1 and cv2.contourArea(out[0][i]) >= min_hole:
+            cnt += 1
+    return cnt
+
+
+def raster_fit(font_path: str, ch: str, size: int = 256) -> np.ndarray:
+    """Render at 80% of the canvas so descenders never clip, then crop to the ink box."""
+    im = Image.new("L", (size, size), 0)
+    f = ImageFont.truetype(font_path, int(size * 0.8))
+    ImageDraw.Draw(im).text((size / 2, size * 0.92), ch, font=f, fill=255, anchor="ms")
+    a = np.array(im) > 127
+    ys, xs = np.where(a)
+    return a[ys.min():ys.max() + 1, xs.min():xs.max() + 1] if len(xs) else a
+
+
 def raster(font: ImageFont.FreeTypeFont, ch: str) -> np.ndarray:
     im = Image.new("L", (S, S), 0)
     ImageDraw.Draw(im).text((S // 2, int(TOP * S / 1000.0)), ch, fill=255, font=font,
@@ -57,6 +92,7 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--json", default="")
     ap.add_argument("--list", type=int, default=15, help="how many offenders to print")
+
     args = ap.parse_args()
 
     f = ImageFont.truetype(args.font, S)
@@ -106,7 +142,15 @@ def main() -> int:
             "same": len(same), "fewer": len(fewer), "lost": len(lost),
             "lost_chars": "".join(r[0] for r in lost),
             "worse_chars": "".join(r[0] for r in sorted(lost + fewer)),
+            "diagnostic_only": True,
+            "note": "holes are style-dependent (四/目/自 open by design); never a gate -- see ERRATA E11",
+            "script_sha256": _hl.sha256(Path(__file__).read_bytes()).hexdigest(),
         }, ensure_ascii=False, indent=1))
+        Path(args.json + ".sha256").write_text(json.dumps({
+            "font_sha256": font_sha,
+            "script_sha256": _hl.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "cmd": cmd,
+        }, ensure_ascii=False, indent=1) + "\n")
         print(f"-> {args.json}")
     return 0
 

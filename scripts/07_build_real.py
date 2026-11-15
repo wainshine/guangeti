@@ -63,6 +63,8 @@ def main():
         return
     ap = __import__("argparse").ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--extra-jsonl", default="",
+                    help="additional labelled rows to trace as real (e.g. verified single-occurrence)")
     ap.add_argument("--out", default=str(ROOT / "build" / "GuanGeKai-Real.ttf"))
     ap.add_argument("--carve-holes", action="store_true",
                     help="experimental hole recovery (E38, no measurable gain — off by default)")
@@ -76,6 +78,11 @@ def main():
         meta[r["file"]] = r
 
     chosen = [json.loads(l) for l in open(ROOT / "work" / "chosen.jsonl")]
+    if args.extra_jsonl:
+        have = {r.get("label") for r in chosen}
+        extra = [json.loads(l) for l in open(args.extra_jsonl)]
+        chosen += [r for r in extra if r.get("label") not in have]
+        print(f"extra real rows: {len(extra)} (added {sum(1 for r in extra if r.get('label') not in have)})")
     norm = json.load(open(ROOT / "work" / "norm.json"))
     if args.limit:
         chosen = chosen[: args.limit]

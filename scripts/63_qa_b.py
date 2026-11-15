@@ -165,13 +165,10 @@ def main():
         if hj.exists():
             holes = json.loads(hj.read_text())
             frac = holes["lost"] / max(1, holes["comparable"])
-            if frac > args.max_lost_frac:
-                fails.append(f"counters lost in {frac:.1%} of comparable glyphs "
-                             f"(> {args.max_lost_frac:.0%})")
+            # 孔洞不参与判定（2026-11-14 所有者：手写/抄本本来就不封口，只有印刷体才封口）。
+            # 这里只打印诊断；真迹的孔洞另有 scripts/81_holes_source_b.py 对源 mask 出两栏。
             ffrac = holes["fewer"] / max(1, holes["comparable"])
-            if ffrac > args.max_fewer_frac:
-                fails.append(f"{ffrac:.1%} of glyphs have fewer counters than WenKai "
-                             f"(> {args.max_fewer_frac:.0%})")
+            print(f"  counters vs WenKai (diagnostic only): lost {frac:.1%}, fewer {ffrac:.1%}")
             # A curated list must keep at least one counter — checked EXHAUSTIVELY,
             # not by looking for the char in the random sample's lost list.  The sample
             # version let a fully solid 国 through (audit 2026-10-27 P1).
@@ -180,13 +177,29 @@ def main():
             fnt = ImageFont.truetype(args.font, S)
             zero = []
             not_applicable = []
+            chosen_files = {json.loads(l)["label"]: json.loads(l)["file"]
+                            for l in open(wd / "chosen.jsonl")}
+
+            def _src_counters(mask):
+                import cv2 as _cv2
+                mm = np.pad(mask.astype(np.uint8), 1, constant_values=0)
+                n_, lab_ = _cv2.connectedComponents(1 - mm, connectivity=4)
+                border = set(lab_[0, :]) | set(lab_[-1, :]) | set(lab_[:, 0]) | set(lab_[:, -1])
+                return sum(1 for i in range(1, n_) if i not in border)
+
             for c in args.common_holes:
-                # only require a counter when the reference font draws one; `门` has no
-                # enclosed counter in WenKai either, so demanding one was a bug
-                from shiji_page import wk_holes as _wkh
-                if _wkh(c, S) < 1:
-                    not_applicable.append(c)
-                    continue
+                # 判据对齐源字：只有"书上这个字本身有孔"时才要求成品保留孔。
+                # 写本/抄本开口（如 自、四）不是缺陷；没有源块（合成字）才退回文楷。
+                mp = wd / "masks" / chosen_files.get(c, "")
+                if c in chosen_files and mp.exists():
+                    if _src_counters(np.array(_Im.open(mp).convert("L")) > 127) < 1:
+                        not_applicable.append(c)
+                        continue
+                else:
+                    from shiji_page import wk_holes as _wkh
+                    if _wkh(c, S) < 1:
+                        not_applicable.append(c)
+                        continue
                 want_c = 1
                 im = _Im.new("L", (S, S), 0)
                 _ImD.Draw(im).text((S // 2, int(0.88 * S)), c, fill=255, font=fnt,
@@ -202,7 +215,7 @@ def main():
                 if got < want_c:
                     zero.append(c)
             if not_applicable:
-                print(f"  (whitelist chars with no counter in WenKai, skipped: "
+                print(f"  (whitelist chars with no counter in the source, skipped: "
                       f"{''.join(not_applicable)})")
             if zero:
                 fails.append(f"common characters lost their counter (exhaustive): "

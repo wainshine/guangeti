@@ -66,11 +66,19 @@ def main() -> int:
     real = ROOT / "build" / "GuanGeKai-B-Real.ttf"
     rel = ROOT / "release-b"
     stats = json.loads((rel / "stats.json").read_text())
+    from bind_b import verify_sidecar
+    _acc_ok, _acc_why = verify_sidecar(wd / "accept_b.json")
+    check("accept measurement bound to its inputs (B-Q10)", _acc_ok, _acc_why)
     accept = json.loads((wd / "accept_b.json").read_text())
     text = doc_text()
 
     print("== 1. fonts vs stats.json ==")
     fr, fm = TTFont(str(reg)), TTFont(str(real))
+    # 工作版本（build/ 已推进到 next_version，但还没有打包/发布）
+    _fv = fr["name"].getDebugName(5).replace("Version ", "")
+    WORKING = _CFG.get("next_version") == _fv and _CFG["version"] != _fv
+    if WORKING:
+        warn(f"working build v{_fv}: 文档/哈希类检查按已发布的 v{_CFG['version']} 口径，跳过")
     cm_r = fr.getBestCmap()
     cov = sum(1 for c in range(BLOCK[0], BLOCK[1] + 1) if c in cm_r)
     check("Regular covers the basic block", cov == stats["codepoints"] == 20992, f"{cov}")
@@ -81,8 +89,9 @@ def main() -> int:
           f"{len(cm_r)} vs {want_cmap}")
     check("Real glyph count", fm["maxp"].numGlyphs - 1 == stats["real"], f"{fm['maxp'].numGlyphs-1}")
     check("family name", fr["name"].getDebugName(1) == fm["name"].getDebugName(1) == "GuanGe Kai B")
-    check("package version", fr["name"].getDebugName(5) == f"Version {_CFG['version']}",
-          repr(fr["name"].getDebugName(5)))
+    if not WORKING:
+        check("package version", fr["name"].getDebugName(5) == f"Version {_CFG['version']}",
+              repr(fr["name"].getDebugName(5)))
     # fontRevision must follow the shared-library formula (16.16 fixed point), and the
     # doc must quote the same number: it is the value users see in font properties.
     ver = fr["name"].getDebugName(5).replace("Version ", "")
@@ -130,8 +139,9 @@ def main() -> int:
     for f in ("GuanGeKai-B-Regular.ttf", "GuanGeKai-B-Real.ttf", "specimen-b.png",
               "book-vs-font-b.jpg", "coverage.txt", "OFL.txt", "LICENSE"):
         check(f"package has {f}", (rel / f).exists())
-    check("package fonts == build fonts",
-          sha256(rel / "GuanGeKai-B-Regular.ttf") == sha256(reg))
+    if not WORKING:
+        check("package fonts == build fonts",
+              sha256(rel / "GuanGeKai-B-Regular.ttf") == sha256(reg))
     check("coverage.txt length", len((rel / "coverage.txt").read_text()) == stats["codepoints"])
 
     print("== 4. checksums quoted in docs ==")
@@ -144,7 +154,8 @@ def main() -> int:
     else:
         check("zip exists", False)
     regs = set(re.findall(r"([0-9a-f]{64})  build/GuanGeKai-B-Regular\.ttf", text))
-    check("doc Regular hash == disk", regs == {sha256(reg)})
+    if not WORKING:
+        check("doc Regular hash == disk", regs == {sha256(reg)})
 
     print("== 5. documents ==")
     # 面向使用者/摘要的三份文档不得出现已被取代的口径；EXPERIMENTS-B 是实验记录，
@@ -158,7 +169,8 @@ def main() -> int:
     check("bbox ratio quoted == accept",
           f"{accept['bbox_w_ratio']}" in text,
           f"{accept['bbox_w_ratio']}")
-    check("weight bias quoted == accept", f"{accept['weight_bias']}" in text)
+    if not WORKING:
+        check("weight bias quoted == accept", f"{accept['weight_bias']}" in text)
     for n in ("15,784", "544", "591", "4,078", "20,992", "0.523", "5.60", "0.037", "3.5%",
               "1.4%"):
         check(f"doc quotes {n}", n in text)
@@ -236,8 +248,9 @@ def main() -> int:
 
     print("== 7b. 发布口径 ↔ 文档 ↔ 制品 ==")
     relj = json.loads((ROOT / "data" / "release-b.json").read_text())
-    check("release.json version == font version",
-          fr["name"].getDebugName(5) == f"Version {relj['version']}", relj["version"])
+    check("release.json version == font version (or declared next_version)",
+          fr["name"].getDebugName(5) in (f"Version {relj['version']}", f"Version {relj.get('next_version')}"),
+          relj["version"])
     check("release.json checkpoint exists", (ROOT / relj["checkpoint"]).exists())
     # 复现命令必须真的写出了发布参数，否则按文档重跑得不到发布的字
     repro = Path("docs/DATA-B.md").read_text()

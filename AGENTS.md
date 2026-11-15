@@ -152,7 +152,7 @@ python3 scripts/07_build_real.py                     # 1. 真字子集（从 wor
 python3 scripts/11_build_full.py            # 2. 完整字体
 python3 scripts/13_extend_punct.py --line A --inplace   # 2.5 补 42 个标点/数字/空格（必须在 11 之后、14 之前）
 python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 3. 质检（应打印 real-subset ... OK）
-python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json work/holes_a.json  # 3.4 孔洞审计（记录，不阻断）
+python3 scripts/71_holes.py --font build/GuanGeKai-Regular.ttf --n 300 --json work/holes_a.json  # 3.4 孔洞诊断（只记录，永不阻断）
 python3 scripts/23_compare_all.py --n 40                              # 3.5 重出对比面板（默认用 617 干净字）
 rm -rf release && python3 scripts/14_package.py               # 4. 重新打包（会复制根 README）
 python3 scripts/95_compare_lines.py                    # 4.5 三线对照图（A/B/C 同一文字并排，出 docs/images/lines-compare.png）
@@ -169,7 +169,7 @@ python3 scripts/97_check_terms.py                            # 7. 术语检查�
 | `13_qa` 覆盖率 | `20992/20992` |
 | `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
 | `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
-| `71_holes` 的 `holes lost` | 不高于上一版（当前基线 **1.9%（n=300，4/214）**；n=200 为 **1.4%（2/145）**，见 `work/holes_a.json` / `work/holes_a_n200.json`） |
+| `71_holes` | **诊断，不作门**：孔洞数随写本风格与二值化分辨率摆动（ERRATA E11），不设阈值、不比较版本 |
 | `95_compare_lines` 出的三线对照图 | 三条线并排看不出「某条线整体偏细/偏粗/缺笔画」；发现即为回归 |
 | `98_style_sheet` 出的 `style-A.png` | 真迹行与 GAN 行风格连续；回退行若明显「等宽细笔」属已知，但占比不应升高 |
 | `97_check_terms.py` | 打印 `TERMS OK`（白名单与「已知遗留」不算） |

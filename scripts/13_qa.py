@@ -64,9 +64,9 @@ def main():
         n_real = rf["maxp"].numGlyphs - 1
         cm_real = len(rf.getBestCmap())
         try:
-            _exp = sum(1 for _ in open(ROOT / "work" / "chosen.jsonl"))
+            _exp = sum(1 for _ in open(ROOT / "work" / "real_contours.jsonl"))
         except Exception:
-            _exp = 1675
+            _exp = sum(1 for _ in open(ROOT / "work" / "chosen.jsonl"))
         status = "OK" if n_real == _exp and cm_real == _exp else "BROKEN"
         print(f"real-subset glyphs {n_real} cmap {cm_real} -> {status}")
         if status != "OK":
