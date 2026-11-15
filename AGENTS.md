@@ -43,7 +43,7 @@ CJK 基本区 **20,992** + 标点/数字/空格 **42** = `cmap` **21,034**；唯
 ## 当前状态（A v1.7.3 / B v1.2.5 / C v1.4.0）
 
 - `build/GuanGeKai-Regular.ttf`：20,992 字 = **2,261 真迹 + 18,731 合成**
-  （**GAN 17,932 + ribbon 回退 799 = 4.1%**；586 个 real_single 已纳入真迹）
+  （**GAN 17,954（ep90 17,248 + ep80 706）+ ribbon 回退 777 = 4.1%**；586 个 real_single 已纳入真迹）
 - `build/GuanGeKai-Real.ttf`：仅 **2,261** 真迹
 - 真字覆盖率 **10.8%** 仍是全局瓶颈。v1.3.x 的合成字骨架取自文楷（结构=文楷结构）；
   **v1.5.0 起合成字由 GAN 生成**，笔画级结构更接近写本：干净集 Dice 0.414→**0.539**（n=617）、
@@ -103,7 +103,7 @@ python3 -c "import json;d=json.load(open('release/provenance.json'));print(sum(v
 > 技术路线一律写方法名 `ribbon` / `zi2zi-GAN` / `zi2zi-JiT`（表格内可用短码 RT1–RT3）。
 > `R0–R7` 保留给闸门判据（`30_gate_rules.py`），技术路线不得使用。**禁止再写「路线 A/B/C」。** <!-- term-ok -->
 
-**发布版 = 真迹 1,675 + GAN 18,518（ep90 17,790 + ep80 补位 728）+ 带状扫掠回退 799。**
+**发布版（v1.7.3 构建）= 真迹 2,261 + GAN 17,954（ep90 17,248 + ep80 补位 706）+ 带状扫掠回退 777。**
 历史三条路线：**`ribbon` 带状扫掠**（v1.3.x 发布方案，现降级为回退兜底）/
 **`zi2zi-GAN`**（v1.5.0 起主线）/ **`zi2zi-JiT`**（未启动）。`docs/PLAN-v1.4.md` 的"三线并行"已作废，当前计划见 `docs/PLAN-v1.5.md`。
 
@@ -170,8 +170,8 @@ python3 scripts/97_check_terms.py                            # 7. 术语检查�
 | 检查 | 期望 |
 |---|---|
 | `13_qa` 覆盖率 | `20992/20992` |
-| `13_qa` 的 `real-subset` 行 | `glyphs 1675 cmap 1675 -> OK` |
-| `ls -lh build/*.ttf` | Regular ~15 MB、**Real ~3.3 MB**（若是 KB 级，说明真字没建出来） |
+| `13_qa` 的 `real-subset` 行 | `glyphs 2261 cmap 2261 -> OK` |
+| `ls -lh build/*.ttf` | Regular ~16.6 MB、**Real ~4.5 MB**（若是 KB 级，说明真字没建出来） |
 | `71_holes` | **诊断，不作门**：孔洞数随写本风格与二值化分辨率摆动（ERRATA E11），不设阈值、不比较版本 |
 | `95_compare_lines` 出的三线对照图 | 三条线并排看不出「某条线整体偏细/偏粗/缺笔画」；发现即为回归 |
 | `98_style_sheet` 出的 `style-A.png` | 真迹行与 GAN 行风格连续；回退行若明显「等宽细笔」属已知，但占比不应升高 |

@@ -164,11 +164,11 @@ A 线的 v1.6.2 同一公式给出 `1.62`（实测 `1.6199951`）。
 
 （本会话早前曾自动删掉 v1.0.0 / v1.0.1 的 zip，已按要求停止。）
 
-## 6. 校验和（v1.2.4 历史；v1.2.5 见下节）
+## 6. 校验和（当前 v1.2.5 见 §6.1；本节保留历史 zip）
+
+> v1.2.4 的字体哈希（`aa19d6d2…` / `7d10e460…`）已由 v1.2.5 取代，见 §6.1 与 git 历史。
 
 ```
-aa19d6d2000d504af7123741fe9273bee157fee1f2915c570a9d05d27bab8f9d  build/GuanGeKai-B-Regular.ttf
-7d10e4602313f3ca440953ed20f75e3a96f1428d96c8c4c75e17e23857f1498a  build/GuanGeKai-B-Real.ttf
 2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip
 ```
 
@@ -179,14 +179,16 @@ d9da537640fbac12003ea2d1a13323cdda9187ff9f5bce49fb5e10095ff4b491  GuanGeKai-B-v1
 c7c27df64c7f1d4afa103bfea339a2cd1fac50234fe1498bd7effedc1f2e46b8  GuanGeKai-B-v1.2.0.zip
 ```
 
-### 6.1 v1.2.5（2026-11-15，构建完成、待打包）
+### 6.1 v1.2.5（2026-11-15 发布）
 
 ```
 544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71  build/GuanGeKai-B-Regular.ttf
 45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c  build/GuanGeKai-B-Real.ttf
+fce919e25df2587e3f6f193aa3bafabbb40e21948f6297b161997efe111231d6  GuanGeKai-B-v1.2.5.zip
 ```
 
-发布包 `release-b/` 仍是 v1.2.4；v1.2.5 的包与 zip 在提交后生成，届时回填 `zip_sha256` 并清掉 `package_pending`。
+发布包 `release-b/` = v1.2.5（11 个文件，`SHA256SUMS` 自校验通过）；包内 `OFL.txt` 是
+2026-11-14 修正后的版本（`manuscript`），包内 README 的 RFN 列表也已补全五项。
 
 发布包内 `release-b/SHA256SUMS` 逐文件自校验。
 

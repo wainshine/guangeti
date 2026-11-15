@@ -25,7 +25,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，16.6 MB，Version 1.7.3）、`build/GuanGeKai-Real.ttf`（2,261 字，4.5 MB）
 - 发布包：`release/` 仍是 v1.7.2；v1.7.3 构建版尚未打包
-- **合成字构成**：2,261 真迹 + GAN 17,932 + ribbon 回退 799；
+- **合成字构成**：2,261 真迹 + GAN 17,954 + ribbon 回退 777；
   `release/provenance.json` 为五态 `real` / `gan_ep90` / `gan_ep80` / `ribbon_fb` / `punct`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
 - 仓库的 git 由用户本人管理，agent **不要** commit / reset
@@ -140,7 +140,7 @@ PDF ─①切字─► cells.jsonl + cells/*.png + masks/*.png
 | E. 带状扫掠 + 斜切端头（v1.3.3–v1.3.5 采用，**v1.5.0 起降为回退方案**） | 端帽与笔内动态接近真字；旧的“拓扑 97%”口径已作废（E28） | `scripts/10_generate.py --method ribbon` |
 | F. GAN（5 层 PatchGAN + hinge + 增强，**v1.5.0 采用**） | 干净集 Dice 0.539、chamfer 6.13（n=617；旧记 0.549/5.92 为抽样口径） | `scripts/10_generate.py --method gan` |
 
-**当前构建版用 GAN**（`zi2zi-GAN`，v1.5.0 起）：真迹 **2,261** + GAN **17,932** + ribbon 回退 799。v1.3.3 的 E（ribbon）已降级为回退兜底。
+**当前构建版用 GAN**（`zi2zi-GAN`，v1.5.0 起）：真迹 **2,261** + GAN **17,954** + ribbon 回退 777。v1.3.3 的 E（ribbon）已降级为回退兜底。
 
 ---
 

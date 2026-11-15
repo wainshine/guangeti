@@ -18,7 +18,7 @@
  "checkpoint_hardtail": "work-b/ckpt/b_wt_ep090.pt",
  "font_sha256": "544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71",
  "real_sha256": "45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c",
- "zip_sha256": "",
+ "zip_sha256": "fce919e25df2587e3f6f193aa3bafabbb40e21948f6297b161997efe111231d6",
  "real": 4073,
  "gan": 15784,
  "gan_ht": 544,
@@ -40,10 +40,8 @@
   "out": "work-b/eval_v124_release.json",
   "measured": "2026-11-13"
  },
- "artifacts_built_at": "",
+ "artifacts_built_at": "2026-11-15",
  "date_semantics": "release_date = 签核/定版日（版本号确定、发布说明签署之日）；artifacts_built_at = 分发包最后一次构建日（release-b/ 与 zip 的打包日，由 64_package_b → zip 决定）。字体字节在 2026-11-14 重新构建验证与包内一致（aa19d6d2… / 7d10e460…），不改变 artifacts_built_at。",
  "checkpoint_sha256": "c47d22f81360b49d8c5e535929b66d53248ff92fd0a175f475ec7a57af24ec83",
- "checkpoint_hardtail_sha256": "1c3fcc740b786db94cdb8983325430ae597086096e62f099d4b6e5a1753bcafc",
- "package_pending": true,
- "zip_sha256_note": "v1.2.5 尚未打包；打包后回填，并清掉 package_pending"
+ "checkpoint_hardtail_sha256": "1c3fcc740b786db94cdb8983325430ae597086096e62f099d4b6e5a1753bcafc"
 }
