@@ -162,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
         "A real glyphs": (n_real(ROOT / "build/GuanGeKai-Real.ttf"), _a_real_exp()),
         "A chosen": (lines(ROOT / "work/chosen.jsonl"), 1675),
         "A provenance real": (sum(1 for v in json.loads(
-            (ROOT / "release/provenance.json").read_text()).values() if v == "real"), 1675),
+            (ROOT / "release/provenance.json").read_text()).values() if v == "real"), _a_real_exp()),
         "B coverage": (coverage(ROOT / "build/GuanGeKai-B-Regular.ttf")[0], 20992),
         "B real glyphs": (n_real(ROOT / "build/GuanGeKai-B-Real.ttf"), 4073),
         "B chosen": (lines(ROOT / "work-b/chosen.jsonl"), 4073),

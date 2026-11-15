@@ -24,7 +24,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 ```
 
 - 成品：`build/GuanGeKai-Regular.ttf`（20,992 字，16.6 MB，Version 1.7.3）、`build/GuanGeKai-Real.ttf`（2,261 字，4.5 MB）
-- 发布包：`release/` 仍是 v1.7.2；v1.7.3 构建版尚未打包
+- 发布包：`release/` = **v1.7.3**（2026-11-15 打包）
 - **合成字构成**：2,261 真迹 + GAN 17,954 + ribbon 回退 777；
   `release/provenance.json` 为五态 `real` / `gan_ep90` / `gan_ep80` / `ribbon_fb` / `punct`
 - **不要**直接改 `data/vendor/zi2zi-JiT`（第三方克隆 + 本地 MPS 补丁，见 §7.3）
@@ -52,7 +52,7 @@ python3 scripts/13_qa.py --font build/GuanGeKai-Regular.ttf   # 覆盖率/空字
 |---|---|---|---|
 | `build/GuanGeKai-Regular.ttf` | 20,992 字（Version 1.7.3） | 16.6 MB | `89120d52209446a3` |
 | `build/GuanGeKai-Real.ttf` | 仅 2,261 真迹 | 4.5 MB | `59b1154d5e0d6b2d` |
-| `GuanGeKai-v1.7.2.zip` | 仍是 v1.7.2 发布包，不含 v1.7.3 构建 | 14.0 MB | `14483141b854056a` |
+| `GuanGeKai-v1.7.3.zip` | v1.7.3 发布包 | 16.5 MB | `00417099bcee4c4b` |
 
 覆盖：CJK 基本区 **20,992 / 20,992**，无缺字、无空字形（`scripts/13_qa.py` 可复验）。
 UPM 1000，TTF/glyf，无 hinting，ASC 880 / DESC −120，字面框 0–880。

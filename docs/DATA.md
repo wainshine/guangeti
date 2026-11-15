@@ -104,22 +104,23 @@
 
 > 体积单位为十进制 MB（1 MB = 10⁶ 字节），与 Finder 显示一致。
 
-A 线（四书本，v1.7.3 构建版）：
+A 线（四书本，v1.7.3 发布版）：
 
 ```
 89120d52209446a3b6403871b7376f76dd8008e8223348de9dedf3609ed8eb75  build/GuanGeKai-Regular.ttf
 59b1154d5e0d6b2d92af64bff78b7594ccba325176abf9f6aa40c70352990323  build/GuanGeKai-Real.ttf
+00417099bcee4c4b70cd668cf1e41513c33e12490cb518d392cb6ff2e6fd8526  GuanGeKai-v1.7.3.zip
 ```
 
-B 线（史记本，v1.2.5 构建版）：
+B 线（史记本，v1.2.5）：
 
 ```
 544ce807bbe5de9589e67e5d4e408ca43cc848ac544f478b95cc51ccca755c71  build/GuanGeKai-B-Regular.ttf
 45d87eb0f4cded331caf9034bb423b1d8105288620af35fe24776c32495aa53c  build/GuanGeKai-B-Real.ttf
-2537de50f67517696fea70102c97ecb4da0f8bd29d3746baebad629ee4e83c46  GuanGeKai-B-v1.2.4.zip（仍是发布包）
+fce919e25df2587e3f6f193aa3bafabbb40e21948f6297b161997efe111231d6  GuanGeKai-B-v1.2.5.zip
 ```
 
-C 线（永乐大典本，v1.4.0 候选）：
+C 线（永乐大典本，v1.4.0）：
 
 ```
 8132f15ff3ef159ae3bd68c27451c51c44f34ce26848e9178e684b9385e03f91  build/GuanGeKai-C-Regular.ttf
